@@ -21,7 +21,11 @@ __settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
 def showGenreList():
     log.info("== ENTER: showGenreList() ==")
 
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    host = __settings__.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
+        return
+    server = host + ":" + port
     userid = downloadUtils.getUserId()
     detailsString = getDetailsString()
 
@@ -56,7 +60,11 @@ def showGenreList():
 def showMovieAlphaList():
     log.info("== ENTER: showMovieAlphaList() ==")
 
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    host = __settings__.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
+        return
+    server = host + ":" + port
     userid = downloadUtils.getUserId()
     detailsString = getDetailsString()
 
@@ -88,6 +96,10 @@ def displaySections():
     log.info("== ENTER: displaySections() ==")
     xbmcplugin.setContent(int(sys.argv[1]), 'files')
 
+    host = __settings__.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
+        return
     # Add collections
     detailsString = getDetailsString()
     collections = getCollections(detailsString)
@@ -115,8 +127,11 @@ def addMenuDirectoryItem(label, path, folder=True, thumbnail=None):
 def getCollections(detailsString):
     log.info("== ENTER: getCollections ==")
 
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
-
+    host = __settings__.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
+        return []
+    server = host + ":" + port
     userid = downloadUtils.getUserId()
     if(userid == None or len(userid) == 0):
         return []

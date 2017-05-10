@@ -88,7 +88,9 @@ def mainEntryPoint():
     WINDOW = xbmcgui.Window( 10000 )
 
     if mode == "CHANGE_USER":
-        checkServer(True)
+        checkServer(change_user=True, notify=False)
+    elif mode == "DETECT_SERVER":
+        checkServer(force=True, notify=True)
     elif sys.argv[1] == "markWatched":
         item_id = sys.argv[2]
         markWatched(item_id)
@@ -124,17 +126,17 @@ def mainEntryPoint():
         getWigetContent(sys.argv[0], int(sys.argv[1]), params)
     elif mode == "PARENT_CONTENT":
         checkService()
-        checkServer()
+        checkServer(notify=False)
         showParentContent(sys.argv[0], int(sys.argv[1]), params)
     elif mode == "SHOW_CONTENT":
         #plugin://plugin.video.embycon?mode=SHOW_CONTENT&item_type=Movie|Series
         checkService()
-        checkServer()
+        checkServer(notify=False)
         showContent(sys.argv[0], int(sys.argv[1]), params)
     else:
         
         checkService()
-        checkServer()
+        checkServer(notify=False)
         
         pluginhandle = int(sys.argv[1])
 
