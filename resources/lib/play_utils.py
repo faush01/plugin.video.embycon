@@ -60,10 +60,9 @@ def playFile(id, auto_resume):
     playurl = PlayUtils().getPlayUrl(id, result)
     log.info("Play URL: " + playurl)
 
-    thumbPath = downloadUtils.getArtwork(result, "Primary")
-    listItem = xbmcgui.ListItem(path=playurl, iconImage=thumbPath, thumbnailImage=thumbPath)
+    listItem = xbmcgui.ListItem(label=result.get("Name", "Missing Name"), path=playurl)
 
-    setListItemProps(id, listItem, result)
+    listItem = setListItemProps(id, listItem, result)
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
@@ -96,9 +95,9 @@ def setListItemProps(id, listItem, result):
     eppNum = -1
     seasonNum = -1
 
-    primary_inage = downloadUtils.getArtwork(result, "Primary")
-    listItem.setProperty("poster", primary_inage)
-    listItem.setArt({"poster": primary_inage})
+    primary_image = downloadUtils.getArtwork(result, "Primary")
+    listItem.setProperty("poster", primary_image)
+    listItem.setArt({"poster": primary_image, "thumb": primary_image, "icon": primary_image})
 
     listItem.setProperty('IsPlayable', 'true')
     listItem.setProperty('IsFolder', 'false')
@@ -117,4 +116,4 @@ def setListItemProps(id, listItem, result):
 
     listItem.setInfo("Video", infoLabels=details)
 
-    return
+    return listItem
