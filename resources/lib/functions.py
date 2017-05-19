@@ -525,7 +525,7 @@ def processDirectory(url, results, progress, pluginhandle):
     if(result == None):
         result = []
     item_count = len(result)
-    current_item = 1;
+    current_item = 1
     viewType = ""
     
     for item in result:

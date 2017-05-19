@@ -46,8 +46,8 @@ def getServerDetails():
     sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
     sock.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
     
-    log.info("MutliGroup       : " + str(MULTI_GROUP));
-    log.info("Sending UDP Data : " + MESSAGE);
+    log.info("MutliGroup       : " + str(MULTI_GROUP))
+    log.info("Sending UDP Data : " + MESSAGE)
     sock.sendto(MESSAGE, MULTI_GROUP)
 
     servers = []
