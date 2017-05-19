@@ -14,6 +14,8 @@ from resume_dialog import ResumeDialog
 from utils import PlayUtils
 
 log = SimpleLogging("EmbyCon." + __name__)
+__settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
+__language__ = __settings__.getLocalizedString
 downloadUtils = DownloadUtils()
 
 def playFile(id, auto_resume):
@@ -21,11 +23,10 @@ def playFile(id, auto_resume):
 
     userid = downloadUtils.getUserId()
 
-    settings = xbmcaddon.Addon(id='plugin.video.embycon')
-    addon_path = settings.getAddonInfo('path')
+    addon_path = __settings__.getAddonInfo('path')
 
-    port = settings.getSetting('port')
-    host = settings.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    host = __settings__.getSetting('ipaddress')
     server = host + ":" + port
 
     jsonData = downloadUtils.downloadUrl("http://" + server + "/emby/Users/" + userid + "/Items/" + id + "?format=json",
@@ -60,7 +61,7 @@ def playFile(id, auto_resume):
     playurl = PlayUtils().getPlayUrl(id, result)
     log.info("Play URL: " + playurl)
 
-    listItem = xbmcgui.ListItem(label=result.get("Name", "Missing Name"), path=playurl)
+    listItem = xbmcgui.ListItem(label=result.get("Name", __language__(30280)), path=playurl)
 
     listItem = setListItemProps(id, listItem, result)
 
@@ -104,7 +105,7 @@ def setListItemProps(id, listItem, result):
 
     # play info
     details = {
-        'title': result.get("Name", "Missing Name"),
+        'title': result.get("Name", __language__(30280)),
         'plot': result.get("Overview")
     }
 

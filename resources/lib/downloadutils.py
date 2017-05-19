@@ -24,7 +24,7 @@ class DownloadUtils():
     def __init__(self, *args):
         self.addonSettings = xbmcaddon.Addon(id='plugin.video.embycon')
         self.getString = self.addonSettings.getLocalizedString
-            
+        self.addon_name = self.addonSettings.getAddonInfo('name')
         port = self.addonSettings.getSetting('port')
         host = self.addonSettings.getSetting('ipaddress')
         self.server = host + ":" + port
@@ -321,7 +321,7 @@ class DownloadUtils():
                 log.error(error)
                 if suppress is False:
                     if popup == 0:
-                        xbmc.executebuiltin("XBMC.Notification(URL error: "+ str(data.reason) +",)")
+                        xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, self.getString(30200) % str(data.reason)))
                     else:
                         xbmcgui.Dialog().ok(self.getString(30135),server)
                 log.error(error)
@@ -335,7 +335,7 @@ class DownloadUtils():
             log.error(error)
             if suppress is False:
                 if popup == 0:
-                    xbmc.executebuiltin("XBMC.Notification(\"EmbyCon\": URL error: Unable to connect to server,)")
+                    xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, self.getString(30200) % self.getString(30201)))
                 else:
                     xbmcgui.Dialog().ok("",self.getString(30204))
                 raise

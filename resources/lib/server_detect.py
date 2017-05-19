@@ -16,6 +16,7 @@ log = SimpleLogging("EmbyCon." + __name__)
 
 __settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __language__ = __settings__.getLocalizedString
+__addon_name__ = __settings__.getAddonInfo('name')
 downloadUtils = DownloadUtils()
 
 
@@ -93,7 +94,7 @@ def checkServer(force=False, change_user=False, notify=False):
             if success:
                 serverUrl = "http://%s:%s" % (host, port)
             else:
-                xbmcgui.Dialog().ok(__language__(30135), __language__(30204))
+                xbmcgui.Dialog().ok(heading=__addon_name__, line1=__language__(30204))
                 xbmc.executebuiltin("ActivateWindow(Home)")
                 return
         if serverUrl == "":
@@ -116,7 +117,7 @@ def checkServer(force=False, change_user=False, notify=False):
         server_address = url_bits.hostname
         server_port = str(url_bits.port)
     except Exception as error:
-        xbmcgui.Dialog().ok(__language__(30202), str(error))
+        xbmcgui.Dialog().ok(heading=__addon_name__, line1=__language__(30202), line2=str(error))
         log.error(str(error))
     
     log.info("detected server info " + server_address + " : " + server_port)
@@ -157,7 +158,7 @@ def checkServer(force=False, change_user=False, notify=False):
         secured.insert(0, True)
         log.info("User List : " + str(names))
         log.info("User List : " + str(userList))
-        return_value = xbmcgui.Dialog().select(__language__(30200), names)
+        return_value = xbmcgui.Dialog().select(__language__(30180), names)
 
         if (return_value > -1):
             if return_value == 0:
