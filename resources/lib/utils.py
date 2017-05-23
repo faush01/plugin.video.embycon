@@ -116,3 +116,52 @@ def getChecksum(item):
     )
 
     return checksum
+
+def getArt(item, server, widget=False):
+    art = {
+        'thumb': '',
+        'fanart': '',
+        'poster': '',
+        'banner': '',
+        'clearlogo': '',
+        'clearart': '',
+        'discart': '',
+        'landscape': '',
+        'tvshow.poster': ''
+    }
+    item_id = item.get("Id")
+
+    image_id = item_id
+    imageTags = item.get("ImageTags")
+    if (imageTags is not None) and (imageTags.get("Primary") is not None):
+        image_tag = imageTags.get("Primary")
+        if widget:
+            art['thumb'] = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag, server=server)
+        else:
+            art['thumb'] = downloadUtils.getArtwork(item, "Primary", server=server)
+
+    if item.get("Type") == "Episode":
+        art['thumb'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", server=server)
+        art['landscape'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", parent=True, server=server)
+        art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
+    else:
+        art['poster'] = art['thumb']
+
+    art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", server=server)
+    if not art['fanart']:
+        art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", parent=True, server=server)
+
+    if not art['landscape']:
+        art['landscape'] = downloadUtils.getArtwork(item, "Thumb", server=server)
+        if not art['landscape']:
+            art['landscape'] = art['fanart']
+
+    if not art['thumb']:
+        art['thumb'] = art['landscape']
+
+    art['banner'] = downloadUtils.getArtwork(item, "Banner", server=server)
+    art['clearlogo'] = downloadUtils.getArtwork(item, "Logo", server=server)
+    art['clearart'] = downloadUtils.getArtwork(item, "Art", server=server)
+    art['discart'] = downloadUtils.getArtwork(item, "Disc", server=server)
+
+    return art

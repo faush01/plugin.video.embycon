@@ -19,7 +19,7 @@ import xbmcaddon
 import xbmc
 
 from downloadutils import DownloadUtils
-from utils import PlayUtils, getDetailsString
+from utils import PlayUtils, getDetailsString, getArt
 from clientinfo import ClientInformation
 from datamanager import DataManager
 from views import DefaultViews, loadSkinDefaults
@@ -343,14 +343,14 @@ def addGUIItem( url, details, extraData, folder=True ):
     
     #StartPercent
     
-    artTypes=['poster', 'fanart_image', 'clearlogo', 'discart', 'banner', 'clearart', 'landscape', 'tvshow.poster']
+    artTypes = ['thumb', 'poster', 'fanart', 'clearlogo', 'discart', 'banner', 'clearart', 'landscape', 'tvshow.poster']
     artLinks = {}
     for artType in artTypes:
-        imagePath = extraData.get(artType, None)
-        if imagePath is not None and imagePath != "":
-            list.setProperty(artType, imagePath)
-            artLinks[artType] = imagePath
-            log.debug("Setting " + artType + " as " + imagePath)
+        artLinks[artType] = extraData.get(artType, '')
+        log.debug("Setting " + artType + " as " + artLinks[artType])
+    list.setProperty('fanart_image', artLinks['fanart'])              # back compat
+    list.setProperty('discart', artLinks['discart'])                  # not avail to setArt
+    list.setProperty('tvshow.poster', artLinks['tvshow.poster'])      # not avail to setArt
     list.setArt(artLinks)
 
     menuItems = addContextMenu(details, extraData, folder)
@@ -742,16 +742,18 @@ def processDirectory(url, results, progress, pluginhandle):
         WatchedEpisodes = 0 if userData.get("UnplayedItemCount") == None else TotalEpisodes - userData.get("UnplayedItemCount")
         UnWatchedEpisodes = 0 if userData.get("UnplayedItemCount") == None else userData.get("UnplayedItemCount")
         NumEpisodes = TotalEpisodes
-        
+
+        art = getArt(item, server)
         # Populate the extraData list
-        extraData={'thumb'        : downloadUtils.getArtwork(item, "Primary", server=server),
-                   'fanart_image' : downloadUtils.getArtwork(item, "Backdrop", server=server),
-                   'poster'       : downloadUtils.getArtwork(item, "Primary", server=server),
-                   'banner'       : downloadUtils.getArtwork(item, "Banner", server=server),
-                   'clearlogo'    : downloadUtils.getArtwork(item, "Logo", server=server),
-                   'discart'      : downloadUtils.getArtwork(item, "Disc", server=server),
-                   'clearart'     : downloadUtils.getArtwork(item, "Art", server=server),
-                   'landscape'    : downloadUtils.getArtwork(item, "Thumb", server=server),
+        extraData={'thumb'        : art['thumb'],
+                   'fanart'       : art['fanart'],
+                   'poster'       : art['poster'],
+                   'banner'       : art['banner'],
+                   'clearlogo'    : art['clearlogo'],
+                   'discart'      : art['discart'],
+                   'clearart'     : art['clearart'],
+                   'landscape'    : art['landscape'],
+                   'tvshow.poster': art['tvshow.poster'],
                    'id'           : id ,
                    'guiid'        : guiid ,
                    'mpaa'         : item.get("OfficialRating"),
@@ -787,14 +789,6 @@ def processDirectory(url, results, progress, pluginhandle):
                    'itemtype'     : item_type}
 
         extraData["Path"] = item.get("Path")
-
-        if item.get("Type") == "Episode":
-            extraData["tvshow.poster"] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
-            extraData["poster"] = None
-            extraData["banner"] = downloadUtils.getArtwork(item, "Banner", parent=True, server=server)
-
-        if extraData['thumb'] == '':
-            extraData['thumb'] = extraData['fanart_image']
 
         extraData['mode'] = "GET_CONTENT"
         
@@ -903,48 +897,10 @@ def getWigetContent(pluginName, handle, params):
     if(result == None):
         result = []   
 
-    image = ""
     itemCount = 1
     listItems = []
     for item in result:
         item_id = item.get("Id")
-       
-        '''
-        image = ""
-        if item.get("Type") == "Episode":
-            #image_id = item.get("SeriesId")
-            #image_tag = item.get("SeriesPrimaryImageTag")
-            #if(image_tag != None):
-            #    image = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag)
-            
-            image_id = item_id
-            imageTags = item.get("ImageTags")
-            if(imageTags != None and imageTags.get("Primary") != None):
-                image_tag = imageTags.get("Primary")
-                image = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag)            
-        else:
-            #image_id = item_id
-            #imageTags = item.get("ImageTags")
-            #if(imageTags != None and imageTags.get("Primary") != None):
-            #    image_tag = imageTags.get("Primary")
-            #    image = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag)
-
-            image_id = item_id
-            imageTags = item.get("BackdropImageTags")
-            if(imageTags != None and len(imageTags) > 0):
-                image_tag = imageTags[0]
-                image = downloadUtils.imageUrl(image_id, "Backdrop", 0, 400, 400, image_tag)
-        '''
-        
-        image_id = item_id
-        imageTags = item.get("ImageTags")
-        if imageTags != None and imageTags.get("Primary") != None:
-            image_tag = imageTags.get("Primary")
-            image = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag, server)
-                
-        #image = downloadUtils.getArtwork(item, "Primary", width=400, height=400)
-        fanart = downloadUtils.getArtwork(item, "Backdrop", server=server)
-               
         name = item.get("Name")
         episodeDetails = ""
         log.debug("WIDGET_DATE_NAME: " + name)
@@ -974,15 +930,18 @@ def getWigetContent(pluginName, handle, params):
             tvshowtitle = episodeDetails
             title = item.get("SeriesName")
 
+        art = getArt(item, server, widget=True)
+
         if kodi_version > 17:
-            list_item = xbmcgui.ListItem(label=name, iconImage=image, thumbnailImage=image, offscreen=True)
+            list_item = xbmcgui.ListItem(label=name, iconImage=art['thumb'], offscreen=True)
         else:
-            list_item = xbmcgui.ListItem(label=name, iconImage=image, thumbnailImage=image)
+            list_item = xbmcgui.ListItem(label=name, iconImage=art['thumb'])
 
         #list_item.setLabel2(episodeDetails)
         list_item.setInfo( type="Video", infoLabels={ "title": title, "tvshowtitle": tvshowtitle } )
-        list_item.setProperty('fanart_image', fanart)
-        
+        list_item.setProperty('fanart_image', art['fanart'])  # back compat
+        list_item.setProperty('discart', art['discart'])  # not avail to setArt
+        list_item.setArt(art)
         # add count
         list_item.setProperty("item_index", str(itemCount))
         itemCount = itemCount + 1
