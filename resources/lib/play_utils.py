@@ -11,7 +11,7 @@ import json
 from simple_logging import SimpleLogging
 from downloadutils import DownloadUtils
 from resume_dialog import ResumeDialog
-from utils import PlayUtils
+from utils import PlayUtils, getArt
 
 log = SimpleLogging("EmbyCon." + __name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
@@ -107,9 +107,11 @@ def setListItemProps(id, listItem, result, server):
     eppNum = -1
     seasonNum = -1
 
-    primary_image = downloadUtils.getArtwork(result, "Primary", server=server)
-    listItem.setProperty("poster", primary_image)
-    listItem.setArt({"poster": primary_image, "thumb": primary_image, "icon": primary_image})
+    art = getArt(result, server=server)
+    listItem.setIconImage(art['thumb'])  # back compat
+    listItem.setProperty('fanart_image', art['fanart'])  # back compat
+    listItem.setProperty('discart', art['discart'])  # not avail to setArt
+    listItem.setArt(art)
 
     listItem.setProperty('IsPlayable', 'true')
     listItem.setProperty('IsFolder', 'false')

@@ -34,12 +34,8 @@ class DownloadUtils():
                 id = data.get("SeriesId")
         '''
         if data.get("Type") == "Episode":  # For episodes: primary (episode thumb) gets episode art, rest series art. 
-            if type != "Primary":
+            if type != "Primary" or parent == True:
                 id = data.get("SeriesId")
-
-        # for episodes and type primary and parent is required then use series ID
-        if data.get("Type") == "Episode" and parent == True:
-            id = data.get("SeriesId")
 
         imageTag = ""
         #"e3ab56fe27d389446754d0fb04910a34" # a place holder tag, needs to be in this format
@@ -52,20 +48,36 @@ class DownloadUtils():
             bgItemTags = data.get("ParentBackdropImageTags")
             if(bgItemTags != None and len(bgItemTags) > 0):
                 imageTag = bgItemTags[0]
+        elif(type == "Backdrop") and (parent == True):
+            id = data.get("ParentBackdropItemId")
+            bgItemTags = data.get("ParentBackdropImageTags")
+            if(bgItemTags != None and len(bgItemTags) > 0):
+                imageTag = bgItemTags[0]
         elif(type == "Backdrop"):
             BGTags = data.get("BackdropImageTags")
             if(BGTags != None and len(BGTags) > 0):
                 bgIndex = int(index)
                 imageTag = data.get("BackdropImageTags")[bgIndex]
                 log.debug("Background Image Tag:" + imageTag)        
-        else:
+        elif(parent == False):
             if(data.get("ImageTags") != None and data.get("ImageTags").get(type) != None):
                 imageTag = data.get("ImageTags").get(type)
                 log.debug("Image Tag:" + imageTag)
+        elif(parent == True):
+            if (itemType == "Episode") and (type == 'Primary'):
+                tagName = 'SeriesPrimaryImageTag'
+                idName = 'SeriesId'
+            else:
+                tagName = 'Parent%sTag' % type
+                idName = 'Parent%sItemId' % type
+            if (data.get(idName) != None and data.get(tagName) != None):
+                id = data.get(idName)
+                imageTag = data.get(tagName)
+                log.debug("Parent Image Tag:" + imageTag)
 
-        #if(imageTag == "" or imageTag == None):
-        #    log.debug("No Image Tag for request:" + type + " item:" + itemType + " parent:" + str(parent))
-        #    return ""
+        if(imageTag == "" or imageTag == None) and (type != 'Banner'):  # ParentTag not passed for Banner
+            log.debug("No Image Tag for request:" + type + " item:" + itemType + " parent:" + str(parent))
+            return ""
 
         query = ""
         
