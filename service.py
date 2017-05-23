@@ -165,11 +165,15 @@ class Service(xbmc.Player):
     def onPlayBackEnded(self):
         # Will be called when kodi stops playing a file
         log.info("EmbyCon Service -> onPlayBackEnded")
+        window_handle = xbmcgui.Window(10000)
+        window_handle.clearProperty("item_id")
         stopAll(self.played_information)
 
     def onPlayBackStopped(self):
         # Will be called when user stops kodi playing a file
         log.info("onPlayBackStopped")
+        window_handle = xbmcgui.Window(10000)
+        window_handle.clearProperty("item_id")
         stopAll(self.played_information)
 
     def onPlayBackPaused(self):
