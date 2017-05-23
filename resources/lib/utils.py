@@ -25,6 +25,8 @@ class PlayUtils():
         playback_type = addonSettings.getSetting("playback_type")
         playback_bitrate = addonSettings.getSetting("playback_bitrate")
         server = addonSettings.getSetting('ipaddress') + ":" + addonSettings.getSetting('port')
+        smb_username = addonSettings.getSetting('smbusername')
+        smb_password = addonSettings.getSetting('smbpassword')
         log.info("playback_type: " + playback_type)
         playurl = None
 
@@ -47,11 +49,10 @@ class PlayUtils():
                 playurl = playurl + "/BDMV/index.bdmv"
 
             # add smb creds
-            if addonSettings.getSetting('smbusername') == '':
+            if smb_username == '':
                 playurl = playurl.replace("\\\\", "smb://")
             else:
-                playurl = playurl.replace("\\\\", "smb://" + addonSettings.getSetting(
-                    'smbusername') + ':' + addonSettings.getSetting('smbpassword') + '@')
+                playurl = playurl.replace("\\\\", "smb://" + smb_username + ':' + smb_password + '@')
 
             playurl = playurl.replace("\\", "/")
 
