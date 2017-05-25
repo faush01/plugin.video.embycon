@@ -2,7 +2,6 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import xbmc
-import xbmcgui
 import xbmcaddon
 import time
 from datetime import datetime
@@ -10,9 +9,10 @@ from datetime import datetime
 from resources.lib.downloadutils import DownloadUtils
 from resources.lib.simple_logging import SimpleLogging
 from resources.lib.play_utils import playFile
+from resources.lib.utils import HomeWindow
 
 # clear user and token when logging in
-home_window = xbmcgui.Window(10000)
+home_window = HomeWindow()
 home_window.clearProperty("userid")
 home_window.clearProperty("AccessToken")
 home_window.clearProperty("EmbyConParams")
@@ -126,9 +126,9 @@ class Service(xbmc.Player):
         current_playing_file = xbmc.Player().getPlayingFile()
         log.info("onPlayBackStarted: " + current_playing_file)
 
-        window_handle = xbmcgui.Window(10000)
-        emby_item_id = window_handle.getProperty("item_id")
-        playback_type = window_handle.getProperty("PlaybackType_" + emby_item_id)
+        home_window = HomeWindow()
+        emby_item_id = home_window.getProperty("item_id")
+        playback_type = home_window.getProperty("PlaybackType_" + emby_item_id)
 
         # if we could not find the ID of the current item then return
         if emby_item_id is None or len(emby_item_id) == 0:
@@ -165,15 +165,15 @@ class Service(xbmc.Player):
     def onPlayBackEnded(self):
         # Will be called when kodi stops playing a file
         log.info("EmbyCon Service -> onPlayBackEnded")
-        window_handle = xbmcgui.Window(10000)
-        window_handle.clearProperty("item_id")
+        home_window = HomeWindow()
+        home_window.clearProperty("item_id")
         stopAll(self.played_information)
 
     def onPlayBackStopped(self):
         # Will be called when user stops kodi playing a file
         log.info("onPlayBackStopped")
-        window_handle = xbmcgui.Window(10000)
-        window_handle.clearProperty("item_id")
+        home_window = HomeWindow()
+        home_window.clearProperty("item_id")
         stopAll(self.played_information)
 
     def onPlayBackPaused(self):
@@ -207,7 +207,7 @@ last_progress_update = datetime.today()
             
 while not xbmc.abortRequested:
 
-    home_window = xbmcgui.Window(10000)
+    home_window = HomeWindow()
 
     if xbmc.Player().isPlaying():
         try:
@@ -231,10 +231,10 @@ while not xbmc.abortRequested:
             playFile(emby_item_id, emby_item_resume)
 
     xbmc.sleep(1000)
-    xbmcgui.Window(10000).setProperty("EmbyCon_Service_Timestamp", str(int(time.time())))
+    HomeWindow().setProperty("Service_Timestamp", str(int(time.time())))
 
 # clear user and token when loggin off
-home_window = xbmcgui.Window(10000)
+home_window = HomeWindow()
 home_window.clearProperty("userid")
 home_window.clearProperty("AccessToken")
 home_window.clearProperty("EmbyConParams")
