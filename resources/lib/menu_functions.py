@@ -1,13 +1,12 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import sys
-import json as json
+import json
 import urllib
 
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
-import xbmc
 
 from downloadutils import DownloadUtils
 from utils import getDetailsString

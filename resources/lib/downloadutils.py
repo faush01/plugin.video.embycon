@@ -3,14 +3,13 @@
 import xbmc
 import xbmcgui
 import xbmcaddon
-import urllib
-import urllib2
+
 import httplib
 import hashlib
 import StringIO
 import gzip
-import sys
-import json as json
+import json
+
 from clientinfo import ClientInformation
 from simple_logging import SimpleLogging
 

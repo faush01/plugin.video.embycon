@@ -1,16 +1,13 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import urllib
-import re
 import sys
 import os
 import time
-from datetime import datetime
-from datetime import timedelta
 from urlparse import urlparse
 import cProfile
 import pstats
-import json as json
+import json
 import StringIO
 
 import xbmcplugin
@@ -19,12 +16,11 @@ import xbmcaddon
 import xbmc
 
 from downloadutils import DownloadUtils
-from utils import PlayUtils, getDetailsString, getArt
+from utils import getDetailsString, getArt
 from clientinfo import ClientInformation
 from datamanager import DataManager
 from views import DefaultViews, loadSkinDefaults
 from server_detect import checkServer
-from resume_dialog import ResumeDialog
 from simple_logging import SimpleLogging
 from menu_functions import displaySections, showMovieAlphaList, showGenreList
 
