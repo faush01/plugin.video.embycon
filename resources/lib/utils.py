@@ -1,15 +1,11 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import xbmc
-import xbmcgui
 import xbmcaddon
 
 import json
-import threading
-from datetime import datetime
+
 from downloadutils import DownloadUtils
-import urllib
-import sys
 from simple_logging import SimpleLogging
 from clientinfo import ClientInformation
 

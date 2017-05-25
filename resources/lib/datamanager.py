@@ -3,9 +3,8 @@
 import hashlib
 import os
 import threading
-import json as json
+import json
 
-import xbmcplugin
 import xbmcgui
 import xbmcaddon
 import xbmc

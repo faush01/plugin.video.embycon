@@ -1,7 +1,7 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import socket
-import json as json
+import json
 from urlparse import urlparse
 
 import xbmcaddon
