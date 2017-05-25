@@ -12,6 +12,7 @@ from simple_logging import SimpleLogging
 from downloadutils import DownloadUtils
 from resume_dialog import ResumeDialog
 from utils import PlayUtils, getArt
+from utils2 import HomeWindow
 
 log = SimpleLogging("EmbyCon." + __name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
@@ -69,7 +70,7 @@ def playFile(id, auto_resume):
     elif playback_type == "2":
         playback_type_string = "Transcode"
 
-    home_window = xbmcgui.Window(10000)
+    home_window = HomeWindow()
     home_window.setProperty("PlaybackType_" + id, playback_type_string)
 
     listItem = xbmcgui.ListItem(label=result.get("Name", __language__(30280)), path=playurl)

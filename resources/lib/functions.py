@@ -17,6 +17,7 @@ import xbmc
 
 from downloadutils import DownloadUtils
 from utils import getDetailsString, getArt
+from utils2 import HomeWindow
 from clientinfo import ClientInformation
 from datamanager import DataManager
 from views import DefaultViews, loadSkinDefaults
@@ -63,10 +64,10 @@ def mainEntryPoint():
         params = {}
     
     if(len(params) == 0):
-        WINDOW = xbmcgui.Window( 10000 )
-        windowParams = WINDOW.getProperty("EmbyConParams")
+        home_window = HomeWindow()
+        windowParams = home_window.getProperty("Params")
         log.info("windowParams : " + windowParams)
-        #WINDOW.clearProperty("EmbyConParams")
+        #home_window.clearProperty("Params")
         if(windowParams):
             try:
                 params = get_params(windowParams)
@@ -81,7 +82,7 @@ def mainEntryPoint():
         param_url = urllib.unquote(param_url)
 
     mode = params.get("mode", None)
-    WINDOW = xbmcgui.Window( 10000 )
+    home_window = HomeWindow()
 
     if mode == "CHANGE_USER":
         checkServer(change_user=True, notify=False)
@@ -115,8 +116,8 @@ def mainEntryPoint():
             log.info("Currently in home - refreshing to allow new settings to be taken")
             xbmc.executebuiltin("ActivateWindow(Home)")
     elif sys.argv[1] == "refresh":
-        WINDOW = xbmcgui.Window( 10000 )
-        WINDOW.setProperty("force_data_reload", "true")    
+        home_window = HomeWindow()
+        home_window.setProperty("force_data_reload", "true")
         xbmc.executebuiltin("Container.Refresh")    
     elif mode == "SET_DEFAULT_VIEWS":
         showSetViews()
@@ -198,7 +199,7 @@ def markWatched(item_id):
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
     downloadUtils.downloadUrl(url, postBody="", type="POST")
-    WINDOW = xbmcgui.Window( 10000 )
+    WINDOW = HomeWindow()
     WINDOW.setProperty("force_data_reload", "true")  
     xbmc.executebuiltin("Container.Refresh")
 
@@ -208,8 +209,8 @@ def markUnwatched(item_id):
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
     downloadUtils.downloadUrl(url, type="DELETE")
-    WINDOW = xbmcgui.Window( 10000 )
-    WINDOW.setProperty("force_data_reload", "true")      
+    home_window = HomeWindow()
+    home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
 
 def markFavorite(item_id):
@@ -218,8 +219,8 @@ def markFavorite(item_id):
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
     downloadUtils.downloadUrl(url, postBody="", type="POST")
-    WINDOW = xbmcgui.Window( 10000 )
-    WINDOW.setProperty("force_data_reload", "true")    
+    home_window = HomeWindow()
+    home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
     
 def unmarkFavorite(item_id):
@@ -228,8 +229,8 @@ def unmarkFavorite(item_id):
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
     downloadUtils.downloadUrl(url, type="DELETE")
-    WINDOW = xbmcgui.Window( 10000 )
-    WINDOW.setProperty("force_data_reload", "true")    
+    home_window = HomeWindow()
+    home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
    
 def delete (item_id):
@@ -246,7 +247,7 @@ def delete (item_id):
                
 def addGUIItem( url, details, extraData, folder=True ):
 
-    WINDOW = xbmcgui.Window(10000)
+    home_window = HomeWindow()
     url = url.encode('utf-8')
 
     log.debug("Adding GuiItem for [%s]" % details.get('title','Unknown'))
@@ -813,7 +814,7 @@ def showSetViews():
 def getWigetContent(pluginName, handle, params):
     log.info("getWigetContent Called" + str(params))
 
-    WINDOW = xbmcgui.Window(10000)
+    home_window = HomeWindow()
     port = __settings__.getSetting('port')
     host = __settings__.getSetting('ipaddress')
     server = host + ":" + port    
@@ -1062,11 +1063,11 @@ def showParentContent(pluginName, handle, params):
     getContent(contentUrl, handle, media_type)
         
 def checkService():
-
-    timeStamp = xbmcgui.Window(10000).getProperty("EmbyCon_Service_Timestamp")
+    home_window = HomeWindow()
+    timeStamp = home_window.getProperty("Service_Timestamp")
     loops = 0
     while(timeStamp == ""):
-        timeStamp = xbmcgui.Window(10000).getProperty("EmbyCon_Service_Timestamp")
+        timeStamp = home_window.getProperty("Service_Timestamp")
         loops = loops + 1
         if(loops == 40):
             log.error("EmbyCon Service Not Running, no time stamp, exiting")
@@ -1095,8 +1096,7 @@ def PLAY(params, handle):
     # set the current playing item id
     # set all the playback info, this will be picked up by the service
     # the service will then start the playback
-    home_window = xbmcgui.Window(10000)
+    home_window = HomeWindow()
     home_window.setProperty("item_id", item_id)
     home_window.setProperty("play_item_id", item_id)
     home_window.setProperty("play_item_resume", str(auto_resume))
-

@@ -8,6 +8,7 @@ import xbmcaddon
 import xbmcgui
 import xbmc
 
+from utils2 import HomeWindow
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
 
@@ -170,7 +171,7 @@ def checkServer(force=False, change_user=False, notify=False):
                 else:
                     settings.setSetting('password', '')
 
-        home_window = xbmcgui.Window(10000)
+        home_window = HomeWindow()
         home_window.clearProperty("userid")
         home_window.clearProperty("AccessToken")
 

@@ -10,6 +10,7 @@ import StringIO
 import gzip
 import json
 
+from utils2 import HomeWindow
 from clientinfo import ClientInformation
 from simple_logging import SimpleLogging
 
@@ -110,7 +111,7 @@ class DownloadUtils():
         
     def getUserId(self):
 
-        WINDOW = xbmcgui.Window( 10000 )
+        WINDOW = HomeWindow()
         userid = WINDOW.getProperty("userid")
 
         if(userid != None and userid != ""):
@@ -176,7 +177,7 @@ class DownloadUtils():
         
     def authenticate(self):
     
-        WINDOW = xbmcgui.Window( 10000 )
+        WINDOW = HomeWindow()
 
         token = WINDOW.getProperty("AccessToken")
         if(token != None and token != ""):
