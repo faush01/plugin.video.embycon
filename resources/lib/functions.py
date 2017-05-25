@@ -17,7 +17,7 @@ import xbmc
 
 from downloadutils import DownloadUtils
 from utils import getDetailsString, getArt
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 from clientinfo import ClientInformation
 from datamanager import DataManager
 from views import DefaultViews, loadSkinDefaults

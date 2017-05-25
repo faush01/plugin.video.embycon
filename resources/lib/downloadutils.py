@@ -10,7 +10,7 @@ import StringIO
 import gzip
 import json
 
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 from clientinfo import ClientInformation
 from simple_logging import SimpleLogging
 

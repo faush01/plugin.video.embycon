@@ -11,7 +11,7 @@ import xbmc
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
 from utils import getChecksum
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 
 log = SimpleLogging("EmbyCon." + __name__)
 

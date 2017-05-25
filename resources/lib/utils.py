@@ -1,9 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import xbmc
 import xbmcaddon
-
-import json
 
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
@@ -76,24 +73,6 @@ class PlayUtils():
         log.info("Playback URL: " + playurl)
         return playurl.encode('utf-8')
 
-
-def getKodiVersion():
-    version = 0.0
-    jsonData = xbmc.executeJSONRPC(
-        '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
-
-    result = json.loads(jsonData)
-
-    try:
-        result = result.get("result")
-        versionData = result.get("version")
-        version = float(str(versionData.get("major")) + "." + str(versionData.get("minor")))
-        log.info("Version : " + str(version) + " - " + str(versionData))
-    except:
-        version = 0.0
-        log.error("Version Error : RAW Version Data : " + str(result))
-
-    return version
 
 def getDetailsString():
     detailsString = "EpisodeCount,SeasonCount,Path,Genres,Studios,CumulativeRunTimeTicks,MediaStreams,Overview,Etag"

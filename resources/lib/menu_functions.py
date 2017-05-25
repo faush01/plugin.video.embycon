@@ -5,11 +5,11 @@ import json
 import urllib
 
 import xbmcplugin
-import xbmcgui
 import xbmcaddon
 
 from downloadutils import DownloadUtils
 from utils import getDetailsString
+from kodi_utils import addMenuDirectoryItem
 from simple_logging import SimpleLogging
 
 log = SimpleLogging("EmbyCon." + __name__)
@@ -134,14 +134,6 @@ def displaySections():
     addMenuDirectoryItem(__language__(30255), "plugin://plugin.video.embycon/?mode=SET_DEFAULT_VIEWS")
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
-def addMenuDirectoryItem(label, path, folder=True, thumbnail=None):
-    li = xbmcgui.ListItem(label, path=path, thumbnailImage=thumbnail)
-    if thumbnail:
-        li.setThumbnailImage(thumbnail)
-    else:
-        li.setThumbnailImage("special://home/addons/plugin.video.embycon/icon.png")
-    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=path, listitem=li, isFolder=folder)
 
 def getCollections(detailsString):
     log.info("== ENTER: getCollections ==")

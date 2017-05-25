@@ -12,7 +12,7 @@ from simple_logging import SimpleLogging
 from downloadutils import DownloadUtils
 from resume_dialog import ResumeDialog
 from utils import PlayUtils, getArt
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 
 log = SimpleLogging("EmbyCon." + __name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')

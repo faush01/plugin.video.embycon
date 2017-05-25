@@ -8,7 +8,7 @@ import xbmcaddon
 import xbmcgui
 import xbmc
 
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
 

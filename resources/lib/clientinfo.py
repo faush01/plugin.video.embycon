@@ -5,7 +5,7 @@ import xbmcaddon
 import xbmc
 import xbmcvfs
 
-from utils2 import HomeWindow
+from kodi_utils import HomeWindow
 from simple_logging import SimpleLogging
 
 log = SimpleLogging("EmbyCon." + __name__)

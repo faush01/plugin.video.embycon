@@ -9,7 +9,7 @@ from datetime import datetime
 from resources.lib.downloadutils import DownloadUtils
 from resources.lib.simple_logging import SimpleLogging
 from resources.lib.play_utils import playFile
-from resources.lib.utils2 import HomeWindow
+from resources.lib.kodi_utils import HomeWindow
 
 # clear user and token when logging in
 home_window = HomeWindow()
