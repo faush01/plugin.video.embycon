@@ -72,7 +72,7 @@ def sendProgress():
     server = host + ":" + port
 
     url = "http://" + server + "/emby/Sessions/Playing/Progress"
-    download_utils.downloadUrl(url, postBody=postdata, type="POST")
+    download_utils.downloadUrl(url, postBody=postdata, method="POST")
 
 
 def stopAll(played_information):
@@ -105,7 +105,7 @@ def stopAll(played_information):
                     'MediaSourceId': emby_item_id,
                     'PositionTicks': int(current_possition * 10000000)
                 }
-                download_utils.downloadUrl(url, postBody=postdata, type="POST")
+                download_utils.downloadUrl(url, postBody=postdata, method="POST")
 
     played_information.clear()
     
@@ -151,7 +151,7 @@ class Service(xbmc.Player):
         server = host + ":" + port
 
         url = "http://" + server + "/emby/Sessions/Playing"
-        download_utils.downloadUrl(url, postBody=postdata, type="POST")
+        download_utils.downloadUrl(url, postBody=postdata, method="POST")
 
         data = {}
         data["item_id"] = emby_item_id
