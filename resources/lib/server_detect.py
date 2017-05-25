@@ -1,14 +1,14 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import socket
-import json as json
+import json
 from urlparse import urlparse
 
 import xbmcaddon
 import xbmcgui
 import xbmc
 
-from websocket import WebSocket
+from utils import HomeWindow
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
 
@@ -113,14 +113,14 @@ def checkServer(force=False, change_user=False, notify=False):
         result = json.loads(jsonData)
 
         names = []
-        userList = []
+        user_list = []
         secured = []
         for user in result:
             config = user.get("Configuration")
             if (config != None):
                 if (config.get("IsHidden") is None) or (config.get("IsHidden") is False):
                     name = user.get("Name")
-                    userList.append(name)
+                    user_list.append(name)
                     if (user.get("HasPassword") is True):
                         secured.append(True)
                         name = __language__(30060) % name
@@ -128,16 +128,16 @@ def checkServer(force=False, change_user=False, notify=False):
                         secured.append(False)
                     names.append(name)
 
-        if (len(current_username) > 0) and (not any(n == current_username for n in userList)):
+        if (len(current_username) > 0) and (not any(n == current_username for n in user_list)):
             names.insert(0, __language__(30061) % current_username)
-            userList.insert(0, current_username)
+            user_list.insert(0, current_username)
             secured.insert(0, True)
 
         names.insert(0, __language__(30062))
-        userList.insert(0, '')
+        user_list.insert(0, '')
         secured.insert(0, True)
         log.debug("User List : " + str(names))
-        log.debug("User List : " + str(userList))
+        log.debug("User List : " + str(user_list))
 
         return_value = xbmcgui.Dialog().select(__language__(30180), names)
 
@@ -152,7 +152,7 @@ def checkServer(force=False, change_user=False, notify=False):
                 else:
                     selected_user = None
             else:
-                selected_user = userList[return_value]
+                selected_user = user_list[return_value]
 
             log.debug("Selected User Name : " + str(selected_user))
 
@@ -171,7 +171,7 @@ def checkServer(force=False, change_user=False, notify=False):
                 else:
                     settings.setSetting('password', '')
 
-        WINDOW = xbmcgui.Window(10000)
+        WINDOW = HomeWindow()
         WINDOW.clearProperty("userid")
         WINDOW.clearProperty("AccessToken")
 

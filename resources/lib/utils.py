@@ -5,11 +5,8 @@ import xbmcgui
 import xbmcaddon
 
 import json
-import threading
-from datetime import datetime
+
 from downloadutils import DownloadUtils
-import urllib
-import sys
 from simple_logging import SimpleLogging
 from clientinfo import ClientInformation
 
@@ -25,6 +22,8 @@ class PlayUtils():
         playback_type = addonSettings.getSetting("playback_type")
         playback_bitrate = addonSettings.getSetting("playback_bitrate")
         server = addonSettings.getSetting('ipaddress') + ":" + addonSettings.getSetting('port')
+        smb_username = addonSettings.getSetting('smbusername')
+        smb_password = addonSettings.getSetting('smbpassword')
         log.info("playback_type: " + playback_type)
         playurl = None
 
@@ -47,11 +46,10 @@ class PlayUtils():
                 playurl = playurl + "/BDMV/index.bdmv"
 
             # add smb creds
-            if addonSettings.getSetting('smbusername') == '':
+            if smb_username == '':
                 playurl = playurl.replace("\\\\", "smb://")
             else:
-                playurl = playurl.replace("\\\\", "smb://" + addonSettings.getSetting(
-                    'smbusername') + ':' + addonSettings.getSetting('smbpassword') + '@')
+                playurl = playurl.replace("\\\\", "smb://" + smb_username + ':' + smb_password + '@')
 
             playurl = playurl.replace("\\", "/")
 
@@ -116,3 +114,76 @@ def getChecksum(item):
     )
 
     return checksum
+
+def getArt(item, server, widget=False):
+    art = {
+        'thumb': '',
+        'fanart': '',
+        'poster': '',
+        'banner': '',
+        'clearlogo': '',
+        'clearart': '',
+        'discart': '',
+        'landscape': '',
+        'tvshow.poster': ''
+    }
+    item_id = item.get("Id")
+
+    image_id = item_id
+    imageTags = item.get("ImageTags")
+    if (imageTags is not None) and (imageTags.get("Primary") is not None):
+        image_tag = imageTags.get("Primary")
+        if widget:
+            art['thumb'] = downloadUtils.imageUrl(image_id, "Primary", 0, 400, 400, image_tag, server=server)
+        else:
+            art['thumb'] = downloadUtils.getArtwork(item, "Primary", server=server)
+
+    if item.get("Type") == "Episode":
+        art['thumb'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", server=server)
+        art['landscape'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", parent=True, server=server)
+        art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
+    else:
+        art['poster'] = art['thumb']
+
+    art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", server=server)
+    if not art['fanart']:
+        art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", parent=True, server=server)
+
+    if not art['landscape']:
+        art['landscape'] = downloadUtils.getArtwork(item, "Thumb", server=server)
+        if not art['landscape']:
+            art['landscape'] = art['fanart']
+
+    if not art['thumb']:
+        art['thumb'] = art['landscape']
+
+    art['banner'] = downloadUtils.getArtwork(item, "Banner", server=server)
+    art['clearlogo'] = downloadUtils.getArtwork(item, "Logo", server=server)
+    art['clearart'] = downloadUtils.getArtwork(item, "Art", server=server)
+    art['discart'] = downloadUtils.getArtwork(item, "Disc", server=server)
+
+    return art
+
+class HomeWindow():
+    """
+        xbmcgui.Window(10000) with add-on id prefixed to keys
+    """
+    def __init__(self):
+        self.id_string = 'plugin.video.embycon-%s'
+        self.window = xbmcgui.Window(10000)
+
+    def getProperty(self, key):
+        key = self.id_string % key
+        value = self.window.getProperty(key)
+        # log.debug('HomeWindow: getProperty |%s| -> |%s|' % (key, value))
+        return value
+
+    def setProperty(self, key, value):
+        key = self.id_string % key
+        # log.debug('HomeWindow: setProperty |%s| -> |%s|' % (key, value))
+        self.window.setProperty(key, value)
+
+    def clearProperty(self, key):
+        key = self.id_string % key
+        # log.debug('HomeWindow: clearProperty |%s|' % key)
+        self.window.clearProperty(key)
