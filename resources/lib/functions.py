@@ -197,9 +197,9 @@ def markWatched(item_id):
     userId = downloadUtils.getUserId()
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
-    downloadUtils.downloadUrl(url, postBody="", type="POST")
-    WINDOW = HomeWindow()
-    WINDOW.setProperty("force_data_reload", "true")  
+    downloadUtils.downloadUrl(url, postBody="", method="POST")
+    home_window = HomeWindow()
+    home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
 
 def markUnwatched(item_id):
@@ -207,7 +207,7 @@ def markUnwatched(item_id):
     userId = downloadUtils.getUserId()
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
-    downloadUtils.downloadUrl(url, type="DELETE")
+    downloadUtils.downloadUrl(url, method="DELETE")
     home_window = HomeWindow()
     home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
@@ -217,7 +217,7 @@ def markFavorite(item_id):
     userId = downloadUtils.getUserId()
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
-    downloadUtils.downloadUrl(url, postBody="", type="POST")
+    downloadUtils.downloadUrl(url, postBody="", method="POST")
     home_window = HomeWindow()
     home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
@@ -227,7 +227,7 @@ def unmarkFavorite(item_id):
     userId = downloadUtils.getUserId()
     server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
-    downloadUtils.downloadUrl(url, type="DELETE")
+    downloadUtils.downloadUrl(url, method="DELETE")
     home_window = HomeWindow()
     home_window.setProperty("force_data_reload", "true")
     xbmc.executebuiltin("Container.Refresh")
@@ -240,7 +240,7 @@ def delete (item_id):
         url = 'http://' + server + '/emby/Items/' + item_id
         progress = xbmcgui.DialogProgress()
         progress.create(__language__(30052), __language__(30053))
-        downloadUtils.downloadUrl(url, type="DELETE")
+        downloadUtils.downloadUrl(url, method="DELETE")
         progress.close()
         xbmc.executebuiltin("Container.Refresh")
                
@@ -320,22 +320,22 @@ def addGUIItem( url, details, extraData, folder=True ):
     details['title'] = listItemName
 
     if kodi_version > 17:
-        list = xbmcgui.ListItem(listItemName, iconImage=thumbPath, thumbnailImage=thumbPath, offscreen=True)
+        list_item = xbmcgui.ListItem(listItemName, iconImage=thumbPath, thumbnailImage=thumbPath, offscreen=True)
     else:
-        list = xbmcgui.ListItem(listItemName, iconImage=thumbPath, thumbnailImage=thumbPath)
+        list_item = xbmcgui.ListItem(listItemName, iconImage=thumbPath, thumbnailImage=thumbPath)
 
     log.debug("Setting thumbnail as " + thumbPath)
     
     # calculate percentage
     if (cappedPercentage != None):
-        list.setProperty("complete_percentage", str(cappedPercentage))          
+        list_item.setProperty("complete_percentage", str(cappedPercentage))
          
     #For all end items
     if(not folder):
-        #list.setProperty('IsPlayable', 'true')
+        #list_item.setProperty('IsPlayable', 'true')
         if extraData.get('type','video').lower() == "video":
-            list.setProperty('TotalTime', str(extraData.get('duration')))
-            list.setProperty('ResumeTime', str(int(extraData.get('resumetime'))))
+            list_item.setProperty('TotalTime', str(extraData.get('duration')))
+            list_item.setProperty('ResumeTime', str(int(extraData.get('resumetime'))))
     
     #StartPercent
     
@@ -344,14 +344,14 @@ def addGUIItem( url, details, extraData, folder=True ):
     for artType in artTypes:
         artLinks[artType] = extraData.get(artType, '')
         log.debug("Setting " + artType + " as " + artLinks[artType])
-    list.setProperty('fanart_image', artLinks['fanart'])              # back compat
-    list.setProperty('discart', artLinks['discart'])                  # not avail to setArt
-    list.setProperty('tvshow.poster', artLinks['tvshow.poster'])      # not avail to setArt
-    list.setArt(artLinks)
+    list_item.setProperty('fanart_image', artLinks['fanart'])              # back compat
+    list_item.setProperty('discart', artLinks['discart'])                  # not avail to setArt
+    list_item.setProperty('tvshow.poster', artLinks['tvshow.poster'])      # not avail to setArt
+    list_item.setArt(artLinks)
 
     menuItems = addContextMenu(details, extraData, folder)
     if(len(menuItems) > 0):
-        list.addContextMenuItems( menuItems, True )
+        list_item.addContextMenuItems( menuItems, True )
 
     # new way
     videoInfoLabels = {}
@@ -359,7 +359,7 @@ def addGUIItem( url, details, extraData, folder=True ):
     if(extraData.get('type') == None or extraData.get('type') == "Video"):
         videoInfoLabels.update(details)
     else:
-        list.setInfo( type = extraData.get('type','Video'), infoLabels = details )
+        list_item.setInfo( type = extraData.get('type','Video'), infoLabels = details )
     
     videoInfoLabels["duration"] = extraData.get("duration")
     videoInfoLabels["playcount"] = extraData.get("playcount")
@@ -379,31 +379,31 @@ def addGUIItem( url, details, extraData, folder=True ):
 
     videoInfoLabels["mediatype"] = "video"
 
-    list.setInfo('video', videoInfoLabels)
+    list_item.setInfo('video', videoInfoLabels)
     
-    list.addStreamInfo('video', {'duration': extraData.get('duration'), 'aspect': extraData.get('aspectratio'),'codec': extraData.get('videocodec'), 'width' : extraData.get('width'), 'height' : extraData.get('height')})
-    list.addStreamInfo('audio', {'codec': extraData.get('audiocodec'),'channels': extraData.get('channels')})
+    list_item.addStreamInfo('video', {'duration': extraData.get('duration'), 'aspect': extraData.get('aspectratio'),'codec': extraData.get('videocodec'), 'width' : extraData.get('width'), 'height' : extraData.get('height')})
+    list_item.addStreamInfo('audio', {'codec': extraData.get('audiocodec'),'channels': extraData.get('channels')})
     
-    list.setProperty('CriticRating', str(extraData.get('criticrating')))
-    list.setProperty('ItemType', extraData.get('itemtype'))
+    list_item.setProperty('CriticRating', str(extraData.get('criticrating')))
+    list_item.setProperty('ItemType', extraData.get('itemtype'))
 
     if extraData.get('totaltime') != None:
-        list.setProperty('TotalTime', extraData.get('totaltime'))
+        list_item.setProperty('TotalTime', extraData.get('totaltime'))
     if extraData.get('TotalSeasons') != None:
-        list.setProperty('TotalSeasons',extraData.get('TotalSeasons'))
+        list_item.setProperty('TotalSeasons',extraData.get('TotalSeasons'))
     if extraData.get('TotalEpisodes') != None:  
-        list.setProperty('TotalEpisodes',extraData.get('TotalEpisodes'))
+        list_item.setProperty('TotalEpisodes',extraData.get('TotalEpisodes'))
     if extraData.get('WatchedEpisodes') != None:
-        list.setProperty('WatchedEpisodes',extraData.get('WatchedEpisodes'))
+        list_item.setProperty('WatchedEpisodes',extraData.get('WatchedEpisodes'))
     if extraData.get('UnWatchedEpisodes') != None:
-        list.setProperty('UnWatchedEpisodes',extraData.get('UnWatchedEpisodes'))
+        list_item.setProperty('UnWatchedEpisodes',extraData.get('UnWatchedEpisodes'))
     if extraData.get('NumEpisodes') != None:
-        list.setProperty('NumEpisodes',extraData.get('NumEpisodes'))
+        list_item.setProperty('NumEpisodes',extraData.get('NumEpisodes'))
     
-    list.setProperty('ItemGUID', extraData.get('guiid'))
-    list.setProperty('id', extraData.get('id'))
+    list_item.setProperty('ItemGUID', extraData.get('guiid'))
+    list_item.setProperty('id', extraData.get('id'))
         
-    return (u, list, folder)
+    return (u, list_item, folder)
 
 def addContextMenu(details, extraData, folder):
     commands = []
