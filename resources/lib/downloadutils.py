@@ -351,7 +351,7 @@ class DownloadUtils():
                 if popup == 0:
                     xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, self.getString(30200) % self.getString(30201)))
                 else:
-                    xbmcgui.Dialog().ok("",self.getString(30204))
+                    xbmcgui.Dialog().ok(self.getString(30135), self.getString(30204))
                 raise
         else:
             try: conn.close()
