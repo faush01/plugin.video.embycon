@@ -43,8 +43,7 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         self.action_exitkeys_id = [10, 13]
         
         # load skin views               
-        addonSettings = xbmcaddon.Addon(id='plugin.video.embycon')
-        addonPath = addonSettings.getAddonInfo('path')
+        addonPath = __addon__.getAddonInfo('path')
         skin_view_file = os.path.join(addonPath, "resources", "data", "skin_views.json")
         log.info("Loading skin views form: " + skin_view_file)
         dataFile = open(skin_view_file, 'r')
@@ -167,7 +166,6 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
             self.setSortId("Seasons", 3053)
             self.setSortId("Episodes", 3054)
         
-            __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
             __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
             view_list_path = os.path.join(__addondir__, "default_views.json")
             dataFile = open(view_list_path, 'w')

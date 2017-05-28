@@ -1,13 +1,11 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import xbmcgui
-import xbmcaddon
 
 from simple_logging import SimpleLogging
 from translation import i18n
 
 log = SimpleLogging(__name__)
-__addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 
 class ResumeDialog(xbmcgui.WindowXMLDialog):
 

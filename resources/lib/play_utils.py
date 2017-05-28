@@ -16,7 +16,7 @@ from kodi_utils import HomeWindow
 from translation import i18n
 
 log = SimpleLogging(__name__)
-__addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
+settings = xbmcaddon.Addon(id='plugin.video.embycon')
 downloadUtils = DownloadUtils()
 
 def playFile(id, auto_resume):
@@ -24,7 +24,6 @@ def playFile(id, auto_resume):
 
     userid = downloadUtils.getUserId()
 
-    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     addon_path = settings.getAddonInfo('path')
     playback_type = settings.getSetting("playback_type")
 

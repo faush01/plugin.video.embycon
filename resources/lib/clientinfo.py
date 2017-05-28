@@ -9,6 +9,8 @@ from kodi_utils import HomeWindow
 from simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
+__addon__ = xbmcaddon.Addon(id="plugin.video.embycon")
+
 
 class ClientInformation():
 
@@ -37,7 +39,7 @@ class ClientInformation():
         return client_id
         
     def getVersion(self):
-        version = xbmcaddon.Addon(id="plugin.video.embycon").getAddonInfo("version")
+        version = __addon__.getAddonInfo("version")
         return version
 
     def getClient(self):

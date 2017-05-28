@@ -27,7 +27,7 @@ from menu_functions import displaySections, showMovieAlphaList, showGenreList, s
 from translation import i18n
 
 __settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
-__addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
+__addon__ = __settings__
 __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
 __cwd__ = __settings__.getAddonInfo('path')
 PLUGINPATH = xbmc.translatePath(os.path.join( __cwd__))
@@ -549,9 +549,8 @@ def processDirectory(url, results, progress, pluginhandle):
 
     xbmcplugin.setContent(pluginhandle, 'movies')
 
-    settings = xbmcaddon.Addon(id='plugin.video.embycon')
-    port = settings.getSetting('port')
-    host = settings.getSetting('ipaddress')
+    port = __settings__.getSetting('port')
+    host = __settings__.getSetting('ipaddress')
     server = host + ":" + port
 
     detailsString = getDetailsString()

@@ -17,6 +17,7 @@ log = SimpleLogging(__name__)
 
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __addon_name__ = __addon__.getAddonInfo('name')
+settings = __addon__
 downloadUtils = DownloadUtils()
 
 def getServerDetails():
@@ -55,7 +56,6 @@ def getServerDetails():
 def checkServer(force=False, change_user=False, notify=False):
     log.debug("checkServer Called")
 
-    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     port = settings.getSetting('port')
     host = settings.getSetting('ipaddress')
     serverUrl = ""

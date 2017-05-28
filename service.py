@@ -19,6 +19,7 @@ home_window.clearProperty("Params")
 
 log = SimpleLogging('service')
 download_utils = DownloadUtils()
+settings = xbmcaddon.Addon(id='plugin.video.embycon')
 
 # auth the service
 try:
@@ -66,7 +67,6 @@ def sendProgress():
 
     log.debug("Sending POST progress started: %s." % postdata)
 
-    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     port = settings.getSetting('port')
     host = settings.getSetting('ipaddress')
     server = host + ":" + port
@@ -94,7 +94,6 @@ def stopAll(played_information):
             if hasData(emby_item_id):
                 log.info("Playback Stopped at: " + str(int(current_possition * 10000000)))
 
-                settings = xbmcaddon.Addon(id='plugin.video.embycon')
                 port = settings.getSetting('port')
                 host = settings.getSetting('ipaddress')
                 server = host + ":" + port
@@ -145,7 +144,6 @@ class Service(xbmc.Player):
 
         log.debug("Sending POST play started: %s." % postdata)
 
-        settings = xbmcaddon.Addon(id='plugin.video.embycon')
         port = settings.getSetting('port')
         host = settings.getSetting('ipaddress')
         server = host + ":" + port
