@@ -24,10 +24,10 @@ from views import DefaultViews, loadSkinDefaults
 from server_detect import checkServer
 from simple_logging import SimpleLogging
 from menu_functions import displaySections, showMovieAlphaList, showGenreList, showWidgets
+from translation import i18n
 
 __settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
-__language__ = __addon__.getLocalizedString
 __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
 __cwd__ = __settings__.getAddonInfo('path')
 PLUGINPATH = xbmc.translatePath(os.path.join( __cwd__))
@@ -150,7 +150,7 @@ def mainEntryPoint():
         if mode == "GET_CONTENT":
             media_type = params.get("media_type", None)
             if not media_type:
-                xbmcgui.Dialog().ok(__language__(30135), __language__(30139))
+                xbmcgui.Dialog().ok(i18n('error'), i18n('no_media_type'))
             log.info("EmbyCon -> media_type: " + str(media_type))
             getContent(param_url, pluginhandle, media_type)
 
@@ -236,13 +236,13 @@ def unmarkFavorite(item_id):
     xbmc.executebuiltin("Container.Refresh")
    
 def delete (item_id):
-    return_value = xbmcgui.Dialog().yesno(__language__(30091),__language__(30092))
+    return_value = xbmcgui.Dialog().yesno(i18n('confirm_file_delete'), i18n('file_delete_confirm'))
     if return_value:
         log.info('Deleting Item : ' + item_id)
         server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
         url = 'http://' + server + '/emby/Items/' + item_id
         progress = xbmcgui.DialogProgress()
-        progress.create(__language__(30052), __language__(30053))
+        progress.create(i18n('deleting'), i18n('waiting_server_delete'))
         downloadUtils.downloadUrl(url, method="DELETE")
         progress.close()
         xbmc.executebuiltin("Container.Refresh")
@@ -252,7 +252,7 @@ def addGUIItem( url, details, extraData, folder=True ):
     home_window = HomeWindow()
     url = url.encode('utf-8')
 
-    log.debug("Adding GuiItem for [%s]" % details.get('title','Unknown'))
+    log.debug("Adding GuiItem for [%s]" % details.get('title', i18n('unknown')))
     log.debug("Passed details: " + str(details))
     log.debug("Passed extraData: " + str(extraData))
 
@@ -273,7 +273,7 @@ def addGUIItem( url, details, extraData, folder=True ):
     #Create the ListItem that will be displayed
     thumbPath=str(extraData.get('thumb',''))
     
-    listItemName = details.get('title','Unknown')
+    listItemName = details.get('title', i18n('unknown'))
     
     # calculate percentage
     cappedPercentage = None
@@ -418,22 +418,22 @@ def addContextMenu(details, extraData, folder):
         # watched/unwatched
         if extraData.get("playcount") == "0":
             argsToPass = 'markWatched,' + extraData.get('id')
-            commands.append((__language__(30270), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
+            commands.append((i18n('emby_mark_watched'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
         else:
             argsToPass = 'markUnwatched,' + extraData.get('id')
-            commands.append((__language__(30271), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
+            commands.append((i18n('emby_mark_unwatched'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
             
         # favourite add/remove
         if extraData.get('favorite') != 'true':
             argsToPass = 'markFavorite,' + extraData.get('id')
-            commands.append((__language__(30272), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
+            commands.append((i18n('emby_set_favorite'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
         else:
             argsToPass = 'unmarkFavorite,' + extraData.get('id')
-            commands.append((__language__(30273), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
+            commands.append((i18n('emby_unset_favorite'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
         
         # delete
         argsToPass = 'delete,' + extraData.get('id')
-        commands.append((__language__(30274), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
+        commands.append((i18n('emby_delete'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
                     
     return(commands)
 
@@ -536,7 +536,7 @@ def getContent(url, pluginhandle, media_type):
     xbmcplugin.endOfDirectory(pluginhandle, cacheToDisc=False)
     
     if(progress != None):
-        progress.update(100, __language__(30125))
+        progress.update(100, i18n('done'))
         progress.close()
     
     return
@@ -567,13 +567,13 @@ def processDirectory(url, results, progress, pluginhandle):
     
         if(progress != None):
             percentDone = (float(current_item) / float(item_count)) * 100
-            progress.update(int(percentDone), __language__(30126) + str(current_item))
+            progress.update(int(percentDone), i18n('processing_item:') + str(current_item))
             current_item = current_item + 1
         
         if(item.get("Name") != None):
             tempTitle = item.get("Name").encode('utf-8')
         else:
-            tempTitle = __language__(20280)
+            tempTitle = i18n('missing_title')
             
         id = str(item.get("Id")).encode('utf-8')
         guiid = id
@@ -1018,7 +1018,7 @@ def showContent(pluginName, handle, params):
     userid = downloadUtils.getUserId()
     media_type = params.get("media_type", None)
     if not media_type:
-        xbmcgui.Dialog().ok(__language__(30135), __language__(30139))
+        xbmcgui.Dialog().ok(i18n('error'), i18n('no_media_type'))
     
     contentUrl = ("http://" + server + "/emby/Users/" + userid + "/Items"
         "?format=json"
@@ -1048,7 +1048,7 @@ def showParentContent(pluginName, handle, params):
     media_type = params.get("media_type", None)
 
     if not media_type:
-        xbmcgui.Dialog().ok(__language__(30135), __language__(30139))
+        xbmcgui.Dialog().ok(i18n('error'), i18n('no_media_type'))
     
     contentUrl = (
         "http://" + server +
@@ -1073,7 +1073,7 @@ def checkService():
         loops = loops + 1
         if(loops == 40):
             log.error("EmbyCon Service Not Running, no time stamp, exiting")
-            xbmcgui.Dialog().ok(__language__(30135), __language__(30136), __language__(30137))
+            xbmcgui.Dialog().ok(i18n('error'), i18n('service_not_running'), i18n('restart_kodi'))
             sys.exit()
         xbmc.sleep(200)
         
@@ -1082,7 +1082,7 @@ def checkService():
     
     if((int(timeStamp) + 240) < int(time.time())):
         log.error("EmbyCon Service Not Running, time stamp to old, exiting")
-        xbmcgui.Dialog().ok(__language__(30135), __language__(30136), __language__(30137))
+        xbmcgui.Dialog().ok(i18n('error'), i18n('service_not_running'), i18n('restart_kodi'))
         sys.exit()
 
 

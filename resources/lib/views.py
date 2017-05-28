@@ -8,10 +8,10 @@ import xbmcaddon
 import json
 
 from simple_logging import SimpleLogging
+from translation import i18n
 
 log = SimpleLogging("EmbyCon." + __name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
-__language__ = __addon__.getLocalizedString
 
 def loadSkinDefaults():
 
@@ -63,14 +63,14 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         self.defaultView = savedData.get("view", {})
         self.defaultSort = savedData.get("sort", {})
 
-        self.getControl(3110).setLabel(__language__(30236))
-        self.getControl(3019).setLabel(__language__(30238))
-        self.getControl(3020).setLabel(__language__(30230))
-        self.getControl(3021).setLabel(__language__(30231))
-        self.getControl(3022).setLabel(__language__(30232))
-        self.getControl(3023).setLabel(__language__(30233))
-        self.getControl(3024).setLabel(__language__(30234))
-        self.getControl(3025).setLabel(__language__(30235))
+        self.getControl(3110).setLabel(i18n('save'))
+        self.getControl(3019).setLabel(i18n('default_sort'))
+        self.getControl(3020).setLabel(i18n('default_view'))
+        self.getControl(3021).setLabel(i18n('movies'))
+        self.getControl(3022).setLabel(i18n('boxsets'))
+        self.getControl(3023).setLabel(i18n('series'))
+        self.getControl(3024).setLabel(i18n('seasons'))
+        self.getControl(3025).setLabel(i18n('episodes'))
 
         # set default values
         name = self.getViewNameById(self.defaultView.get("Movies"))

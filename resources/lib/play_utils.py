@@ -13,10 +13,10 @@ from downloadutils import DownloadUtils
 from resume_dialog import ResumeDialog
 from utils import PlayUtils, getArt
 from kodi_utils import HomeWindow
+from translation import i18n
 
 log = SimpleLogging("EmbyCon." + __name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
-__language__ = __addon__.getLocalizedString
 downloadUtils = DownloadUtils()
 
 def playFile(id, auto_resume):
@@ -73,7 +73,7 @@ def playFile(id, auto_resume):
     home_window = HomeWindow()
     home_window.setProperty("PlaybackType_" + id, playback_type_string)
 
-    listItem = xbmcgui.ListItem(label=result.get("Name", __language__(30280)), path=playurl)
+    listItem = xbmcgui.ListItem(label=result.get("Name", i18n('missing_title')), path=playurl)
 
     listItem = setListItemProps(id, listItem, result, server)
 
@@ -119,7 +119,7 @@ def setListItemProps(id, listItem, result, server):
 
     # play info
     details = {
-        'title': result.get("Name", __language__(30280)),
+        'title': result.get("Name", i18n('missing_title')),
         'plot': result.get("Overview")
     }
 

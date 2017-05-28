@@ -13,6 +13,7 @@ import json
 from kodi_utils import HomeWindow
 from clientinfo import ClientInformation
 from simple_logging import SimpleLogging
+from translation import i18n
 
 log = SimpleLogging("EmbyCon." + __name__)
 
@@ -22,7 +23,6 @@ class DownloadUtils():
 
     def __init__(self, *args):
         settings = xbmcaddon.Addon(id='plugin.video.embycon')
-        self.getString = settings.getLocalizedString
         self.addon_name = settings.getAddonInfo('name')
 
     def getArtwork(self, data, art_type, parent = False, index = "0", width = 10000, height = 10000, server=None):
@@ -161,13 +161,13 @@ class DownloadUtils():
         if (secure) or (not userid):
             authOk = self.authenticate()
             if (authOk == ""):
-                return_value = xbmcgui.Dialog().ok(self.getString(30044), self.getString(30044))
+                return_value = xbmcgui.Dialog().ok(self.addon_name , i18n('incorrect_user_pass'))
                 return ""
             if not userid:
                 userid = WINDOW.getProperty("userid")
 
         if userid == "":
-            return_value = xbmcgui.Dialog().ok(self.getString(30045),self.getString(30045))
+            return_value = xbmcgui.Dialog().ok(self.addon_name ,i18n('username_not_found'))
 
         log.info("userid : " + userid)
 
@@ -335,9 +335,9 @@ class DownloadUtils():
                 log.error(error)
                 if suppress is False:
                     if popup == 0:
-                        xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, self.getString(30200) % str(data.reason)))
+                        xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, i18n('url_error_') % str(data.reason)))
                     else:
-                        xbmcgui.Dialog().ok(self.getString(30135),server)
+                        xbmcgui.Dialog().ok(self.addon_name, i18n('url_error_') % str(data.reason))
                 log.error(error)
                 try: conn.close()
                 except: pass
@@ -349,9 +349,9 @@ class DownloadUtils():
             log.error(error)
             if suppress is False:
                 if popup == 0:
-                    xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, self.getString(30200) % self.getString(30201)))
+                    xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, i18n('url_error_') % i18n('unable_connect_server')))
                 else:
-                    xbmcgui.Dialog().ok(self.getString(30135), self.getString(30204))
+                    xbmcgui.Dialog().ok(self.addon_name, i18n('url_error_') % i18n('unable_connect_server'))
                 raise
         else:
             try: conn.close()

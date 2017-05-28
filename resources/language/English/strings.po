@@ -14,7 +14,7 @@ msgctxt "#30000"
 msgid "Server Address: "
 msgstr ""
 
-msgctxt "#30030"
+msgctxt "#30001"
 msgid "Server Port: "
 msgstr ""
 
@@ -80,6 +80,10 @@ msgstr ""
 
 msgctxt "#30045"
 msgid "Username not found"
+msgstr ""
+
+msgctxt "#30052"
+msgid "Deleting"
 msgstr ""
 
 msgctxt "#30053"
