@@ -13,7 +13,7 @@ from simple_logging import SimpleLogging
 from utils import getChecksum
 from kodi_utils import HomeWindow
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 
 class DataManager():
 

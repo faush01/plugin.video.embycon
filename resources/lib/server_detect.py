@@ -13,7 +13,7 @@ from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
 from translation import i18n
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __addon_name__ = __addon__.getAddonInfo('name')

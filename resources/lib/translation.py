@@ -1,8 +1,7 @@
-import xbmc
 import xbmcaddon
 from simple_logging import SimpleLogging
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 addon = xbmcaddon.Addon()
 
 
@@ -10,7 +9,7 @@ def i18n(string_id):
     try:
         return addon.getLocalizedString(STRINGS[string_id]).encode('utf-8', 'ignore')
     except Exception as e:
-        xbmc.log(log.format('Failed String Lookup: %s (%s)' % (string_id, e), 'WARNING'), xbmc.LOGWARNING)
+        log.warning('Failed String Lookup: %s (%s)' % (string_id, e))
         return string_id
 
 

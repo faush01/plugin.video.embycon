@@ -6,7 +6,7 @@ import xbmcaddon
 from simple_logging import SimpleLogging
 from translation import i18n
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 
 class ResumeDialog(xbmcgui.WindowXMLDialog):

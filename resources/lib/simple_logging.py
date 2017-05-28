@@ -10,9 +10,10 @@ class SimpleLogging():
 
     def __init__(self, name):
         settings = xbmcaddon.Addon(id='plugin.video.embycon')
+        prefix = settings.getAddonInfo('name')
         log_level = settings.getSetting('logLevel')
         self.level = int(log_level)
-        self.name = name
+        self.name = prefix + '.' + name
 
     def getLevel(self):
         return self.level
@@ -27,6 +28,12 @@ class SimpleLogging():
             except UnicodeEncodeError:
                 xbmc.log(self.format(msg, "ERROR").encode('utf-8'), level=xbmc.LOGNOTICE)
 
+    def warning(self, msg):
+        if(self.level >= 0):
+            try:
+                xbmc.log(self.format(msg, "WARNING"), level=xbmc.LOGNOTICE)
+            except UnicodeEncodeError:
+                xbmc.log(self.format(msg, "WARNING").encode('utf-8'), level=xbmc.LOGNOTICE)
 
     def info(self, msg):
         if(self.level >= 1):

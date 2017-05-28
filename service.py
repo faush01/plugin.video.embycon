@@ -17,7 +17,7 @@ home_window.clearProperty("userid")
 home_window.clearProperty("AccessToken")
 home_window.clearProperty("Params")
 
-log = SimpleLogging("EmbyCon.service")
+log = SimpleLogging('service')
 download_utils = DownloadUtils()
 
 # auth the service

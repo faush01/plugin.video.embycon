@@ -13,7 +13,7 @@ from kodi_utils import addMenuDirectoryItem
 from simple_logging import SimpleLogging
 from translation import i18n
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 downloadUtils = DownloadUtils()
 
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')

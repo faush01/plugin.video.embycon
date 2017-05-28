@@ -8,7 +8,7 @@ from clientinfo import ClientInformation
 
 #define our global download utils
 downloadUtils = DownloadUtils()
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 
 ###########################################################################
 class PlayUtils():

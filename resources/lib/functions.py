@@ -32,7 +32,7 @@ __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
 __cwd__ = __settings__.getAddonInfo('path')
 PLUGINPATH = xbmc.translatePath(os.path.join( __cwd__))
 
-log = SimpleLogging("EmbyCon." + __name__)
+log = SimpleLogging(__name__)
 
 kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 

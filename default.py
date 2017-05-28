@@ -3,7 +3,7 @@
 from resources.lib.simple_logging import SimpleLogging
 from resources.lib.functions import mainEntryPoint
 
-log = SimpleLogging("EmbyCon.default")
+log = SimpleLogging('default')
 
 log.info("About to enter mainEntryPoint()")
 
