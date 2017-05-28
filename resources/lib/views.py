@@ -13,12 +13,12 @@ from translation import i18n
 log = SimpleLogging(__name__)
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 
-def loadSkinDefaults():
 
+def loadSkinDefaults():
     defaultData = {}
     # load current default views
     # add a hash of xbmc.getSkinDir() to file name to make it skin specific
-    __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
+    __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
     view_list_path = os.path.join(__addondir__, "default_views.json")
     if os.path.exists(view_list_path):
         dataFile = open(view_list_path, 'r')
@@ -28,8 +28,8 @@ def loadSkinDefaults():
 
     return defaultData
 
+
 class DefaultViews(xbmcgui.WindowXMLDialog):
-   
     viewData = {}
     sortData = {"Title": "title", "Date": "date"}
     defaultView = {}
@@ -41,7 +41,7 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         self.action_exitkeys_id = [10, 13]
-        
+
         # load skin views               
         addonPath = __addon__.getAddonInfo('path')
         skin_view_file = os.path.join(addonPath, "resources", "data", "skin_views.json")
@@ -49,14 +49,14 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         dataFile = open(skin_view_file, 'r')
         jsonData = dataFile.read()
         dataFile.close()
-        defaultViewData = json.loads(jsonData)                
+        defaultViewData = json.loads(jsonData)
         log.info("Loaded skin views: " + str(defaultViewData))
         skin_used = xbmc.getSkinDir()
         log.info("Current skin: " + skin_used)
         skin_views = defaultViewData.get(skin_used, None)
         log.info("Current skin views: " + str(skin_views))
         self.viewData = skin_views
-        
+
         # load current default views
         savedData = loadSkinDefaults()
         self.defaultView = savedData.get("view", {})
@@ -81,7 +81,7 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         name = self.getViewNameById(self.defaultView.get("Seasons"))
         self.getControl(3013).setLabel(name)
         name = self.getViewNameById(self.defaultView.get("Episodes"))
-        self.getControl(3014).setLabel(name)         
+        self.getControl(3014).setLabel(name)
 
         name = self.getSortNameById(self.defaultSort.get("Movies"))
         self.getControl(3050).setLabel(name)
@@ -94,9 +94,9 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         name = self.getSortNameById(self.defaultSort.get("Episodes"))
         self.getControl(3054).setLabel(name)
 
-    def onFocus(self, controlId):      
+    def onFocus(self, controlId):
         pass
-        
+
     def doAction(self, actionID):
         pass
 
@@ -111,22 +111,22 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
         return "None"
 
     def getViewNameById(self, viewId):
-        if(viewId == None):
+        if (viewId == None):
             return "None"
-            
+
         for name, id in self.viewData.iteritems():
             if id == viewId:
                 return name
-            
+
         return "None"
-    
+
     def getNextViewName(self, current):
         keys = list(self.viewData.keys())
-        if(current not in keys):
+        if (current not in keys):
             return keys[0]
-            
+
         index = keys.index(current)
-        if(index > -1 and index < len(keys)-1):
+        if (index > -1 and index < len(keys) - 1):
             return keys[index + 1]
         else:
             return keys[0]
@@ -143,7 +143,7 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
             return keys[0]
 
     def onClick(self, controlID):
-        
+
         if controlID >= 3010 and controlID <= 3014:
             control = self.getControl(controlID)
             control.setLabel(self.getNextViewName(control.getLabel()))
@@ -153,7 +153,7 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
             control.setLabel(self.getNextSortName(control.getLabel()))
 
         elif controlID == 3110:
-        
+
             self.setViewId("Movies", 3010)
             self.setViewId("BoxSets", 3011)
             self.setViewId("Series", 3012)
@@ -165,29 +165,29 @@ class DefaultViews(xbmcgui.WindowXMLDialog):
             self.setSortId("Series", 3052)
             self.setSortId("Seasons", 3053)
             self.setSortId("Episodes", 3054)
-        
-            __addondir__ = xbmc.translatePath( __addon__.getAddonInfo('profile'))
+
+            __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
             view_list_path = os.path.join(__addondir__, "default_views.json")
             dataFile = open(view_list_path, 'w')
             defaults_data = {"view": self.defaultView, "sort": self.defaultSort}
             stringdata = json.dumps(defaults_data)
             dataFile.write(stringdata)
-            dataFile.close()        
+            dataFile.close()
 
             self.close()
-        
+
         pass
-        
+
     def setViewId(self, viewName, labelId):
         viewId = self.viewData.get(self.getControl(labelId).getLabel())
-        if(viewId == None):
+        if (viewId == None):
             return
         else:
             self.defaultView[viewName] = viewId
 
     def setSortId(self, sortName, labelId):
         sortId = self.sortData.get(self.getControl(labelId).getLabel())
-        if(sortId == None):
+        if (sortId == None):
             return
         else:
             self.defaultSort[sortName] = sortId

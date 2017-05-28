@@ -8,8 +8,6 @@ log = SimpleLogging('default')
 log.info("About to enter mainEntryPoint()")
 
 mainEntryPoint()
-    
-#clear done and exit.
-#sys.modules.clear()
 
-
+# clear done and exit.
+# sys.modules.clear()

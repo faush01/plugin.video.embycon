@@ -19,6 +19,7 @@ downloadUtils = DownloadUtils()
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 settings = __addon__
 
+
 def showGenreList():
     log.info("== ENTER: showGenreList() ==")
 
@@ -102,11 +103,12 @@ def showMovieAlphaList():
 
     for collection in collections:
         url = (sys.argv[0] + "?url=" + urllib.quote('http://%s%s' % (collection['address'], collection['path'])) +
-              "&mode=GET_CONTENT&media_type=" + collection["media_type"])
+               "&mode=GET_CONTENT&media_type=" + collection["media_type"])
         log.info("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
         addMenuDirectoryItem(collection.get('title', i18n('unknown')), url)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
 
 def displaySections():
     log.info("== ENTER: displaySections() ==")
@@ -121,7 +123,7 @@ def displaySections():
     collections = getCollections(detailsString)
     for collection in collections:
         url = (sys.argv[0] + "?url=" + urllib.quote('http://%s%s' % (collection['address'], collection['path'])) +
-              "&mode=GET_CONTENT&media_type=" + collection["media_type"])
+               "&mode=GET_CONTENT&media_type=" + collection["media_type"])
         log.info("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
         addMenuDirectoryItem(collection.get('title', i18n('unknown')), url, thumbnail=collection.get("thumbnail"))
 
@@ -133,6 +135,7 @@ def displaySections():
     addMenuDirectoryItem(i18n('widgets'), "plugin://plugin.video.embycon/?mode=WIDGETS")
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
 
 def getCollections(detailsString):
     log.info("== ENTER: getCollections ==")
@@ -168,7 +171,7 @@ def getCollections(detailsString):
     jsonData = downloadUtils.downloadUrl(
         htmlpath + userid + "/items?ParentId=" + parentid + "&Sortby=SortName&format=json")
     log.debug("jsonData : " + jsonData)
-    collections=[]
+    collections = []
 
     result = []
     try:

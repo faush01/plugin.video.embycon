@@ -20,21 +20,22 @@ __addon_name__ = __addon__.getAddonInfo('name')
 settings = __addon__
 downloadUtils = DownloadUtils()
 
+
 def getServerDetails():
     log.debug("Getting Server Details from Network")
 
     MESSAGE = "who is EmbyServer?"
     MULTI_GROUP = ("<broadcast>", 7359)
-    
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(6.0)
-    
-    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 10) #timeout
-    
+
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 10)  # timeout
+
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
     sock.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
-    
+
     log.debug("MutliGroup       : " + str(MULTI_GROUP))
     log.debug("Sending UDP Data : " + MESSAGE)
     sock.sendto(MESSAGE, MULTI_GROUP)

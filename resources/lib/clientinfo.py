@@ -13,9 +13,8 @@ __addon__ = xbmcaddon.Addon(id="plugin.video.embycon")
 
 
 class ClientInformation():
-
     def getDeviceId(self):
-    
+
         WINDOW = HomeWindow()
         client_id = WINDOW.getProperty("client_id")
 
@@ -37,7 +36,7 @@ class ClientInformation():
 
         WINDOW.setProperty("client_id", client_id)
         return client_id
-        
+
     def getVersion(self):
         version = __addon__.getAddonInfo("version")
         return version
