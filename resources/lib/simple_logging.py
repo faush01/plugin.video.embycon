@@ -28,13 +28,6 @@ class SimpleLogging():
             except UnicodeEncodeError:
                 xbmc.log(self.format(msg, "ERROR").encode('utf-8'), level=xbmc.LOGNOTICE)
 
-    def warning(self, msg):
-        if (self.level >= 0):
-            try:
-                xbmc.log(self.format(msg, "WARNING"), level=xbmc.LOGNOTICE)
-            except UnicodeEncodeError:
-                xbmc.log(self.format(msg, "WARNING").encode('utf-8'), level=xbmc.LOGNOTICE)
-
     def info(self, msg):
         if (self.level >= 1):
             try:

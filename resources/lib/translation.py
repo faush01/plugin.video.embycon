@@ -9,7 +9,7 @@ def i18n(string_id):
     try:
         return addon.getLocalizedString(STRINGS[string_id]).encode('utf-8', 'ignore')
     except Exception as e:
-        log.warning('Failed String Lookup: %s (%s)' % (string_id, e))
+        log.error('Failed String Lookup: %s (%s)' % (string_id, e))
         return string_id
 
 
