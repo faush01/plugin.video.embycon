@@ -17,12 +17,12 @@ log = SimpleLogging(__name__)
 downloadUtils = DownloadUtils()
 
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
-settings = __addon__
 
 
 def showGenreList():
     log.info("== ENTER: showGenreList() ==")
 
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     host = settings.getSetting('ipaddress')
     port = settings.getSetting('port')
     if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
@@ -67,6 +67,7 @@ def showGenreList():
 def showMovieAlphaList():
     log.info("== ENTER: showMovieAlphaList() ==")
 
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     host = settings.getSetting('ipaddress')
     port = settings.getSetting('port')
     if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
@@ -114,6 +115,7 @@ def displaySections():
     log.info("== ENTER: displaySections() ==")
     xbmcplugin.setContent(int(sys.argv[1]), 'files')
 
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     host = settings.getSetting('ipaddress')
     port = settings.getSetting('port')
     if (len(host) == 0) or (host == "<none>") or (len(port) == 0):
@@ -140,6 +142,7 @@ def displaySections():
 def getCollections(detailsString):
     log.info("== ENTER: getCollections ==")
 
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     host = settings.getSetting('ipaddress')
     port = settings.getSetting('port')
 

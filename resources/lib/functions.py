@@ -26,10 +26,9 @@ from simple_logging import SimpleLogging
 from menu_functions import displaySections, showMovieAlphaList, showGenreList, showWidgets
 from translation import i18n
 
-__settings__ = xbmcaddon.Addon(id='plugin.video.embycon')
-__addon__ = __settings__
+__addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
-__cwd__ = __settings__.getAddonInfo('path')
+__cwd__ = __addon__.getAddonInfo('path')
 PLUGINPATH = xbmc.translatePath(os.path.join(__cwd__))
 
 log = SimpleLogging(__name__)
@@ -43,7 +42,8 @@ dataManager = DataManager()
 def mainEntryPoint():
     log.info("===== EmbyCon START =====")
 
-    profile_code = __settings__.getSetting('profile') == "true"
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+    profile_code = settings.getSetting('profile') == "true"
     pr = None
     if (profile_code):
         return_value = xbmcgui.Dialog().yesno("Profiling Enabled", "Do you want to run profiling?")
@@ -112,7 +112,7 @@ def mainEntryPoint():
     elif mode == "WIDGETS":
         showWidgets()
     elif mode == "SHOW_SETTINGS":
-        __settings__.openSettings()
+        __addon__.openSettings()
         WINDOW = xbmcgui.getCurrentWindowId()
         if WINDOW == 10000:
             log.info("Currently in home - refreshing to allow new settings to be taken")
@@ -197,8 +197,9 @@ def mainEntryPoint():
 
 def markWatched(item_id):
     log.info("Mark Item Watched : " + item_id)
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     userId = downloadUtils.getUserId()
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    server = settings.getSetting('ipaddress') + ":" + settings.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
     downloadUtils.downloadUrl(url, postBody="", method="POST")
     home_window = HomeWindow()
@@ -208,8 +209,9 @@ def markWatched(item_id):
 
 def markUnwatched(item_id):
     log.info("Mark Item UnWatched : " + item_id)
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     userId = downloadUtils.getUserId()
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    server = settings.getSetting('ipaddress') + ":" + settings.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/PlayedItems/" + item_id
     downloadUtils.downloadUrl(url, method="DELETE")
     home_window = HomeWindow()
@@ -219,8 +221,9 @@ def markUnwatched(item_id):
 
 def markFavorite(item_id):
     log.info("Add item to favourites : " + item_id)
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     userId = downloadUtils.getUserId()
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    server = settings.getSetting('ipaddress') + ":" + settings.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
     downloadUtils.downloadUrl(url, postBody="", method="POST")
     home_window = HomeWindow()
@@ -230,8 +233,9 @@ def markFavorite(item_id):
 
 def unmarkFavorite(item_id):
     log.info("Remove item from favourites : " + item_id)
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     userId = downloadUtils.getUserId()
-    server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+    server = settings.getSetting('ipaddress') + ":" + settings.getSetting('port')
     url = "http://" + server + "/emby/Users/" + userId + "/FavoriteItems/" + item_id
     downloadUtils.downloadUrl(url, method="DELETE")
     home_window = HomeWindow()
@@ -243,7 +247,8 @@ def delete(item_id):
     return_value = xbmcgui.Dialog().yesno(i18n('confirm_file_delete'), i18n('file_delete_confirm'))
     if return_value:
         log.info('Deleting Item : ' + item_id)
-        server = __settings__.getSetting('ipaddress') + ":" + __settings__.getSetting('port')
+        settings = xbmcaddon.Addon(id='plugin.video.embycon')
+        server = settings.getSetting('ipaddress') + ":" + settings.getSetting('port')
         url = 'http://' + server + '/emby/Items/' + item_id
         progress = xbmcgui.DialogProgress()
         progress.create(i18n('deleting'), i18n('waiting_server_delete'))
@@ -254,6 +259,8 @@ def delete(item_id):
 
 def addGUIItem(url, details, extraData, folder=True):
     home_window = HomeWindow()
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+
     url = url.encode('utf-8')
 
     log.debug("Adding GuiItem for [%s]" % details.get('title', i18n('unknown')))
@@ -314,12 +321,12 @@ def addGUIItem(url, details, extraData, folder=True):
         '''
 
     countsAdded = False
-    addCounts = __settings__.getSetting('addCounts') == 'true'
+    addCounts = settings.getSetting('addCounts') == 'true'
     if addCounts and extraData.get('UnWatchedEpisodes') != "0":
         countsAdded = True
         listItemName = listItemName + " (" + extraData.get('UnWatchedEpisodes') + ")"
 
-    addResumePercent = __settings__.getSetting('addResumePercent') == 'true'
+    addResumePercent = settings.getSetting('addResumePercent') == 'true'
     if (countsAdded == False and addResumePercent and details.get('title') != None and cappedPercentage != None):
         listItemName = listItemName + " (" + str(cappedPercentage) + "%)"
 
@@ -478,6 +485,7 @@ def getContent(url, pluginhandle, media_type):
     log.info("URL: " + str(url))
     log.info("MediaType: " + str(media_type))
 
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
     # determine view type, map it from media type to view type
     viewType = ""
     media_type = str(media_type).lower().strip()
@@ -519,7 +527,7 @@ def getContent(url, pluginhandle, media_type):
 
     # show a progress indicator if needed
     progress = None
-    if (__settings__.getSetting('showLoadProgress') == "true"):
+    if (settings.getSetting('showLoadProgress') == "true"):
         progress = xbmcgui.DialogProgress()
         progress.create("Loading Content")
         progress.update(0, "Retrieving Data")
@@ -559,8 +567,9 @@ def processDirectory(url, results, progress, pluginhandle):
 
     xbmcplugin.setContent(pluginhandle, 'movies')
 
-    port = __settings__.getSetting('port')
-    host = __settings__.getSetting('ipaddress')
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+    port = settings.getSetting('port')
+    host = settings.getSetting('ipaddress')
     server = host + ":" + port
 
     detailsString = getDetailsString()
@@ -608,12 +617,12 @@ def processDirectory(url, results, progress, pluginhandle):
             guiid = item.get("SeriesId")
         elif item.get("Type") == "Episode":
             prefix = ''
-            if __settings__.getSetting('addSeasonNumber') == 'true':
+            if settings.getSetting('addSeasonNumber') == 'true':
                 prefix = "S" + str(tempSeason)
-                if __settings__.getSetting('addEpisodeNumber') == 'true':
+                if settings.getSetting('addEpisodeNumber') == 'true':
                     prefix = prefix + "E"
                     # prefix = str(tempEpisode)
-            if __settings__.getSetting('addEpisodeNumber') == 'true':
+            if settings.getSetting('addEpisodeNumber') == 'true':
                 prefix = prefix + str(tempEpisode)
             if prefix != '':
                 tempTitle = prefix + ' - ' + tempTitle
@@ -828,8 +837,9 @@ def getWigetContent(pluginName, handle, params):
     log.info("getWigetContent Called" + str(params))
 
     home_window = HomeWindow()
-    port = __settings__.getSetting('port')
-    host = __settings__.getSetting('ipaddress')
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+    port = settings.getSetting('port')
+    host = settings.getSetting('ipaddress')
     server = host + ":" + port
 
     type = params.get("type")
@@ -1021,8 +1031,9 @@ def getWigetContent(pluginName, handle, params):
 def showContent(pluginName, handle, params):
     log.info("showContent Called: " + str(params))
 
-    port = __settings__.getSetting('port')
-    host = __settings__.getSetting('ipaddress')
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+    port = settings.getSetting('port')
+    host = settings.getSetting('ipaddress')
     server = host + ":" + port
 
     item_type = params.get("item_type")
@@ -1051,8 +1062,9 @@ def showContent(pluginName, handle, params):
 def showParentContent(pluginName, handle, params):
     log.info("showParentContent Called: " + str(params))
 
-    port = __settings__.getSetting('port')
-    host = __settings__.getSetting('ipaddress')
+    settings = xbmcaddon.Addon(id='plugin.video.embycon')
+    port = settings.getSetting('port')
+    host = settings.getSetting('ipaddress')
     server = host + ":" + port
 
     parentId = params.get("ParentId")
