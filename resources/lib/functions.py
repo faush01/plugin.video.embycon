@@ -585,8 +585,6 @@ def processDirectory(url, results, progress, pluginhandle):
     parsed = urlparse(url)
     userid = downloadUtils.getUserId()
 
-    xbmcplugin.setContent(pluginhandle, 'movies')
-
     settings = xbmcaddon.Addon(id='plugin.video.embycon')
     port = settings.getSetting('port')
     host = settings.getSetting('ipaddress')
@@ -880,6 +878,7 @@ def getWigetContent(handle, params):
                 "&IsMissing=False")
 
     if (type == "recent_movies"):
+        xbmcplugin.setContent(handle, 'movies')
         itemsUrl += ("&Recursive=true"
                      "&SortBy=DateCreated"
                      "&SortOrder=Descending"
@@ -888,6 +887,7 @@ def getWigetContent(handle, params):
                      "&IsMissing=False"
                      "&IncludeItemTypes=Movie")
     elif (type == "inprogress_movies"):
+        xbmcplugin.setContent(handle, 'movies')
         itemsUrl += ("&Recursive=true"
                      "&SortBy=DatePlayed"
                      "&SortOrder=Descending"
@@ -896,6 +896,7 @@ def getWigetContent(handle, params):
                      "&IsMissing=False"
                      "&IncludeItemTypes=Movie")
     elif (type == "random_movies"):
+        xbmcplugin.setContent(handle, 'movies')
         itemsUrl += ("&Recursive=true"
                      "&SortBy=Random"
                      "&SortOrder=Descending"
@@ -904,6 +905,7 @@ def getWigetContent(handle, params):
                      "&IsMissing=False"
                      "&IncludeItemTypes=Movie")
     elif (type == "recent_episodes"):
+        xbmcplugin.setContent(handle, 'episodes')
         itemsUrl += ("&Recursive=true"
                      "&SortBy=DateCreated"
                      "&SortOrder=Descending"
@@ -912,6 +914,7 @@ def getWigetContent(handle, params):
                      "&IsMissing=False"
                      "&IncludeItemTypes=Episode")
     elif (type == "inprogress_episodes"):
+        xbmcplugin.setContent(handle, 'episodes')
         itemsUrl += ("&Recursive=true"
                      "&SortBy=DatePlayed"
                      "&SortOrder=Descending"
@@ -920,6 +923,7 @@ def getWigetContent(handle, params):
                      "&IsMissing=False"
                      "&IncludeItemTypes=Episode")
     elif (type == "nextup_episodes"):
+        xbmcplugin.setContent(handle, 'episodes')
         itemsUrl = ("http://" + server + "/emby/Shows/NextUp"
                         "?Limit=20" 
                         "&userid=" + userid + ""
