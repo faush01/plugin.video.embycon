@@ -373,9 +373,9 @@ def addGUIItem(url, details, extraData, folder=True):
     # add cast
     people = extraData.get('cast')
     if people is not None:
-        try:
+        if kodi_version >= 17:
             list_item.setCast(people)
-        except:
+        else:
             videoInfoLabels['cast'] = videoInfoLabels['castandrole'] = [(cast_member['name'], cast_member['role']) for cast_member in people]
 
     if (extraData.get('type') == None or extraData.get('type') == "Video"):
