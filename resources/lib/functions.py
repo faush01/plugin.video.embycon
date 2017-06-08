@@ -367,13 +367,16 @@ def addGUIItem(url, details, extraData, folder=True):
     if (len(menuItems) > 0):
         list_item.addContextMenuItems(menuItems, True)
 
+    # new way
+    videoInfoLabels = {}
+
     # add cast
     people = extraData.get('cast')
     if people is not None:
-        list_item.setCast(people)
-
-    # new way
-    videoInfoLabels = {}
+        try:
+            list_item.setCast(people)
+        except:
+            videoInfoLabels['cast'] = videoInfoLabels['castandrole'] = [(cast_member['name'], cast_member['role']) for cast_member in people]
 
     if (extraData.get('type') == None or extraData.get('type') == "Video"):
         videoInfoLabels.update(details)
