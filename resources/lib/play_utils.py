@@ -61,7 +61,18 @@ def playFile(id, auto_resume):
             elif resume_result == -1:
                 return
 
-    playurl, listitem_props = PlayUtils().getPlayUrl(id, result)
+    listitem_props = []
+    playurl = None
+
+    # check if strm file, path will contain contain strm contents
+    if result.get('MediaSources'):
+        source = result['MediaSources'][0]
+        if source.get('Container') == 'strm':
+            playurl, listitem_props = PlayUtils().getStrmDetails(result)
+
+    if not playurl:
+        playurl = PlayUtils().getPlayUrl(id, result)
+
     log.info("Play URL: " + playurl + " ListItem Properties: " + str(listitem_props))
 
     playback_type_string = "DirectPlay"

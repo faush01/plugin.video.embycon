@@ -24,29 +24,6 @@ class PlayUtils():
         smb_password = addonSettings.getSetting('smbpassword')
         log.info("playback_type: " + playback_type)
         playurl = None
-        listitem_props = []
-
-        # check if strm file, will contain contain playback url
-        if result.get('MediaSources'):
-            source = result['MediaSources'][0]
-            if source.get('Container') == 'strm':
-                contents = source.get('Path').encode('utf-8')  # contains contents of strm file with linebreaks
-
-                line_break = '\r'
-                if '\r\n' in contents:
-                    line_break += '\n'
-
-                lines = contents.split(line_break)
-                for line in lines:
-                    if line.startswith('#KODIPROP:'):
-                        match = re.search('#KODIPROP:(?P<item_property>[^=]+?)=(?P<property_value>.+)', line)
-                        if match:
-                            listitem_props.append((match.group('item_property'), match.group('property_value')))
-                    elif line != '':
-                        playurl = line
-
-                if playurl:
-                    return playurl, listitem_props
 
         # do direct path playback
         if playback_type == "0":
@@ -87,8 +64,32 @@ class PlayUtils():
 
             playurl = playurl + "&api_key=" + user_token
 
+        log.info("Playback URL: " + playurl)
+        return playurl.encode('utf-8')
+
+    def getStrmDetails(self, result):
+        playurl = None
+        listitem_props = []
+
+        source = result['MediaSources'][0]
+        contents = source.get('Path').encode('utf-8')  # contains contents of strm file with linebreaks
+
+        line_break = '\r'
+        if '\r\n' in contents:
+            line_break += '\n'
+
+        lines = contents.split(line_break)
+        for line in lines:
+            line = line.strip()
+            if line.startswith('#KODIPROP:'):
+                match = re.search('#KODIPROP:(?P<item_property>[^=]+?)=(?P<property_value>.+)', line)
+                if match:
+                    listitem_props.append((match.group('item_property'), match.group('property_value')))
+            elif line != '':
+                playurl = line
+
         log.info("Playback URL: " + playurl + " ListItem Properties: " + str(listitem_props))
-        return playurl.encode('utf-8'), listitem_props
+        return playurl, listitem_props
 
 
 def getDetailsString():
