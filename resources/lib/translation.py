@@ -49,6 +49,8 @@ STRINGS = {
     'save': 30236,
     'start_from_beginning': 30237,
     'default_sort': 30238,
+    'next_page': 30245,
+    'search': 30246,
     'widgets': 30247,
     'emby_movies': 30248,
     'emby_tvshows': 30249,

@@ -318,6 +318,14 @@ msgctxt "#30238"
 msgid "Default Sort"
 msgstr ""
 
+msgctxt "#30245"
+msgid "Next page"
+msgstr ""
+
+msgctxt "#30246"
+msgid "Search"
+msgstr ""
+
 msgctxt "#30247"
 msgid "Widgets"
 msgstr ""
