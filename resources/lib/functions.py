@@ -472,27 +472,28 @@ def addContextMenu(details, extraData, folder):
     if item_id != None:
         scriptToRun = PLUGINPATH + "/default.py"
 
-        argsToPass = "?mode=PLAY&item_id=" + extraData.get("id") + "&force_transcode=true"
-        commands.append((i18n('emby_force_transcode'), "RunPlugin(plugin://plugin.video.embycon" + argsToPass + ")"))
+        if not folder:
+            argsToPass = "?mode=PLAY&item_id=" + item_id + "&force_transcode=true"
+            commands.append((i18n('emby_force_transcode'), "RunPlugin(plugin://plugin.video.embycon" + argsToPass + ")"))
 
         # watched/unwatched
         if extraData.get("playcount") == "0":
-            argsToPass = 'markWatched,' + extraData.get('id')
+            argsToPass = 'markWatched,' + item_id
             commands.append((i18n('emby_mark_watched'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
-        else:
-            argsToPass = 'markUnwatched,' + extraData.get('id')
+        elif extraData.get("playcount"):
+            argsToPass = 'markUnwatched,' + item_id
             commands.append((i18n('emby_mark_unwatched'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
 
         # favourite add/remove
-        if extraData.get('favorite') != 'true':
-            argsToPass = 'markFavorite,' + extraData.get('id')
+        if extraData.get('favorite') == 'false':
+            argsToPass = 'markFavorite,' + item_id
             commands.append((i18n('emby_set_favorite'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
-        else:
-            argsToPass = 'unmarkFavorite,' + extraData.get('id')
+        elif extraData.get('favorite') == 'true':
+            argsToPass = 'unmarkFavorite,' + item_id
             commands.append((i18n('emby_unset_favorite'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
 
         # delete
-        argsToPass = 'delete,' + extraData.get('id')
+        argsToPass = 'delete,' + item_id
         commands.append((i18n('emby_delete'), "RunScript(" + scriptToRun + ", " + argsToPass + ")"))
 
     return (commands)
@@ -1299,6 +1300,10 @@ def searchResults(params):
                 .format(item_type=item_type, item_url=item_url)
             list_item.setProperty('IsPlayable', 'false')
             is_folder = True
+
+        menuItems = addContextMenu({}, {'id': item_id}, is_folder)
+        if (len(menuItems) > 0):
+            list_item.addContextMenuItems(menuItems, True)
 
         if (season is not None) and (episode is not None):
             info['episode'] = episode
