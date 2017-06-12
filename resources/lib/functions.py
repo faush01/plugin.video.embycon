@@ -1180,12 +1180,8 @@ def searchResults(params):
     if (not item_type) or (not query):
         return
 
-    index = params.get('index', 0)
-    if not index.isdigit():
-        index = 0
-
-    index = int(index)
-    limit = 50
+    limit = int(params.get('limit', 50))
+    index = 0
 
     settings = xbmcaddon.Addon(id='plugin.video.embycon')
     port = settings.getSetting('port')
