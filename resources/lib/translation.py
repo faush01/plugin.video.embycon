@@ -27,6 +27,8 @@ STRINGS = {
     'n/a': 30063,
     'confirm_file_delete': 30091,
     'file_delete_confirm': 30092,
+    'loading_content': 30112,
+    'retrieving_data': 30113,
     'done': 30125,
     'processing_item:': 30126,
     'error': 30135,

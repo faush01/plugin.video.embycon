@@ -575,8 +575,8 @@ def getContent(url, pluginhandle, media_type):
     progress = None
     if (settings.getSetting('showLoadProgress') == "true"):
         progress = xbmcgui.DialogProgress()
-        progress.create("Loading Content")
-        progress.update(0, "Retrieving Data")
+        progress.create(i18n('loading_content'))
+        progress.update(0, i18n('retrieving_data'))
 
     # use the data manager to get the data
     result = dataManager.GetContent(url)

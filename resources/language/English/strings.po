@@ -118,6 +118,14 @@ msgctxt "#30110"
 msgid "Interface"
 msgstr ""
 
+msgctxt "#30112"
+msgid "Loading Content"
+msgstr ""
+
+msgctxt "#30113"
+msgid "Retrieving Data"
+msgstr ""
+
 msgctxt "#30114"
 msgid "On Resume Jump Back Seconds"
 msgstr ""
