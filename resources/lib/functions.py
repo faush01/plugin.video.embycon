@@ -1265,6 +1265,7 @@ def searchResults(params):
                 season = str(season_number)
 
             tvshowtitle = item.get('Series')
+            title = tvshowtitle + ' - ' + title
 
         primary_image = thumb_image = backdrop_image = ''
         primary_tag = item.get('PrimaryImageTag')
