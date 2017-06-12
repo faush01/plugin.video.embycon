@@ -1253,8 +1253,8 @@ def searchResults(params):
             thumb_image = downloadUtils.imageUrl(thumb_id, 'Thumb', 0, 400, 400, imageTag=thumb_tag, server=server)
         backdrop_id = item.get('BackdropImageId')
         backdrop_tag = item.get('BackdropImageTag')
-        if thumb_tag and thumb_id:
-            backdrop_image = downloadUtils.imageUrl(backdrop_id, 'Thumb', 0, 400, 400, imageTag=backdrop_tag, server=server)
+        if backdrop_tag and backdrop_id:
+            backdrop_image = downloadUtils.imageUrl(backdrop_id, 'Backdrop', 0, 400, 400, imageTag=backdrop_tag, server=server)
 
         art = {
             'thumb': thumb_image or primary_image,
