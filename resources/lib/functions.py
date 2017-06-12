@@ -1228,9 +1228,8 @@ def searchResults(params):
         progress.create(i18n('loading_content'))
         progress.update(0, i18n('retrieving_data'))
 
-    json_data = downloadUtils.downloadUrl(content_url, suppress=False, popup=1)
-    log.debug('SearchHints jsonData: ' + json_data)
-    result = json.loads(json_data)
+    result = dataManager.GetContent(content_url)
+    log.debug('SearchHints jsonData: ' + str(result))
 
     results = result.get('SearchHints')
     if results is None:
