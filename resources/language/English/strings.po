@@ -290,6 +290,10 @@ msgctxt "#30213"
 msgid "Transcode Force 8 Bit"
 msgstr ""
 
+msgctxt "#30229"
+msgid "TV Shows"
+msgstr ""
+
 msgctxt "#30230"
 msgid "Default View"
 msgstr ""

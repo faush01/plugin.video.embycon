@@ -42,6 +42,7 @@ STRINGS = {
     'select_user': 30180,
     'url_error_': 30200,
     'unable_connect_server': 30201,
+    'tvshows': 30229,
     'default_view': 30230,
     'movies': 30231,
     'boxsets': 30232,

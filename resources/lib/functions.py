@@ -1151,7 +1151,7 @@ def search(handle, params):
     if item_type.lower() == 'movie':
         heading_type = i18n('movies')
     elif item_type.lower() == 'series':
-        heading_type = i18n('series')
+        heading_type = i18n('tvshows')
     elif item_type.lower() == 'episode':
         heading_type = i18n('episodes')
     else:

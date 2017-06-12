@@ -463,7 +463,7 @@ def showWidgets():
 
 def showSearch():
     addMenuDirectoryItem(i18n('movies'), 'plugin://plugin.video.embycon/?mode=NEW_SEARCH&item_type=Movie')
-    addMenuDirectoryItem(i18n('series'), 'plugin://plugin.video.embycon/?mode=NEW_SEARCH&item_type=Series')
+    addMenuDirectoryItem(i18n('tvshows'), 'plugin://plugin.video.embycon/?mode=NEW_SEARCH&item_type=Series')
     addMenuDirectoryItem(i18n('episodes'), 'plugin://plugin.video.embycon/?mode=NEW_SEARCH&item_type=Episode')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
