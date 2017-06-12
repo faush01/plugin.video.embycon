@@ -526,6 +526,37 @@ def get_params(paramstring):
     return param
 
 
+def setSort(pluginhandle, viewType):
+    defaultData = loadSkinDefaults()
+
+    # set the default sort order
+    defaultSortData = defaultData.get("sort", {})
+    sortName = defaultSortData.get(viewType)
+    log.info("SETTING_SORT : " + str(viewType) + " : " + str(sortName))
+    if sortName == "title":
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
+    elif sortName == "date":
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
+    else:
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_GENRE)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_UNSORTED)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_RATING)
+        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_LABEL)
+
+
+def setView(viewType):
+    defaultData = loadSkinDefaults()
+
+    defaultViewData = defaultData.get("view", {})
+    viewNum = defaultViewData.get(viewType)
+    log.info("SETTING_VIEW : " + str(viewType) + " : " + str(viewNum))
+    if viewNum is not None:
+        xbmc.executebuiltin("Container.SetViewMode(%s)" % int(viewNum))
+
+
 def getContent(url, pluginhandle, media_type):
     log.info("== ENTER: getContent ==")
     log.info("URL: " + str(url))
@@ -552,24 +583,7 @@ def getContent(url, pluginhandle, media_type):
         xbmcplugin.setContent(pluginhandle, 'episodes')
     log.info("ViewType: " + viewType)
 
-    defaultData = loadSkinDefaults()
-
-    # set the default sort order
-    defaultSortData = defaultData.get("sort", {})
-    sortName = defaultSortData.get(viewType)
-    log.info("SETTING_SORT : " + str(viewType) + " : " + str(sortName))
-    if sortName == "title":
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
-    elif sortName == "date":
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
-    else:
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_GENRE)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_UNSORTED)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_NONE)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_RATING)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_LABEL)
+    setSort(pluginhandle, viewType)
 
     # show a progress indicator if needed
     progress = None
@@ -590,11 +604,7 @@ def getContent(url, pluginhandle, media_type):
     xbmcplugin.addDirectoryItems(pluginhandle, dirItems)
 
     # set the view mode based on what the user wanted for this view type
-    defaultViewData = defaultData.get("view", {})
-    viewNum = defaultViewData.get(viewType)
-    log.info("SETTING_VIEW : " + str(viewType) + " : " + str(viewNum))
-    if viewNum is not None:
-        xbmc.executebuiltin("Container.SetViewMode(%s)" % int(viewNum))
+    setView(viewType)
 
     xbmcplugin.endOfDirectory(pluginhandle, cacheToDisc=False)
 
@@ -1182,7 +1192,7 @@ def searchResults(params):
     host = settings.getSetting('ipaddress')
     server = host + ':' + port
     userid = downloadUtils.getUserId()
-    detailsString = getDetailsString()
+    details_string = getDetailsString()
 
     content_url = ('http://' + server +
                   '/emby/Search/Hints?searchTerm=' + query +
@@ -1193,68 +1203,86 @@ def searchResults(params):
                   '&IncludePeople=false&IncludeMedia=true&IncludeGenres=false&IncludeStudios=false&IncludeArtists=false')
 
     if item_type.lower() == 'movie':
-        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+        xbmcplugin.setContent(handle, 'movies')
+        view_type = 'Movies'
         media_type = 'movie'
     elif item_type.lower() == 'series':
-        xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
+        xbmcplugin.setContent(handle, 'tvshows')
+        view_type = 'Series'
         media_type = 'tvshow'
     elif item_type.lower() == 'episode':
-        xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+        xbmcplugin.setContent(handle, 'episodes')
+        view_type = 'Episodes'
         media_type = 'episode'
     else:
-        xbmcplugin.setContent(int(sys.argv[1]), 'videos')
+        xbmcplugin.setContent(handle, 'videos')
+        view_type = ''
         media_type = 'video'
+
+    setSort(handle, view_type)
+
+    # show a progress indicator if needed
+    progress = None
+    if (settings.getSetting('showLoadProgress') == "true"):
+        progress = xbmcgui.DialogProgress()
+        progress.create(i18n('loading_content'))
+        progress.update(0, i18n('retrieving_data'))
 
     json_data = downloadUtils.downloadUrl(content_url, suppress=False, popup=1)
     log.debug('SearchHints jsonData: ' + json_data)
     result = json.loads(json_data)
 
     results = result.get('SearchHints')
-    if (results == None):
+    if results is None:
         results = []
 
     item_count = 1
-    total_results = result.get('TotalRecordCount', 0)
+    total_results = int(result.get('TotalRecordCount', 0))
     log.debug('SEARCH_TOTAL_RESULTS: ' + str(total_results))
     list_items = []
+
     for item in results:
         item_id = item.get('ItemId')
         name = title = item.get('Name')
         log.debug('SEARCH_RESULT_NAME: ' + name)
 
+        if progress is not None:
+            percent_complete = (float(item_count) / float(total_results)) * 100
+            progress.update(int(percent_complete), i18n('processing_item:') + str(item_count))
+
         tvshowtitle = ''
         season = episode = None
 
-        if (item.get('Type') == 'Episode' and item.get('Series') != None):
+        if (item.get('Type') == 'Episode') and (item.get('Series') is not None):
             episode = '0'
-            if (item.get('IndexNumber') != None):
-                eppNumber = item.get('IndexNumber')
-                if eppNumber < 10:
-                    episode = '0' + str(eppNumber)
+            if item.get('IndexNumber') is not None:
+                ep_number = item.get('IndexNumber')
+                if ep_number < 10:
+                    episode = '0' + str(ep_number)
                 else:
-                    episode = str(eppNumber)
+                    episode = str(ep_number)
 
             season = '0'
-            seasonNumber = item.get('ParentIndexNumber')
-            if seasonNumber < 10:
-                season = '0' + str(seasonNumber)
+            season_number = item.get('ParentIndexNumber')
+            if season_number < 10:
+                season = '0' + str(season_number)
             else:
-                season = str(seasonNumber)
+                season = str(season_number)
 
             tvshowtitle = item.get('Series')
 
         primary_image = thumb_image = backdrop_image = ''
         primary_tag = item.get('PrimaryImageTag')
         if primary_tag:
-            primary_image = downloadUtils.imageUrl(item_id, 'Primary', 0, 400, 400, imageTag=primary_tag, server=server)
+            primary_image = downloadUtils.imageUrl(item_id, 'Primary', 0, 0, 0, imageTag=primary_tag, server=server)
         thumb_id = item.get('ThumbImageId')
         thumb_tag = item.get('ThumbImageTag')
         if thumb_tag and thumb_id:
-            thumb_image = downloadUtils.imageUrl(thumb_id, 'Thumb', 0, 400, 400, imageTag=thumb_tag, server=server)
-        backdrop_id = item.get('BackdropImageId')
+            thumb_image = downloadUtils.imageUrl(thumb_id, 'Thumb', 0, 0, 0, imageTag=thumb_tag, server=server)
+        backdrop_id = item.get('BackdropImageItemId')
         backdrop_tag = item.get('BackdropImageTag')
         if backdrop_tag and backdrop_id:
-            backdrop_image = downloadUtils.imageUrl(backdrop_id, 'Backdrop', 0, 400, 400, imageTag=backdrop_tag, server=server)
+            backdrop_image = downloadUtils.imageUrl(backdrop_id, 'Backdrop', 0, 0, 0, imageTag=backdrop_tag, server=server)
 
         art = {
             'thumb': thumb_image or primary_image,
@@ -1284,8 +1312,8 @@ def searchResults(params):
         item_count += 1
 
         if item.get('MediaType') == 'Video':
-            totalTime = str(int(float(item.get('RunTimeTicks', '0')) / (10000000 * 60)))
-            list_item.setProperty('TotalTime', str(totalTime))
+            total_time = str(int(float(item.get('RunTimeTicks', '0')) / (10000000 * 60)))
+            list_item.setProperty('TotalTime', str(total_time))
             list_item.setProperty('IsPlayable', 'true')
             list_item_url = 'plugin://plugin.video.embycon/?item_id=' + item_id + '&mode=PLAY'
             is_folder = False
@@ -1294,16 +1322,16 @@ def searchResults(params):
                         '/emby/Users/' + userid +
                         '/items?ParentId=' + item_id +
                         '&IsVirtualUnAired=false&IsMissing=false' +
-                        '&Fields=' + detailsString +
+                        '&Fields=' + details_string +
                         '&format=json')
             list_item_url = 'plugin://plugin.video.embycon/?mode=GET_CONTENT&media_type={item_type}&url={item_url}'\
                 .format(item_type=item_type, item_url=item_url)
             list_item.setProperty('IsPlayable', 'false')
             is_folder = True
 
-        menuItems = addContextMenu({}, {'id': item_id}, is_folder)
-        if (len(menuItems) > 0):
-            list_item.addContextMenuItems(menuItems, True)
+        menu_items = addContextMenu({}, {'id': item_id}, is_folder)
+        if len(menu_items) > 0:
+            list_item.addContextMenuItems(menu_items, True)
 
         if (season is not None) and (episode is not None):
             info['episode'] = episode
@@ -1317,21 +1345,13 @@ def searchResults(params):
         item_tuple = (list_item_url, list_item, is_folder)
         list_items.append(item_tuple)
 
-    if total_results > (index + limit):
-        next_page_url = 'plugin://plugin.video.embycon/?mode=SEARCH_RESULTS&query={query}&item_type={item_type}&index={index}'\
-            .format(query=query, item_type=item_type, index=str((index + limit) + 1))
-        icon = 'special://home/addons/plugin.video.embycon/icon.png'
-        if kodi_version > 17:
-            list_item = xbmcgui.ListItem(label=i18n('next_page'), iconImage=icon, offscreen=True)
-        else:
-            list_item = xbmcgui.ListItem(label=i18n('next_page'), iconImage=icon)
-        list_item.setProperty('IsPlayable', 'false')
-        list_item.setPath(next_page_url)
-        item_tuple = (next_page_url, list_item, True)
-        list_items.append(item_tuple)
-
     xbmcplugin.addDirectoryItems(handle, list_items)
+    setView(view_type)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+
+    if progress is not None:
+        progress.update(100, i18n('done'))
+        progress.close()
 
 
 def PLAY(params, handle):
