@@ -289,7 +289,13 @@ class DownloadUtils():
             if (host == "<none>" or host == "" or port == ""):
                 return ""
 
-            conn = httplib.HTTPConnection(server, timeout=40)
+            settings = xbmcaddon.Addon('plugin.video.embycon')
+            use_https = settings.getSetting('use_https') == 'true'
+
+            if use_https:
+                conn = httplib.HTTPSConnection(server, timeout=40)
+            else:
+                conn = httplib.HTTPConnection(server, timeout=40)
 
             head = self.getAuthHeader(authenticate)
             log.info("HEADERS : " + str(head))
