@@ -423,6 +423,25 @@ def getCollections(detailsString):
     collections.append(item_data)
 
     item_data = {}
+    item_data['title'] = i18n('tvshows_latest')
+    item_data['media_type'] = 'Episodes'
+    item_data['path'] = ('{server}/emby/Users/{userid}/Items/Latest' +
+                         '?Limit={ItemLimit}' +
+                         '&Recursive=true' +
+                         '&GroupItems=true' +
+                         '&SortBy=DateCreated' +
+                         '&Fields=' + detailsString +
+                         '&SortOrder=Descending' +
+                         '&Filters=IsUnplayed' +
+                         '&IsVirtualUnaired=false' +
+                         '&IsMissing=False' +
+                         '&IncludeItemTypes=Episode' +
+                         '&ImageTypeLimit=1' +
+                         '&format=json')
+    item_data['name_format'] = 'episode_name_format'
+    collections.append(item_data)
+
+    item_data = {}
     item_data['title'] = i18n('episodes_in_progress')
     item_data['media_type'] = 'Episodes'
     item_data['path'] = ('{server}/emby/Users/{userid}/Items' +

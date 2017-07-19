@@ -588,7 +588,10 @@ def processDirectory(results, progress, params):
         name_format = settings.getSetting(name_format)
 
     dirItems = []
-    result = results.get("Items")
+    try:
+        result = results.get("Items")
+    except:
+        result = results
     if result is None:
         result = []
 
@@ -653,7 +656,7 @@ def processDirectory(results, progress, params):
 
         # set the item name
         # override with name format string from request
-        if name_format is not None:
+        if (name_format is not None) and (item.get("Type") == "Episode"):
             nameInfo = {}
             nameInfo["ItemName"] = item.get("Name", "").encode('utf-8')
             nameInfo["SeriesName"] = item.get("SeriesName", "").encode('utf-8')
