@@ -585,8 +585,9 @@ def processDirectory(results, progress, params):
     name_format = params.get("name_format", None)
     if name_format is not None:
         name_format = urllib.unquote(name_format)
-        name_format = settings.getSetting(name_format)
-
+        name_formatting = settings.getSetting(name_format)
+        if name_format == "latest_name_format":
+            name_formatting = settings.getSetting("episode_name_format")
     dirItems = []
     if results is None:
         result = []
@@ -656,14 +657,14 @@ def processDirectory(results, progress, params):
 
         # set the item name
         # override with name format string from request
-        if (name_format is not None) and (item.get("Type") == "Episode"):
+        if (name_format is not None) and (name_format == 'latest_name_format' and isFolder == True) != True:
             nameInfo = {}
             nameInfo["ItemName"] = item.get("Name", "").encode('utf-8')
             nameInfo["SeriesName"] = item.get("SeriesName", "").encode('utf-8')
             nameInfo["SeasonIndex"] = tempSeason
             nameInfo["EpisodeIndex"] = tempEpisode
-            log.debug("FormatName : %s | %s" % (name_format, nameInfo))
-            tempTitle = name_format.format(**nameInfo).strip()
+            log.debug("FormatName : %s | %s" % (name_formatting, nameInfo))
+            tempTitle = name_formatting.format(**nameInfo).strip()
 
         else:
             if (item.get("Name") != None):
