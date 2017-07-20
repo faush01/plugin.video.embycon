@@ -588,12 +588,12 @@ def processDirectory(results, progress, params):
         name_format = settings.getSetting(name_format)
 
     dirItems = []
-    try:
-        result = results.get("Items")
-    except:
-        result = results
-    if result is None:
+    if results is None:
         result = []
+    if "Items" in results:
+        result = results.get("Items") 
+    else: 
+        result = results
 
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
