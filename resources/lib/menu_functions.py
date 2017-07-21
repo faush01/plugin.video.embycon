@@ -438,7 +438,7 @@ def getCollections(detailsString):
                          '&IncludeItemTypes=Episode' +
                          '&ImageTypeLimit=1' +
                          '&format=json')
-    item_data['name_format'] = 'latest_name_format'
+    item_data['name_format'] = 'Episode|episode_name_format'
     collections.append(item_data)
 
     item_data = {}

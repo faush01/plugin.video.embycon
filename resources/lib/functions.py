@@ -592,9 +592,9 @@ def processDirectory(results, progress, params):
     dirItems = []
     if results is None:
         result = []
-    if "Items" in results:
+    if isinstance(results, dict):
         result = results.get("Items") 
-    else: 
+    else:
         result = results
 
     # flatten single season
