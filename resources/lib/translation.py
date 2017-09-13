@@ -1,3 +1,4 @@
+import encodings
 import xbmcaddon
 from simple_logging import SimpleLogging
 
@@ -62,7 +63,6 @@ STRINGS = {
     'movies_az': 30252,
     'change_user': 30253,
     'show_settings': 30254,
-    'set_default_views': 30255,
     'movies_all': 30256,
     'movies_recently_added': 30257,
     'movies_in_progress': 30258,
@@ -95,5 +95,8 @@ STRINGS = {
     'show_clients': 30017,
     'tvshows_unwatched': 30279,
     '_unwatched': 30285,
-    'movies_unwatched': 30286
+    'movies_unwatched': 30286,
+    'tvshows_latest' : 30287,
+    '_latest' : 30288,
+    'tvshow_genre': 30289
 }

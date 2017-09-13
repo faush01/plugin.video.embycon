@@ -1,6 +1,7 @@
 import xbmc
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 
 import sys
 import json
@@ -8,7 +9,7 @@ import json
 from simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
-
+addon = xbmcaddon.Addon(id='plugin.video.embycon')
 
 class HomeWindow():
     """
@@ -39,9 +40,11 @@ class HomeWindow():
 def addMenuDirectoryItem(label, path, folder=True, thumbnail=None):
     li = xbmcgui.ListItem(label, path=path)
     if thumbnail is None:
-        thumbnail = "special://home/addons/plugin.video.embycon/icon.png"
-    li.setIconImage(thumbnail)
-    li.setThumbnailImage(thumbnail)
+        thumbnail = addon.getAddonInfo('icon')
+    artLinks = {}
+    artLinks["thumb"] = thumbnail
+    artLinks["icon"] = thumbnail
+    li.setArt(artLinks)
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=path, listitem=li, isFolder=folder)
 
 
@@ -56,7 +59,7 @@ def getKodiVersion():
         result = result.get("result")
         versionData = result.get("version")
         version = float(str(versionData.get("major")) + "." + str(versionData.get("minor")))
-        log.info("Version : " + str(version) + " - " + str(versionData))
+        log.debug("Version : " + str(version) + " - " + str(versionData))
     except:
         version = 0.0
         log.error("Version Error : RAW Version Data : " + str(result))

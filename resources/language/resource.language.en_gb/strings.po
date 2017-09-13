@@ -26,10 +26,6 @@ msgctxt "#30003"
 msgid "Verify HTTPS Certificate: "
 msgstr ""
 
-msgctxt "#30004"
-msgid "Log Level: "
-msgstr ""
-
 msgctxt "#30005"
 msgid "Username: "
 msgstr ""
@@ -96,6 +92,14 @@ msgstr ""
 
 msgctxt "#30025"
 msgid "Password:"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Widget item select action"
+msgstr ""
+
+msgctxt "#30027"
+msgid "Show unplayed in recently added"
 msgstr ""
 
 msgctxt "#30044"
@@ -422,10 +426,6 @@ msgctxt "#30254"
 msgid "Show Settings"
 msgstr ""
 
-msgctxt "#30255"
-msgid "Set Default Views"
-msgstr ""
-
 msgctxt "#30256"
 msgid "Movies - All"
 msgstr ""
@@ -551,5 +551,13 @@ msgid "Movies - Unwatched"
 msgstr ""
 
 msgctxt "#30287"
-msgid "Log Errors and Anonymous Metrics"
+msgid "TV Shows - Latest"
+msgstr ""
+
+msgctxt "#30288"
+msgid " - Latest"
+msgstr ""
+
+msgctxt "#30289"
+msgid "TV Show (Genre)"
 msgstr ""

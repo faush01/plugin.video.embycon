@@ -3,6 +3,7 @@
 import sys
 import json
 import urllib
+import encodings
 
 import xbmcplugin
 import xbmcaddon
@@ -19,8 +20,8 @@ downloadUtils = DownloadUtils()
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 
 
-def showGenreList():
-    log.info("== ENTER: showGenreList() ==")
+def showGenreList(item_type=None):
+    log.debug("== ENTER: showGenreList() ==")
 
     server = downloadUtils.getServer()
     if server is None:
@@ -28,9 +29,21 @@ def showGenreList():
 
     detailsString = getDetailsString()
 
+    kodi_type = "Movies"
+    emby_type = "Movie"
+    if item_type is not None and item_type == "series":
+        emby_type = "Series"
+        kodi_type = "tvshows"
+
     try:
-        jsonData = downloadUtils.downloadUrl("{server}/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeTypes=Movie&Recursive=true&UserId={userid}&format=json")
-        log.info("GENRE_LIST_DATA : " + jsonData)
+        jsonData = downloadUtils.downloadUrl("{server}/emby/Genres?" +
+                                             "SortBy=SortName" +
+                                             "&SortOrder=Ascending" +
+                                             "&IncludeItemTypes=" + emby_type +
+                                             "&Recursive=true" +
+                                             "&UserId={userid}" +
+                                             "&format=json")
+        log.debug("GENRE_LIST_DATA : " + jsonData)
     except Exception, msg:
         error = "Get connect : " + str(msg)
         log.error(error)
@@ -43,11 +56,11 @@ def showGenreList():
     for genre in result:
         item_data = {}
         item_data['title'] = genre.get("Name")
-        item_data['media_type'] = "Movies"
+        item_data['media_type'] = kodi_type
         item_data['thumbnail'] = downloadUtils.getArtwork(genre, "Thumb", server=server)
         item_data['path'] = ('{server}/emby/Users/{userid}/Items?Fields=' + detailsString +
                              '&Recursive=true&GenreIds=' + genre.get("Id") +
-                             '&IncludeItemTypes=Movie' +
+                             '&IncludeItemTypes=' + emby_type +
                              '&ImageTypeLimit=1&format=json')
         collections.append(item_data)
 
@@ -55,14 +68,14 @@ def showGenreList():
         url = sys.argv[0] + ("?url=" + urllib.quote(collection['path']) +
                              "&mode=GET_CONTENT" +
                              "&media_type=" + collection["media_type"])
-        log.info("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
+        log.debug("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
         addMenuDirectoryItem(collection.get('title', i18n('unknown')), url, thumbnail=collection.get("thumbnail"))
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
 def showMovieAlphaList():
-    log.info("== ENTER: showMovieAlphaList() ==")
+    log.debug("== ENTER: showMovieAlphaList() ==")
 
     settings = xbmcaddon.Addon(id='plugin.video.embycon')
     server = downloadUtils.getServer()
@@ -101,14 +114,14 @@ def showMovieAlphaList():
     for collection in collections:
         url = (sys.argv[0] + "?url=" + urllib.quote(collection['path']) +
                "&mode=GET_CONTENT&media_type=" + collection["media_type"])
-        log.info("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
+        log.debug("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
         addMenuDirectoryItem(collection.get('title', i18n('unknown')), url)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
 def displaySections():
-    log.info("== ENTER: displaySections() ==")
+    log.debug("== ENTER: displaySections() ==")
     xbmcplugin.setContent(int(sys.argv[1]), 'files')
 
     server = downloadUtils.getServer()
@@ -125,11 +138,12 @@ def displaySections():
                    "&mode=GET_CONTENT&media_type=" + collection["media_type"])
             if collection.get("name_format") is not None:
                 url += "&name_format=" + urllib.quote(collection.get("name_format"))
-            log.info("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
+            log.debug("addMenuDirectoryItem: " + collection.get('title', i18n('unknown')) + " " + str(url))
             addMenuDirectoryItem(collection.get('title', i18n('unknown')), url, thumbnail=collection.get("thumbnail"))
 
-        addMenuDirectoryItem(i18n('movies_genre'), "plugin://plugin.video.embycon/?mode=MOVIE_GENRA")
+        addMenuDirectoryItem(i18n('movies_genre'), "plugin://plugin.video.embycon/?mode=MOVIE_GENRE")
         addMenuDirectoryItem(i18n('movies_az'), "plugin://plugin.video.embycon/?mode=MOVIE_ALPHA")
+        addMenuDirectoryItem(i18n('tvshow_genre'), "plugin://plugin.video.embycon/?mode=SERIES_GENRE")
         addMenuDirectoryItem(i18n('search'), "plugin://plugin.video.embycon/?mode=SEARCH")
 
         addMenuDirectoryItem(i18n('show_clients'), "plugin://plugin.video.embycon/?mode=SHOW_SERVER_SESSIONS")
@@ -137,7 +151,6 @@ def displaySections():
 
     addMenuDirectoryItem(i18n('detect_server'), "plugin://plugin.video.embycon/?mode=DETECT_SERVER_USER")
     addMenuDirectoryItem(i18n('show_settings'), "plugin://plugin.video.embycon/?mode=SHOW_SETTINGS")
-    addMenuDirectoryItem(i18n('set_default_views'), "plugin://plugin.video.embycon/?mode=SET_DEFAULT_VIEWS")
 
     if collections:
         addMenuDirectoryItem(i18n('widgets'), "plugin://plugin.video.embycon/?mode=WIDGETS")
@@ -146,7 +159,7 @@ def displaySections():
 
 
 def getCollections(detailsString):
-    log.info("== ENTER: getCollections ==")
+    log.debug("== ENTER: getCollections ==")
 
     server = downloadUtils.getServer()
     if server is None:
@@ -155,7 +168,7 @@ def getCollections(detailsString):
     userid = downloadUtils.getUserId()
 
     if userid == None or len(userid) == 0:
-        log.info("No userid so returning []")
+        log.debug("No userid so returning []")
         return []
 
     try:
@@ -171,7 +184,7 @@ def getCollections(detailsString):
         return []
 
     parentid = result.get("Id")
-    log.info("parentid : " + parentid)
+    log.debug("parentid : " + parentid)
 
     htmlpath = "{server}/emby/Users/{userid}/items?ParentId=" + parentid + "&Sortby=SortName&format=json"
     jsonData = downloadUtils.downloadUrl(htmlpath)
@@ -189,8 +202,8 @@ def getCollections(detailsString):
         item_name = (item.get("Name")).encode('utf-8')
 
         collection_type = item.get('CollectionType', None)
-        log.info("CollectionType: " + str(collection_type))
-        log.info("Title: " + item_name)
+        log.debug("CollectionType: " + str(collection_type))
+        log.debug("Title: " + item_name)
 
         if collection_type in ["tvshows", "movies", "boxsets"]:
             collections.append({
@@ -235,7 +248,25 @@ def getCollections(detailsString):
                          '&ImageTypeLimit=1' +
                          '&format=json'),
                 'media_type': 'Episodes',
-                'name_format': 'episode_name_format'})
+                'name_format': 'Episode|episode_name_format'})
+            collections.append({
+                'title': item_name + i18n('_latest'),
+                'thumbnail': downloadUtils.getArtwork(item, "Primary", server=server),
+                'path': ('{server}/emby/Users/{userid}/Items/Latest' +
+                         '?ParentId=' + item.get("Id") +
+                         '&Limit={ItemLimit}' +
+                         '&IsVirtualUnaired=false' +
+                         '&IsMissing=False' +
+                         '&Fields=' + detailsString +
+                         '&SortBy=DateCreated' +
+                         '&SortOrder=Descending' +
+                         '&Filters=IsUnplayed' +
+                         '&Recursive=true' +
+                         '&IncludeItemTypes=Episode' +
+                         '&ImageTypeLimit=1' +
+                         '&format=json'),
+                'media_type': 'Episodes',
+                'name_format': 'Episode|episode_name_format'})            
             collections.append({
                 'title': item_name + i18n('_recently_added'),
                 'thumbnail': downloadUtils.getArtwork(item, "Primary", server=server),
@@ -247,13 +278,13 @@ def getCollections(detailsString):
                          '&Fields=' + detailsString +
                          '&SortBy=DateCreated' +
                          '&SortOrder=Descending' +
-                         '&Filters=IsUnplayed,IsNotFolder' +
+                         '&Filters={IsUnplayed,}IsNotFolder' +
                          '&Recursive=true' +
                          '&IncludeItemTypes=Episode' +
                          '&ImageTypeLimit=1' +
                          '&format=json'),
                 'media_type': 'Episodes',
-                'name_format': 'episode_name_format'})
+                'name_format': 'Episode|episode_name_format'})
             collections.append({
                 'title': item_name + i18n('_next_up'),
                 'thumbnail': downloadUtils.getArtwork(item, "Primary", server=server),
@@ -269,7 +300,7 @@ def getCollections(detailsString):
                          '&ImageTypeLimit=1' +
                          '&format=json'),
                 'media_type': 'Episodes',
-                'name_format': 'episode_name_format'})
+                'name_format': 'Episode|episode_name_format'})
 
         if collection_type == "movies":
             collections.append({
@@ -308,7 +339,7 @@ def getCollections(detailsString):
                          '&Fields=' + detailsString +
                          '&SortBy=DateCreated' +
                          '&SortOrder=Descending' +
-                         '&Filters=IsUnplayed,IsNotFolder' +
+                         '&Filters={IsUnplayed,}IsNotFolder' +
                          '&ImageTypeLimit=1' +
                          '&format=json'),
                 'media_type': collection_type})
@@ -359,7 +390,7 @@ def getCollections(detailsString):
                          '&SortBy=DateCreated' +
                          '&Fields=' + detailsString +
                          '&SortOrder=Descending' +
-                         '&Filters=IsUnplayed,IsNotFolder' +
+                         '&Filters={IsUnplayed,}IsNotFolder' +
                          '&IncludeItemTypes=Movie' +
                          '&ImageTypeLimit=1' +
                          '&format=json')
@@ -424,6 +455,25 @@ def getCollections(detailsString):
     collections.append(item_data)
 
     item_data = {}
+    item_data['title'] = i18n('tvshows_latest')
+    item_data['media_type'] = 'Episodes'
+    item_data['path'] = ('{server}/emby/Users/{userid}/Items/Latest' +
+                         '?Limit={ItemLimit}' +
+                         '&Recursive=true' +
+                         '&GroupItems=true' +
+                         '&SortBy=DateCreated' +
+                         '&Fields=' + detailsString +
+                         '&SortOrder=Descending' +
+                         '&Filters={IsUnplayed}' +
+                         '&IsVirtualUnaired=false' +
+                         '&IsMissing=False' +
+                         '&IncludeItemTypes=Episode' +
+                         '&ImageTypeLimit=1' +
+                         '&format=json')
+    item_data['name_format'] = 'Episode|episode_name_format'
+    collections.append(item_data)
+
+    item_data = {}
     item_data['title'] = i18n('episodes_in_progress')
     item_data['media_type'] = 'Episodes'
     item_data['path'] = ('{server}/emby/Users/{userid}/Items' +
@@ -434,7 +484,7 @@ def getCollections(detailsString):
                          '&IncludeItemTypes=Episode' +
                          '&ImageTypeLimit=1' +
                          '&format=json')
-    item_data['name_format'] = 'episode_name_format'
+    item_data['name_format'] = 'Episode|episode_name_format'
     collections.append(item_data)
 
     item_data = {}
@@ -446,13 +496,13 @@ def getCollections(detailsString):
                          '&SortBy=DateCreated' +
                          '&Fields=' + detailsString +
                          '&SortOrder=Descending' +
-                         '&Filters=IsUnplayed,IsNotFolder' +
+                         '&Filters={IsUnplayed,}IsNotFolder' +
                          '&IsVirtualUnaired=false' +
                          '&IsMissing=False' +
                          '&IncludeItemTypes=Episode' +
                          '&ImageTypeLimit=1' +
                          '&format=json')
-    item_data['name_format'] = 'episode_name_format'
+    item_data['name_format'] = 'Episode|episode_name_format'
     collections.append(item_data)
 
     item_data = {}
@@ -468,7 +518,7 @@ def getCollections(detailsString):
                          '&IncludeItemTypes=Episode' +
                          '&ImageTypeLimit=1' +
                          '&format=json')
-    item_data['name_format'] = 'episode_name_format'
+    item_data['name_format'] = 'Episode|episode_name_format'
     collections.append(item_data)
 
     item_data = {}

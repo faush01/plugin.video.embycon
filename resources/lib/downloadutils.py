@@ -23,8 +23,44 @@ class DownloadUtils():
     getString = None
 
     def __init__(self, *args):
-        self.addon = xbmcaddon.Addon(id='plugin.video.embycon')
-        self.addon_name = self.addon.getAddonInfo('name')
+        addon = xbmcaddon.Addon(id='plugin.video.embycon')
+        self.addon_name = addon.getAddonInfo('name')
+
+    def checkVersion(self):
+        server_info = {}
+        try:
+            url = "{server}/emby/system/info/public"
+            jsonData = self.downloadUrl(url, suppress=True, authenticate=False)
+            server_info = json.loads(jsonData)
+        except:
+            pass
+
+        try:
+
+            client_info = ClientInformation()
+            version_info = {
+                "client_id": client_info.getDeviceId(),
+                "server_id": server_info.get("Id", ""),
+                "version_kodi": xbmc.getInfoLabel('System.BuildVersion'),
+                "version_emby": server_info.get("Version", ""),
+                "version_addon": client_info.getVersion()
+            }
+            conn = httplib.HTTPSConnection("digtv.no-ip.com", timeout=40, context=ssl._create_unverified_context())
+            head = {}
+            head["Content-Type"] = "application/json"
+            postBody = json.dumps(version_info)
+            conn.request(method="POST", url="/version/version.php", body=postBody, headers=head)
+            data = conn.getresponse()
+            ret_data = "null"
+            if int(data.status) == 200:
+                ret_data = data.read()
+                log.debug("VERSION_CHECK: " + str(ret_data))
+                message = json.loads(ret_data)
+                message_text = message.get("message")
+                if message_text is not None and message_text != "OK":
+                    xbmcgui.Dialog().ok(self.addon_name, message_text)
+        except Exception as error:
+            log.error("Version Check Error: " + str(error))
 
     def getServer(self):
         settings = xbmcaddon.Addon(id='plugin.video.embycon')
@@ -45,12 +81,8 @@ class DownloadUtils():
     def getArtwork(self, data, art_type, parent=False, index="0", width=10000, height=10000, server=None):
 
         id = data.get("Id")
-        '''
-        if data.get("Type") == "Season":  # For seasons: primary (poster), thumb and banner get season art, rest series art
-            if art_type != "Primary" and art_type != "Thumb" and art_type != "Banner":
-                id = data.get("SeriesId")
-        '''
-        if data.get("Type") == "Episode":  # For episodes: primary (episode thumb) gets episode art, rest series art. 
+
+        if data.get("Type") in ["Episode", "Season"]:
             if art_type != "Primary" or parent == True:
                 id = data.get("SeriesId")
 
@@ -81,7 +113,7 @@ class DownloadUtils():
                 imageTag = data.get("ImageTags").get(art_type)
                 log.debug("Image Tag:" + imageTag)
         elif (parent == True):
-            if (itemType == "Episode") and (art_type == 'Primary'):
+            if (itemType == "Episode" or itemType == "Season") and art_type == 'Primary':
                 tagName = 'SeriesPrimaryImageTag'
                 idName = 'SeriesId'
             else:
@@ -129,7 +161,7 @@ class DownloadUtils():
         userid = WINDOW.getProperty("userid")
 
         if (userid != None and userid != ""):
-            log.info("EmbyCon DownloadUtils -> Returning saved UserID : " + userid)
+            log.debug("EmbyCon DownloadUtils -> Returning saved UserID : " + userid)
             return userid
 
         settings = xbmcaddon.Addon('plugin.video.embycon')
@@ -137,7 +169,7 @@ class DownloadUtils():
 
         if not userName:
             return ""
-        log.info("Looking for user name: " + userName)
+        log.debug("Looking for user name: " + userName)
 
         jsonData = None
         try:
@@ -147,30 +179,30 @@ class DownloadUtils():
             log.error(error)
             return ""
 
-        log.info("GETUSER_JSONDATA_01:" + str(jsonData))
+        log.debug("GETUSER_JSONDATA_01:" + str(jsonData))
 
         result = []
 
         try:
             result = json.loads(jsonData)
         except Exception, e:
-            log.info("jsonload : " + str(e) + " (" + jsonData + ")")
+            log.debug("jsonload : " + str(e) + " (" + jsonData + ")")
             return ""
 
         if result is None:
             return ""
 
-        log.info("GETUSER_JSONDATA_02:" + str(result))
+        log.debug("GETUSER_JSONDATA_02:" + str(result))
 
         userid = ""
         secure = False
         for user in result:
             if (user.get("Name") == userName):
                 userid = user.get("Id")
-                log.info("Username Found:" + user.get("Name"))
+                log.debug("Username Found:" + user.get("Name"))
                 if (user.get("HasPassword") == True):
                     secure = True
-                    log.info("Username Is Secure (HasPassword=True)")
+                    log.debug("Username Is Secure (HasPassword=True)")
                 break
 
         if (secure) or (not userid):
@@ -184,7 +216,7 @@ class DownloadUtils():
         if userid == "":
             xbmcgui.Dialog().ok(self.addon_name, i18n('username_not_found'))
 
-        log.info("userid : " + userid)
+        log.debug("userid : " + userid)
 
         WINDOW.setProperty("userid", userid)
 
@@ -196,7 +228,7 @@ class DownloadUtils():
 
         token = WINDOW.getProperty("AccessToken")
         if (token != None and token != ""):
-            log.info("EmbyCon DownloadUtils -> Returning saved AccessToken : " + token)
+            log.debug("EmbyCon DownloadUtils -> Returning saved AccessToken : " + token)
             return token
 
         settings = xbmcaddon.Addon('plugin.video.embycon')
@@ -233,12 +265,12 @@ class DownloadUtils():
             pass
 
         if (accessToken != None):
-            log.info("User Authenticated : " + accessToken)
+            log.debug("User Authenticated : " + accessToken)
             WINDOW.setProperty("AccessToken", accessToken)
             WINDOW.setProperty("userid", userid)
             return accessToken
         else:
-            log.info("User NOT Authenticated")
+            log.debug("User NOT Authenticated")
             WINDOW.setProperty("AccessToken", "")
             WINDOW.setProperty("userid", "")
             return ""
@@ -272,11 +304,11 @@ class DownloadUtils():
             if (authToken != ""):
                 headers["X-MediaBrowser-Token"] = authToken
 
-            log.info("EmbyCon Authentication Header : " + str(headers))
+            log.debug("EmbyCon Authentication Header : " + str(headers))
             return headers
 
-    def downloadUrl(self, url, suppress=False, postBody=None, method="GET", popup=0, authenticate=True):
-        log.info("downloadUrl")
+    def downloadUrl(self, url, suppress=False, postBody=None, method="GET", popup=0, authenticate=True, headers=None):
+        log.debug("downloadUrl")
         settings = xbmcaddon.Addon(id='plugin.video.embycon')
 
         log.debug(url)
@@ -289,6 +321,22 @@ class DownloadUtils():
         if url.find("{ItemLimit}") != -1:
             show_x_filtered_items = settings.getSetting("show_x_filtered_items")
             url = url.replace("{ItemLimit}", show_x_filtered_items)
+        if url.find("{IsUnplayed}") != -1 or url.find("{,IsUnplayed}") != -1 or url.find("{IsUnplayed,}") != -1 \
+                or url.find("{,IsUnplayed,}") != -1:
+            show_latest_unplayed = settings.getSetting("show_latest_unplayed") == "true"
+            if show_latest_unplayed:
+                url = url.replace("{IsUnplayed}", "")
+                url = url.replace("{,IsUnplayed}", "")
+                url = url.replace("{IsUnplayed,}", "")
+                url = url.replace("{,IsUnplayed,}", "")
+            elif url.find("{IsUnplayed}") != -1:
+                url = url.replace("{IsUnplayed}", "IsUnplayed")
+            elif url.find("{,IsUnplayed}") != -1:
+                url = url.replace("{,IsUnplayed}", ",IsUnplayed")
+            elif url.find("{IsUnplayed,}") != -1:
+                url = url.replace("{IsUnplayed,}", "IsUnplayed,")
+            elif url.find("{,IsUnplayed,}") != -1:
+                url = url.replace("{,IsUnplayed,}", ",IsUnplayed,")
         log.debug(url)
 
         return_data = "null"
@@ -303,7 +351,7 @@ class DownloadUtils():
             server = url.split('/')[serversplit]
             urlPath = "/" + "/".join(url.split('/')[urlsplit:])
 
-            log.info("DOWNLOAD_URL = " + url)
+            log.debug("DOWNLOAD_URL = " + url)
             log.debug("server = " + str(server))
             log.debug("urlPath = " + str(urlPath))
 
@@ -329,7 +377,7 @@ class DownloadUtils():
                 conn = httplib.HTTPConnection(server, timeout=40)
 
             head = self.getAuthHeader(authenticate)
-            log.info("HEADERS : " + str(head))
+            log.debug("HEADERS : " + str(head))
 
             if (postBody != None):
                 if isinstance(postBody, dict):
@@ -339,9 +387,9 @@ class DownloadUtils():
                     content_type = "application/x-www-form-urlencoded"
 
                 head["Content-Type"] = content_type
-                log.info("Content-Type : " + content_type)
+                log.debug("Content-Type : " + content_type)
 
-                log.info("POST DATA : " + postBody)
+                log.debug("POST DATA : " + postBody)
                 conn.request(method=method, url=urlPath, body=postBody, headers=head)
             else:
                 conn.request(method=method, url=urlPath, headers=head)
@@ -359,6 +407,8 @@ class DownloadUtils():
                     return_data = gzipper.read()
                 else:
                     return_data = retData
+                if headers is not None and isinstance(headers, dict):
+                    headers.update(data.getheaders())
                 log.debug("Data Len After : " + str(len(return_data)))
                 log.debug("====== 200 returned =======")
                 log.debug("Content-Type : " + str(contentType))
@@ -377,7 +427,7 @@ class DownloadUtils():
                 log.error(error)
                 if suppress is False:
                     if popup == 0:
-                        xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, i18n('url_error_') % str(data.reason)))
+                        xbmcgui.Dialog().notification(self.addon_name, i18n('url_error_') + str(data.reason))
                     else:
                         xbmcgui.Dialog().ok(self.addon_name, i18n('url_error_') % str(data.reason))
                 log.error(error)
@@ -387,7 +437,7 @@ class DownloadUtils():
             log.error(error)
             if suppress is False:
                 if popup == 0:
-                    xbmc.executebuiltin("Notification(%s, %s)" % (self.addon_name, i18n('url_error_') % str(msg)))
+                    xbmcgui.Dialog().notification(self.addon_name, i18n('url_error_') + str(msg))
                 else:
                     xbmcgui.Dialog().ok(self.addon_name, i18n('url_error_') % i18n('unable_connect_server'), str(msg))
                 #raise

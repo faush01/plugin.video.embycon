@@ -1,7 +1,7 @@
 # Gnu General Public License - see LICENSE.TXT
 import xbmcaddon
-
 import re
+import encodings
 
 from downloadutils import DownloadUtils
 from simple_logging import SimpleLogging
@@ -15,20 +15,20 @@ log = SimpleLogging(__name__)
 ###########################################################################
 class PlayUtils():
     def getPlayUrl(self, id, result, force_transcode):
-        log.info("getPlayUrl")
+        log.debug("getPlayUrl")
         addonSettings = xbmcaddon.Addon(id='plugin.video.embycon')
         playback_type = addonSettings.getSetting("playback_type")
         server = downloadUtils.getServer()
-        log.info("playback_type: " + playback_type)
+        log.debug("playback_type: " + playback_type)
         if force_transcode:
-            log.info("playback_type: FORCED_TRANSCODE")
+            log.debug("playback_type: FORCED_TRANSCODE")
         playurl = None
 
         # transcode
         if playback_type == "2" or force_transcode:
 
             playback_bitrate = addonSettings.getSetting("playback_bitrate")
-            log.info("playback_bitrate: " + playback_bitrate)
+            log.debug("playback_bitrate: " + playback_bitrate)
 
             width_options = ["640", "720", "1024", "1280", "1440", "1600", "1920", "2600", "4096"]
             playback_max_width = width_options[int(addonSettings.getSetting("playback_max_width"))]
@@ -77,7 +77,7 @@ class PlayUtils():
             user_token = downloadUtils.authenticate()
             playurl = playurl + "&api_key=" + user_token
 
-        log.info("Playback URL: " + playurl)
+        log.debug("Playback URL: " + playurl)
         return playurl.encode('utf-8')
 
     def getStrmDetails(self, result):
@@ -101,7 +101,7 @@ class PlayUtils():
             elif line != '':
                 playurl = line
 
-        log.info("Playback URL: " + playurl + " ListItem Properties: " + str(listitem_props))
+        log.debug("Playback URL: " + playurl + " ListItem Properties: " + str(listitem_props))
         return playurl, listitem_props
 
 
@@ -112,7 +112,7 @@ def getDetailsString():
     include_people = addonSettings.getSetting("include_people") == "true"
     include_overview = addonSettings.getSetting("include_overview") == "true"
 
-    detailsString = "EpisodeCount,SeasonCount,Path,Genres,Studios,CumulativeRunTimeTicks,Etag"
+    detailsString = "DateCreated,EpisodeCount,SeasonCount,Path,Genres,Studios,CumulativeRunTimeTicks,Etag"
 
     if include_media:
         detailsString += ",MediaStreams"
@@ -151,7 +151,10 @@ def getArt(item, server, widget=False):
         'clearart': '',
         'discart': '',
         'landscape': '',
-        'tvshow.poster': ''
+        'tvshow.poster': '',
+        'tvshow.clearart': '',
+        'tvshow.banner': '',
+        'tvshow.landscape': ''
     }
     item_id = item.get("Id")
 
@@ -164,10 +167,20 @@ def getArt(item, server, widget=False):
         else:
             art['thumb'] = downloadUtils.getArtwork(item, "Primary", server=server)
 
+    if item.get("Type") == "Episode" or item.get("Type") == "Season":
+        art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
+        art['tvshow.clearart'] = downloadUtils.getArtwork(item, "Logo", parent=True, server=server)
+        art['tvshow.banner'] = downloadUtils.getArtwork(item, "Banner", parent=True, server=server)
+        art['tvshow.landscape'] = downloadUtils.getArtwork(item, "Thumb", parent=True, server=server)
+    elif item.get("Type") == "Series":
+        art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=False, server=server)
+        art['tvshow.clearart'] = downloadUtils.getArtwork(item, "Logo", parent=False, server=server)
+        art['tvshow.banner'] = downloadUtils.getArtwork(item, "Banner", parent=False, server=server)
+        art['tvshow.landscape'] = downloadUtils.getArtwork(item, "Thumb", parent=False, server=server)
+
     if item.get("Type") == "Episode":
         art['thumb'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", server=server)
         art['landscape'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", parent=True, server=server)
-        art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
     else:
         art['poster'] = art['thumb']
 
