@@ -643,8 +643,7 @@ def processDirectory(results, progress, params):
                           '&Recursive=true' +
                           '&IncludeItemTypes=Episode' +
                           '&format=json')
-            details = {'title': 'All',
-                       'plot': 'All Seasons',
+            details = {'title': i18n('all'),
             }
             art = getArt(item, server)
             # Populate the extraData list
