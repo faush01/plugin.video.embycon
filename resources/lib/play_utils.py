@@ -3,11 +3,13 @@
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcplugin
 
 from datetime import timedelta
 import time
 import json
 import hashlib
+import sys
 
 from simple_logging import SimpleLogging
 from downloadutils import DownloadUtils
@@ -91,6 +93,7 @@ def playFile(play_info):
         if source.get('Container') == 'strm':
             playurl, listitem_props = PlayUtils().getStrmDetails(result)
 
+    playback_type = "0"
     if not playurl:
         playurl, playback_type = PlayUtils().getPlayUrl(id, result, force_transcode, play_session_id)
 
@@ -134,36 +137,40 @@ def playFile(play_info):
     elif playback_type == "1":
         externalSubs(result, list_item)
 
+    if seekTime > 0:
+        seekTime = seekTime - jump_back_amount
+
     list_item.setPath(playurl)
-    list_item = setListItemProps(id, list_item, result, server, listitem_props, item_title)
+    list_item = setListItemProps(id, list_item, result, server, listitem_props, item_title, seekTime)
 
-    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-    playlist.clear()
-    playlist.add(playurl, list_item)
-    xbmc.Player().play(playlist)
+    plugin_handle = int(sys.argv[1])
+    with_player = plugin_handle == -1  # if plugin handle is -1 setResolvedUrl will not work
+    if with_player:
+        log.debug("Using xbmc.Player() for playback")
+        xbmc.Player().play(playurl, list_item)
+    else:
+        log.debug("Using xbmcplugin.setResolvedUrl() for playback")
+        xbmcplugin.setResolvedUrl(plugin_handle, True, list_item)
+        # listitem property startOffset doesn't work for setResolvedUrl, use Player().seekTime
 
-    if seekTime == 0:
-        return
-
-    count = 0
-    while not xbmc.Player().isPlaying():
-        log.debug("Not playing yet...sleep for 1 sec")
-        count = count + 1
-        if count >= 10:
+        if seekTime == 0:
             return
-        else:
-            xbmc.Monitor().waitForAbort(1)
 
-    seekTime = seekTime - jump_back_amount
+        count = 0
+        while not xbmc.Player().isPlaying():
+            log.debug("Not playing yet...sleep for 1 sec")
+            count = count + 1
+            if count >= 10:
+                return
+            else:
+                xbmc.Monitor().waitForAbort(1)
 
-    while xbmc.Player().getTime() < (seekTime - 5):
-        # xbmc.Player().pause()
-        xbmc.sleep(100)
-        xbmc.Player().seekTime(seekTime)
-        xbmc.sleep(100)
-        # xbmc.Player().play()
+        while xbmc.Player().getTime() < (seekTime - 5):
+            xbmc.sleep(100)
+            xbmc.Player().seekTime(seekTime)
+            xbmc.sleep(100)
 
-def setListItemProps(id, listItem, result, server, extra_props, title):
+def setListItemProps(id, listItem, result, server, extra_props, title, seek_time):
     # set up item and item info
     thumbID = id
     eppNum = -1
@@ -178,6 +185,8 @@ def setListItemProps(id, listItem, result, server, extra_props, title):
     listItem.setProperty('IsPlayable', 'true')
     listItem.setProperty('IsFolder', 'false')
     listItem.setProperty('id', result.get("Id"))
+
+    listItem.setProperty('startOffset', str(seek_time))
 
     for prop in extra_props:
         listItem.setProperty(prop[0], prop[1])

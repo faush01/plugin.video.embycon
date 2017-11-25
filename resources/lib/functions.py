@@ -27,6 +27,7 @@ from translation import i18n
 from server_sessions import showServerSessions
 from action_menu import ActionMenu
 from widgets import getWidgetContent, getWidgetContentCast, getWidgetContentSimilar, getWidgetContentNextUp, getSuggestions, getWidgetUrlContent, checkForNewContent
+from play_utils import playFile
 
 __addon__ = xbmcaddon.Addon(id='plugin.video.embycon')
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
@@ -1294,3 +1295,4 @@ def PLAY(params):
     home_window.setProperty("play_item_message", play_data)
 
     #xbmcgui.Dialog().notification("EmbyCon", "Starting Playback")
+    playFile(play_info)
