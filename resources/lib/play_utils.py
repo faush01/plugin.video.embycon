@@ -143,6 +143,10 @@ def playFile(play_info):
     list_item.setPath(playurl)
     list_item = setListItemProps(id, list_item, result, server, listitem_props, item_title, seekTime)
 
+    log.debug("Using xbmc.Player() for playback")
+    xbmc.Player().play(playurl, list_item)
+
+    """
     plugin_handle = int(sys.argv[1])
     with_player = plugin_handle == -1  # if plugin handle is -1 setResolvedUrl will not work
     if with_player:
@@ -169,6 +173,7 @@ def playFile(play_info):
             xbmc.sleep(100)
             xbmc.Player().seekTime(seekTime)
             xbmc.sleep(100)
+    """
 
 def setListItemProps(id, listItem, result, server, extra_props, title, seek_time):
     # set up item and item info
