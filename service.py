@@ -172,11 +172,15 @@ def promptForStopActions(item_id, current_possition):
                     play_info["item_id"] = next_item_id
                     play_info["auto_resume"] = "-1"
                     play_info["force_transcode"] = False
-                    play_data = json.dumps(play_info)
 
-                    home_window = HomeWindow()
+                    play_data = home_window.getProperty("play_item_message")  # re-use options from starting request. reset on manual playback
+                    if play_data:
+                        play_info = json.loads(play_data)
+                        play_info["item_id"] = next_item_id
+                        play_data = json.dumps(play_info)
+                        home_window.setProperty("play_item_message", play_data)
                     home_window.setProperty("item_id", next_item_id)
-                    home_window.setProperty("play_item_message", play_data)
+                    playFile(play_info)
 
                 break
 
@@ -226,7 +230,6 @@ class Service(xbmc.Player):
         current_playing_file = xbmc.Player().getPlayingFile()
         log.debug("onPlayBackStarted: " + current_playing_file)
 
-        home_window = HomeWindow()
         emby_item_id = home_window.getProperty("item_id")
         playback_type = home_window.getProperty("PlaybackType_" + emby_item_id)
         play_session_id = home_window.getProperty("PlaySessionId_" + emby_item_id)
@@ -263,14 +266,12 @@ class Service(xbmc.Player):
     def onPlayBackEnded(self):
         # Will be called when kodi stops playing a file
         log.debug("EmbyCon Service -> onPlayBackEnded")
-        home_window = HomeWindow()
         home_window.clearProperty("item_id")
         stopAll(self.played_information)
 
     def onPlayBackStopped(self):
         # Will be called when user stops kodi playing a file
         log.debug("onPlayBackStopped")
-        home_window = HomeWindow()
         home_window.clearProperty("item_id")
         stopAll(self.played_information)
 
@@ -301,7 +302,6 @@ class Service(xbmc.Player):
 
 
 monitor = Service()
-home_window = HomeWindow()
 last_progress_update = time.time()
 last_content_check = time.time()
 
@@ -318,13 +318,6 @@ while not xbmc.abortRequested:
                 last_progress_update = time.time()
                 sendProgress()
         else:
-            # if we have a play item them trigger playback
-            play_data = home_window.getProperty("play_item_message")
-            if play_data:
-                home_window.clearProperty("play_item_message")
-                play_info = json.loads(play_data)
-                playFile(play_info)
-
             # if not playing every 60 seonds check for new widget content
             if (time.time() - last_content_check) > 60:
                 last_content_check = time.time()
