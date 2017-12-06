@@ -120,7 +120,9 @@ class PlayUtils():
 
         line_break = '\r'
         if '\r\n' in contents:
-            line_break += '\n'
+            line_break = '\r\n'
+        elif '\n' in contents:
+            line_break = '\n'
 
         lines = contents.split(line_break)
         for line in lines:
