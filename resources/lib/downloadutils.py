@@ -95,7 +95,7 @@ class DownloadUtils():
                 tagName = 'SeriesPrimaryImageTag'
                 idName = 'SeriesId'
             else:
-                tagName = 'Parent%sTag' % art_type
+                tagName = 'Parent%sImageTag' % art_type
                 idName = 'Parent%sItemId' % art_type
             parent_image_id = data[idName]
             parent_image_tag = data[tagName]
