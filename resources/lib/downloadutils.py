@@ -209,7 +209,7 @@ class DownloadUtils():
         log.debug("userid: {0}", userid)
 
         WINDOW.setProperty("userid", userid)
-        xbmcgui.Window(10000).setProperty("EmbyUserImage", userImage)
+        WINDOW.setProperty("userimage", userImage)
 
         return userid
 
