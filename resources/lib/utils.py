@@ -237,7 +237,7 @@ def getArt(item, server, widget=False):
         art['tvshow.fanart'] = downloadUtils.getArtwork(item, "Backdrop", parent=False, server=server)
 
     if item_type == "Episode":
-        art['thumb'] = art['thumb'] if art['thumb'] else downloadUtils.getArtwork(item, "Thumb", server=server)
+        art['landscape'] = downloadUtils.getArtwork(item, "Thumb", parent=True, server=server)
     else:
         art['poster'] = art['thumb']
 
