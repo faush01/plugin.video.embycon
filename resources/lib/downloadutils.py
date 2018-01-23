@@ -231,8 +231,13 @@ class DownloadUtils():
         url = "{server}/emby/Users/AuthenticateByName?format=json"
 
         sha1 = hashlib.sha1(settings.getSetting('password'))
+        md5 = hashlib.md5(settings.getSetting('password'))
+        plain = settings.getSetting('password')
 
-        messageData = "username=" + urllib.quote(settings.getSetting('username')) + "&password=" + sha1.hexdigest()
+        messageData = ("username=" + urllib.quote(settings.getSetting('username')) +
+                       "&password=" + sha1.hexdigest() +
+                       "&passwordMd5=" + md5.hexdigest() +
+                       "&pw=" + plain)
 
         resp = self.downloadUrl(url, postBody=messageData, method="POST", suppress=True, authenticate=False)
 
