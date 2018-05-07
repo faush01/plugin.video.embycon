@@ -19,7 +19,7 @@ import xbmc
 
 from resources.lib.error import catch_except
 from downloadutils import DownloadUtils
-from utils import getArt, cache_artwork, send_event_notification
+from utils import getArt, cache_artwork, send_event_notification, single_urlencode
 from kodi_utils import HomeWindow
 from clientinfo import ClientInformation
 from datamanager import DataManager
@@ -616,7 +616,7 @@ def showMenu(params):
         return
 
     action_items = []
-    
+
     if result["Type"] in ["Episode", "Movie", "Music"]:
         li = xbmcgui.ListItem(i18n('play'))
         li.setProperty('menu_id', 'play')
@@ -806,7 +806,7 @@ def showParentContent(params):
 def searchResults(params):
 
     item_type = params.get('item_type')
-    query_string = params.get('query')
+    query_string = single_urlencode(params.get('query').decode("utf-8"))
 
     if item_type.lower() == 'movie':
         heading_type = i18n('movies')
