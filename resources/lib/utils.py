@@ -203,7 +203,9 @@ def getArt(item, server, widget=False):
 
     item_type = item["Type"]
 
-    if item_type == "Episode":
+    if item_type == "Genre":
+        art['poster'] = downloadUtils.getArtwork(item, "Primary", server=server)
+    elif item_type == "Episode":
         art['tvshow.poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
         art['tvshow.clearart'] = downloadUtils.getArtwork(item, "Art", parent=True, server=server)
         art['tvshow.clearlogo'] = downloadUtils.getArtwork(item, "Logo", parent=True, server=server)
