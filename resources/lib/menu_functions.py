@@ -271,6 +271,7 @@ def getCollections():
         log.debug("CollectionType: {0}", collection_type)
         log.debug("Title: {0}", item_name)
         art = getArt(item=item, server=server)
+        art['landscape'] = downloadUtils.getArtwork(item, "Primary", server=server)
 
         if collection_type == "music":
             item_data = {}
@@ -384,7 +385,7 @@ def getCollections():
                          '&ImageTypeLimit=1' +
                          '&format=json'),
                 'media_type': 'Episodes',
-                'name_format': 'Episode|episode_name_format'})            
+                'name_format': 'Episode|episode_name_format'})
             collections.append({
                 'title': item_name + i18n('_recently_added'),
                 'art': art,
