@@ -14,30 +14,29 @@ class ContextMonitor(threading.Thread):
     stop_monitor = False
 
     def run(self):
-
-        #condition_command = "(Window.IsVisible(DialogContextMenu.xml) + !String.IsEmpty(ListItem.Property(id)) + String.StartsWith(ListItem.Path,plugin://plugin.video.embycon))"
-        condition_command = ("Window.IsVisible(DialogContextMenu.xml) + " +
-                             "[Window.IsActive(Home) | " +
-                             "[!String.IsEmpty(ListItem.Property(id) + " +
-                             "String.StartsWith(ListItem.Path,plugin://plugin.video.embycon)]]")
-
         monitor = xbmc.Monitor()
+        container_id = None
         log.debug("ContextMonitor Thread Started")
 
         while not xbmc.abortRequested:
 
-            if xbmc.getCondVisibility(condition_command):
-                log.debug("ContextMonitor Found Context Menu!!!!!!")
-                xbmc.executebuiltin("Dialog.Close(contextmenu, true)")
+            if not xbmc.getCondVisibility("Window.IsVisible(contextmenu)"):
+                container_id = xbmc.getInfoLabel("System.CurrentControlID")
+                log.debug("ContextMonitor Container ID: {0}", container_id)
 
-                item_id = xbmc.getInfoLabel('ListItem.Property(id)')
-                if item_id:
-                    log.debug("ContextMonitor Item ID: {0}", item_id)
-                    params = {}
-                    params["item_id"] = item_id
-                    show_menu(params)
+                if xbmc.getCondVisibility("String.StartsWith(Container(" + str(container_id) + ").ListItem.Path,plugin://plugin.video.embycon)"):
+                    item_id = xbmc.getInfoLabel("Container(" + str(container_id) + ").ListItem.Property(id)")
+                else:
+                    item_id = None
 
-            xbmc.sleep(200)
+            elif item_id:
+                log.debug("ContextMonitor Item ID: {0}", item_id)
+                xbmc.executebuiltin("Dialog.Close(contextmenu,true)")
+                params = {}
+                params["item_id"] = item_id
+                show_menu(params)
+
+            xbmc.sleep(50)
 
         log.debug("ContextMonitor Thread Exited")
 
