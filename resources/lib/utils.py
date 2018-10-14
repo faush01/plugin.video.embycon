@@ -276,9 +276,8 @@ def single_urlencode(text):
     return text.decode('utf-8') #return the result again as unicode
 
 
-def send_event_notification(method, data):
+def send_event_notification(method, data, source_id='embycon'):
     next_data = json.dumps(data)
-    source_id = "embycon"
     data = '\\"[\\"{0}\\"]\\"'.format(binascii.hexlify(next_data))
     command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, data)
     log.debug("Sending notification event data: {0}", command)
