@@ -443,6 +443,9 @@ class DownloadUtils():
             filter_string = getDetailsString()
             url = url.replace("{field_filters}", filter_string)
 
+        if url.find(" / ") != -1:
+            url = url.replace(" / ", "|")
+
         log.debug("After: {0}", url)
 
         try:
