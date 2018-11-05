@@ -231,7 +231,7 @@ def extract_item_info(item, gui_options):
     # Process Genres
     genres = item["Genres"]
     if genres is not None and len(genres) > 0:
-        item_details.genre = " / ".join(genres)
+        item_details.genre = genres
 
     # Process UserData
     userData = item["UserData"]
@@ -380,6 +380,8 @@ def add_gui_item(url, item_details, display_options, folder=True):
     list_item.setProperty('discart', item_details.art['discart'])  # not avail to setArt
     list_item.setProperty('tvshow.poster', item_details.art['tvshow.poster'])  # not avail to setArt
 
+    list_item.setProperty('genres', "%7C".join(item_details.genre))
+
     # new way
     info_labels = {}
 
@@ -398,7 +400,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
 
     info_labels["rating"] = item_details.rating
     info_labels["year"] = item_details.year
-    info_labels["genre"] = item_details.genre
+    info_labels["genre"] = " / ".join(item_details.genre)
 
     mediatype = 'video'
 
