@@ -224,7 +224,7 @@ def extract_item_info(item, gui_options):
 
     # production location
     prod_location = item["ProductionLocations"]
-    log.debug("ProductionLocations : {0}", prod_location)
+    # log.debug("ProductionLocations : {0}", prod_location)
     if prod_location and len(prod_location) > 0:
         item_details.production_location = prod_location[0]
 
@@ -301,7 +301,7 @@ def extract_item_info(item, gui_options):
 
 def add_gui_item(url, item_details, display_options, folder=True):
 
-    log.debug("Passed item_details: {0}", item_details.__dict__)
+    log.debug("item_details: {0}", item_details.__dict__)
 
     if not item_details.name:
         return None
@@ -362,7 +362,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
     else:
         list_item = xbmcgui.ListItem(listItemName, iconImage=thumbPath, thumbnailImage=thumbPath)
 
-    log.debug("Setting thumbnail as: {0}", thumbPath)
+    #log.debug("Setting thumbnail as: {0}", thumbPath)
 
     # calculate percentage
     if (cappedPercentage != 0):
@@ -393,27 +393,14 @@ def add_gui_item(url, item_details, display_options, folder=True):
             info_labels['cast'] = info_labels['castandrole'] = [(cast_member['name'], cast_member['role']) for cast_member in item_details.cast]
 
     info_labels["title"] = listItemName
-    info_labels["plot"] = item_details.plot
-    info_labels["Overlay"] = item_details.overlay
-    info_labels["TVShowTitle"] = item_details.series_name
-
     info_labels["duration"] = item_details.duration
     info_labels["playcount"] = item_details.play_count
     if item_details.favorite == 'true':
         info_labels["top250"] = "1"
 
-    info_labels["userrating"] = item_details.critic_rating
-    info_labels["mpaa"] = item_details.mpaa
     info_labels["rating"] = item_details.rating
-    info_labels["director"] = item_details.director
-    info_labels["writer"] = item_details.writer
     info_labels["year"] = item_details.year
-    info_labels["premiered"] = item_details.premiere_date
-    info_labels["dateadded"] = item_details.date_added
-    info_labels["studio"] = item_details.studio
-    info_labels["country"] = item_details.production_location
     info_labels["genre"] = " / ".join(item_details.genre)
-    info_labels["tagline"] = item_details.tagline
 
     mediatype = 'video'
 
@@ -444,6 +431,19 @@ def add_gui_item(url, item_details, display_options, folder=True):
 
     if is_video:
 
+        info_labels["Overlay"] = item_details.overlay
+        info_labels["tagline"] = item_details.tagline
+        info_labels["studio"] = item_details.studio
+        info_labels["premiered"] = item_details.premiere_date
+        info_labels["plot"] = item_details.plot
+        info_labels["director"] = item_details.director
+        info_labels["writer"] = item_details.writer
+        info_labels["dateadded"] = item_details.date_added
+        info_labels["TVShowTitle"] = item_details.series_name
+        info_labels["country"] = item_details.production_location
+        info_labels["mpaa"] = item_details.mpaa
+        info_labels["userrating"] = item_details.critic_rating
+
         if item_type == 'movie':
             info_labels["trailer"] = "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
 
@@ -469,7 +469,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
             list_item.addStreamInfo('subtitle', {'language': item_details.subtitle_lang})
 
         list_item.setRating("imdb", item_details.community_rating, 0, True)
-        #list_item.setRating("rt", item_details.critic_rating, 0, False)
+        # list_item.setRating("rt", item_details.critic_rating, 0, False)
         list_item.setProperty('TotalTime', str(item_details.duration))
 
     else:
