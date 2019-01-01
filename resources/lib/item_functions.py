@@ -488,7 +488,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
         info_labels["tvshowtitle"] = item_details.series_name
 
     elif item_type == 'season':
-        info_labels["season"] = item_details.total_items
+        info_labels["season"] = item_details.season_number
         info_labels["tvshowtitle"] = item_details.series_name
 
     elif item_type == "series":
