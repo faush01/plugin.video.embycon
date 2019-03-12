@@ -688,7 +688,7 @@ msgstr "Nuovo intervallo di controllo del contenuto (0 = disabilitato)"
 
 msgctxt "#30343"
 msgid "Changes Require Kodi Restart"
-msgstr "Le modificherihciedo il riavvi di Kodi"
+msgstr "Le modifiche richiedono il riavvio di Kodi"
 
 msgctxt "#30344"
 msgid "Number of images removed from cache : %s"
