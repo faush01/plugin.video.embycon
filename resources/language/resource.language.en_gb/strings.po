@@ -214,6 +214,10 @@ msgctxt "#30183"
 msgid "Include people"
 msgstr ""
 
+msgctxt "#30184"
+msgid "Include extrafanart"
+msgstr ""
+
 msgctxt "#30200"
 msgid "URL error: %s"
 msgstr ""

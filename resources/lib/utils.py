@@ -193,6 +193,15 @@ def getArt(item, server):
     art = {
         'thumb': '',
         'fanart': '',
+        'fanart1': '',
+        'fanart2': '',
+        'fanart3': '',
+        'fanart4': '',
+        'fanart5': '',
+        'fanart6': '',
+        'fanart7': '',
+        'fanart8': '',
+        'fanart9': '',
         'poster': '',
         'banner': '',
         'clearlogo': '',
@@ -271,6 +280,16 @@ def getArt(item, server):
     art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", server=server)
     if not art['fanart']:
         art['fanart'] = downloadUtils.getArtwork(item, "Backdrop", parent=True, server=server)
+
+    art['fanart1'] = downloadUtils.getArtwork(item, "Backdrop1", server=server)
+    art['fanart2'] = downloadUtils.getArtwork(item, "Backdrop2", server=server)
+    art['fanart3'] = downloadUtils.getArtwork(item, "Backdrop3", server=server)
+    art['fanart4'] = downloadUtils.getArtwork(item, "Backdrop4", server=server)
+    art['fanart5'] = downloadUtils.getArtwork(item, "Backdrop5", server=server)
+    art['fanart6'] = downloadUtils.getArtwork(item, "Backdrop6", server=server)
+    art['fanart7'] = downloadUtils.getArtwork(item, "Backdrop7", server=server)
+    art['fanart8'] = downloadUtils.getArtwork(item, "Backdrop8", server=server)
+    art['fanart9'] = downloadUtils.getArtwork(item, "Backdrop9", server=server)
 
     return art
 

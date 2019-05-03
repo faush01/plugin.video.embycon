@@ -11,6 +11,7 @@ import ssl
 import StringIO
 import gzip
 import json
+import re
 from urlparse import urlparse
 import urllib
 from datetime import datetime
@@ -303,6 +304,9 @@ class DownloadUtils:
 
     def getArtwork(self, data, art_type, parent=False, index=0, server=None):
 
+        addonSettings = xbmcaddon.Addon()
+        include_extra_fanart = addonSettings.getSetting("include_extra_fanart") == "true"
+
         id = data["Id"]
         item_type = data["Type"]
 
@@ -310,24 +314,25 @@ class DownloadUtils:
             if art_type != "Primary" or parent == True:
                 id = data["SeriesId"]
 
+        artwork = ""
         imageTag = ""
+        bgImageTags = data["BackdropImageTags"]
         # "e3ab56fe27d389446754d0fb04910a34" # a place holder tag, needs to be in this format
 
         # for episodes always use the parent BG
         if item_type == "Episode" and art_type == "Backdrop":
             id = data["ParentBackdropItemId"]
-            bgItemTags = data["ParentBackdropImageTags"]
-            if bgItemTags is not None and len(bgItemTags) > 0:
-                imageTag = bgItemTags[0]
+            bgImageTags = data["ParentBackdropImageTags"]
+            if bgImageTags is not None and len(bgImageTags) > index:
+                imageTag = bgImageTags[index]
         elif art_type == "Backdrop" and parent is True:
             id = data["ParentBackdropItemId"]
-            bgItemTags = data["ParentBackdropImageTags"]
-            if bgItemTags is not None and len(bgItemTags) > 0:
-                imageTag = bgItemTags[0]
+            bgImageTags = data["ParentBackdropImageTags"]
+            if bgImageTags is not None and len(bgImageTags) > index:
+                imageTag = bgImageTags[index]
         elif art_type == "Backdrop":
-            BGTags = data["BackdropImageTags"]
-            if BGTags is not None and len(BGTags) > index:
-                imageTag = BGTags[index]
+            if bgImageTags is not None and len(bgImageTags) > index:
+                imageTag = bgImageTags[index]
                 # log.debug("Background Image Tag: {0}", imageTag)
         elif parent is False:
             image_tags = data["ImageTags"]
@@ -350,12 +355,32 @@ class DownloadUtils:
                 imageTag = parent_image_tag
                 # log.debug("Parent Image Tag: {0}", imageTag)
 
-
-        if not imageTag and not ((art_type == 'Banner' or art_type == 'Art') and parent is True):  # ParentTag not passed for Banner and Art
+        if not imageTag and not ((art_type == 'Banner' or art_type == 'Art') and parent is True) and bgImageTags is None:  # ParentTag not passed for Banner and Art
             log.debug("No Image Tag for request:{0} item:{1} parent:{2}", art_type, item_type, parent)
             return ""
+        
+        if not re.search(r'\d$', art_type):
+            artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, id, art_type, index, imageTag)
 
-        artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, id, art_type, index, imageTag)
+        if include_extra_fanart and bgImageTags is not None:
+            if art_type == "Backdrop1" and len(bgImageTags) >= 2:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/1?Format=original&Tag=%s" % (server, id, bgImageTags[1])
+            if art_type == "Backdrop2" and len(bgImageTags) >= 3:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/2?Format=original&Tag=%s" % (server, id, bgImageTags[2])
+            if art_type == "Backdrop3" and len(bgImageTags) >= 4:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/3?Format=original&Tag=%s" % (server, id, bgImageTags[3])
+            if art_type == "Backdrop4" and len(bgImageTags) >= 5:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/4?Format=original&Tag=%s" % (server, id, bgImageTags[4])
+            if art_type == "Backdrop5" and len(bgImageTags) >= 6:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/5?Format=original&Tag=%s" % (server, id, bgImageTags[5])
+            if art_type == "Backdrop6" and len(bgImageTags) >= 7:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/6?Format=original&Tag=%s" % (server, id, bgImageTags[6])
+            if art_type == "Backdrop7" and len(bgImageTags) >= 8:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/7?Format=original&Tag=%s" % (server, id, bgImageTags[7])
+            if art_type == "Backdrop8" and len(bgImageTags) >= 9:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/8?Format=original&Tag=%s" % (server, id, bgImageTags[8])
+            if art_type == "Backdrop9" and len(bgImageTags) >= 10:
+                artwork = "%s/emby/Items/%s/Images/Backdrop/9?Format=original&Tag=%s" % (server, id, bgImageTags[9])
 
         if self.use_https and not self.verify_cert:
             artwork += "|verifypeer=false"
