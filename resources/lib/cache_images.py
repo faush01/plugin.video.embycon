@@ -1,8 +1,8 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib
-import httplib
+import urllib.request, urllib.parse, urllib.error
+import http.client
 import base64
 import sys
 import threading
@@ -148,7 +148,7 @@ class CacheArtwork(threading.Thread):
                 unused_texture_ids = set()
                 for texture in textures:
                     url = texture.get("url")
-                    url = urllib.unquote(url)
+                    url = urllib.parse.unquote(url)
                     url = url.replace("image://", "")
                     url = url[0:-1]
                     if url.find("/emby/") > -1 and url not in emby_texture_urls:
@@ -288,7 +288,7 @@ class CacheArtwork(threading.Thread):
         texture_urls = set()
         for texture in textures:
             url = texture.get("url")
-            url = urllib.unquote(url)
+            url = urllib.parse.unquote(url)
             url = url.replace("image://", "")
             url = url[0:-1]
             texture_urls.add(url)
@@ -341,7 +341,7 @@ class CacheArtwork(threading.Thread):
             message = "%s of %s" % (index, total)
             progress.update(percentage, "%s" % (message))
 
-            conn = httplib.HTTPConnection(kodi_http_server, timeout=20)
+            conn = http.client.HTTPConnection(kodi_http_server, timeout=20)
             conn.request(method="GET", url=kodi_texture_url, headers=headers)
             data = conn.getresponse()
             if data.status == 200:

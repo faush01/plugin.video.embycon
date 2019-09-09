@@ -5,7 +5,7 @@ from collections import defaultdict
 import threading
 import hashlib
 import os
-import cPickle
+import pickle
 import time
 #import copy
 #import urllib
@@ -65,7 +65,8 @@ class DataManager:
         server = download_utils.getServer()
 
         m = hashlib.md5()
-        m.update(user_id + "|" + str(server) + "|" + url)
+        line = user_id + "|" + str(server) + "|" + url
+        m.update(line.encode("utf-8"))
         url_hash = m.hexdigest()
         cache_file = os.path.join(self.addon_dir, "cache_" + url_hash + ".pickle")
 
@@ -93,7 +94,7 @@ class DataManager:
 
             with open(cache_file, 'rb') as handle:
                 try:
-                    cache_item = cPickle.load(handle)
+                    cache_item = pickle.load(handle)
                     cache_thread.cached_item = cache_item
                     item_list = cache_item.item_list
                     total_records = cache_item.total_records
@@ -207,7 +208,7 @@ class CacheManagerThread(threading.Thread):
             log.debug("CacheManagerThread : Saving New Data loops({0})", loops)
 
             with open(self.cached_item.file_path, 'wb') as handle:
-                cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             home_window.clearProperty(self.cached_item.file_path)
 
@@ -253,7 +254,7 @@ class CacheManagerThread(threading.Thread):
                 loops = self.wait_for_save(home_window, self.cached_item.file_path)
 
                 with open(self.cached_item.file_path, 'wb') as handle:
-                    cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                    pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 home_window.clearProperty(self.cached_item.file_path)
                 log.debug("CacheManagerThread : Sending container refresh ({0})", loops)
@@ -263,7 +264,7 @@ class CacheManagerThread(threading.Thread):
                 self.cached_item.date_last_used = time.time()
                 loops = self.wait_for_save(home_window, self.cached_item.file_path)
                 with open(self.cached_item.file_path, 'wb') as handle:
-                    cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                    pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 log.debug("CacheManagerThread : Updating last used date for cache data ({0})", loops)
                 home_window.clearProperty(self.cached_item.file_path)
 
@@ -302,7 +303,7 @@ def clear_old_cache_data():
             for x in range(0, 5):
                 try:
                     with open(os.path.join(addon_dir, filename), 'rb') as handle:
-                        cache_item = cPickle.load(handle)
+                        cache_item = pickle.load(handle)
                     break
                 except Exception as error:
                     log.debug("clear_old_cache_data() : Pickle load error : {0}", error)

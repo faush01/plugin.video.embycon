@@ -4,7 +4,6 @@
 
 import json
 import threading
-import websocket
 
 import xbmc
 import xbmcgui
@@ -15,6 +14,8 @@ from . import clientinfo
 from . import downloadutils
 from .json_rpc import json_rpc
 from .kodi_utils import HomeWindow
+from .websocket import WebSocketApp
+
 
 log = SimpleLogging(__name__)
 
@@ -256,7 +257,7 @@ class WebSocketClient(threading.Thread):
         websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (server, token, self.device_id)
         log.debug("websocket url: {0}", websocket_url)
 
-        self._client = websocket.WebSocketApp(websocket_url,
+        self._client = WebSocketApp(websocket_url,
                                               on_open=self.on_open,
                                               on_message=self.on_message,
                                               on_error=self.on_error,

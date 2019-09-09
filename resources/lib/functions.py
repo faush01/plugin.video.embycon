@@ -1,18 +1,18 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import sys
 import os
 import time
 import cProfile
 import pstats
 import json
-import StringIO
+import io
 import encodings
 import binascii
 import re
 import hashlib
-import cPickle
+import pickle
 
 import xbmcplugin
 import xbmcgui
@@ -88,7 +88,7 @@ def mainEntryPoint():
     param_url = params.get('url', None)
 
     if param_url:
-        param_url = urllib.unquote(param_url)
+        param_url = urllib.parse.unquote(param_url)
 
     mode = params.get("mode", None)
 
@@ -162,7 +162,7 @@ def mainEntryPoint():
 
         fileTimeStamp = time.strftime("%Y%m%d-%H%M%S")
         tabFileName = __addondir__ + "profile(" + fileTimeStamp + ").txt"
-        s = StringIO.StringIO()
+        s = io.StringIO()
         ps = pstats.Stats(pr, stream=s)
         ps = ps.sort_stats('cumulative')
         ps.print_stats()
@@ -479,7 +479,7 @@ def show_menu(params):
              '&IsMissing=false' +
              '&Fields={field_filters}' +
              '&format=json')
-        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Season")
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Season")
         built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
         xbmc.executebuiltin(built_in_command)
 
@@ -496,7 +496,7 @@ def show_menu(params):
              '&Fields={field_filters}' +
              '&format=json')
 
-        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Series")
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Series")
 
         if xbmc.getCondVisibility("Window.IsActive(home)"):
             built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
@@ -653,7 +653,7 @@ def search_results(params):
     query_string = params.get('query')
     if query_string:
         log.debug("query_string : {0}", query_string)
-        query_string = urllib.unquote(query_string)
+        query_string = urllib.parse.unquote(query_string)
         log.debug("query_string : {0}", query_string)
 
     item_type = item_type.lower()
@@ -700,7 +700,7 @@ def search_results(params):
     else:
         query = query_string
 
-    query = urllib.quote(query)
+    query = urllib.parse.quote(query)
     log.debug("query : {0}", query)
 
     if (not item_type) or (not query):

@@ -34,7 +34,7 @@ except ImportError:
 
     HAVE_SSL = False
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 import os
 import array
 import struct
@@ -222,7 +222,7 @@ def create_connection(url, timeout=None, **options):
     return websock
 
 _MAX_INTEGER = (1 << 32) -1
-_AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e + 1)
+_AVAILABLE_KEY_CHARS = list(range(0x21, 0x2f + 1)) + list(range(0x3a, 0x7e + 1))
 _MAX_CHAR_BYTE = (1<<8) -1
 
 # ref. Websocket gets an update, and it breaks stuff.
@@ -305,7 +305,7 @@ class ABNF(object):
 
         opcode: operation code. please see OPCODE_XXX.
         """
-        if opcode == ABNF.OPCODE_TEXT and isinstance(data, unicode):
+        if opcode == ABNF.OPCODE_TEXT and isinstance(data, str):
             data = data.encode("utf-8")
         # mask must be set if send data from client
         return ABNF(1, 0, 0, 0, opcode, 1, data)
@@ -355,7 +355,7 @@ class ABNF(object):
         """
         _m = array.array("B", mask_key)
         _d = array.array("B", data)
-        for i in xrange(len(_d)):
+        for i in range(len(_d)):
             _d[i] ^= _m[i % 4]
         return _d.tostring()
 
@@ -530,7 +530,7 @@ class WebSocket(object):
         self.connected = True
 
     def _validate_header(self, headers, key):
-        for k, v in _HEADERS_TO_CHECK.iteritems():
+        for k, v in _HEADERS_TO_CHECK.items():
             r = headers.get(k, None)
             if not r:
                 return False
@@ -754,7 +754,7 @@ class WebSocket(object):
 
     def _send(self, data):
         try:
-            return self.sock.send(data)
+            return self.sock.send(data.encode("utf-8"))
         except socket.timeout as e:
             raise WebSocketTimeoutException(e.args[0])
         except Exception as e:
@@ -916,6 +916,7 @@ class WebSocketApp(object):
 
         except Exception as e:
             self._callback(self.on_error, e)
+            raise
         finally:
             if thread:
                 self.keep_running = False
@@ -942,5 +943,5 @@ if __name__ == "__main__":
     print("Sent")
     print("Receiving...")
     result = ws.recv()
-    print("Received '%s'" % result)
+    print(("Received '%s'" % result))
     ws.close()

@@ -2,7 +2,7 @@
 
 import socket
 import json
-from urlparse import urlparse
+from urllib.parse import urlparse
 import time
 import hashlib
 from datetime import datetime
@@ -50,14 +50,16 @@ def getServerDetails():
 
     # while True:
     try:
-        sock.sendto(MESSAGE, MULTI_GROUP)
+        sock.sendto(MESSAGE.encode("utf-8"), MULTI_GROUP)
         while True:
             try:
                 server_count += 1
                 progress.update(server_count * 10, string_load(30375) % server_count)
                 xbmc.sleep(1000)
                 data, addr = sock.recvfrom(1024)
-                servers.append(json.loads(data))
+                responce_data = json.loads(data)
+                servers.append(responce_data)
+                log.debug("UDP Responce Data : {0}", responce_data)
             except:
                 break
     except Exception as e:
@@ -190,7 +192,6 @@ def checkServer(force=False, change_user=False, notify=False):
     # do we need to change the user
     user_details = load_user_details(settings)
     current_username = user_details.get("username", "")
-    current_username = unicode(current_username, "utf-8")
 
     # if asked or we have no current user then show user selection screen
     if something_changed or change_user or len(current_username) == 0:
@@ -263,7 +264,7 @@ def checkServer(force=False, change_user=False, notify=False):
                             user_item.setProperty("secure", "true")
 
                             m = hashlib.md5()
-                            m.update(name)
+                            m.update(name.encode("utf-8"))
                             hashed_username = m.hexdigest()
                             saved_password = settings.getSetting("saved_user_password_" + hashed_username)
                             if saved_password:

@@ -5,14 +5,14 @@ import xbmcgui
 import xbmcaddon
 import xbmcvfs
 
-import httplib
+import http.client
 import hashlib
 import ssl
-import StringIO
+from io import BytesIO
 import gzip
 import json
-from urlparse import urlparse
-import urllib
+from urllib.parse import urlparse
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime
 from base64 import b64encode
 from collections import defaultdict
@@ -487,7 +487,7 @@ class DownloadUtils:
 
         secure = False
         for user in result:
-            if user.get("Name") == unicode(user_name, "utf-8"):
+            if user.get("Name") == user_name:
                 userid = user.get("Id")
                 userImage = self.get_user_artwork(user, 'Primary')
                 log.debug("Username Found: {0}", user.get("Name"))
@@ -539,8 +539,8 @@ class DownloadUtils:
         url = "{server}/emby/Users/AuthenticateByName?format=json"
 
         user_details = load_user_details(settings)
-        user_name = urllib.quote(user_details.get("username", ""))
-        pwd_text = urllib.quote(user_details.get("password", ""))
+        user_name = urllib.parse.quote(user_details.get("username", ""))
+        pwd_text = urllib.parse.quote(user_details.get("password", ""))
 
         messageData = "username=" + user_name + "&pw=" + pwd_text
 
@@ -583,7 +583,7 @@ class DownloadUtils:
         settings = xbmcaddon.Addon()
         deviceName = settings.getSetting('deviceName')
         # remove none ascii chars
-        deviceName = deviceName.decode("ascii", errors='ignore')
+        #deviceName = deviceName.decode("ascii", errors='ignore')
         # remove some chars not valid for names
         deviceName = deviceName.replace("\"", "_")
         if len(deviceName) == 0:
@@ -680,13 +680,13 @@ class DownloadUtils:
 
             if local_use_https and self.verify_cert:
                 log.debug("Connection: HTTPS, Cert checked")
-                conn = httplib.HTTPSConnection(server, timeout=40)
+                conn = http.client.HTTPSConnection(server, timeout=40)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
-                conn = httplib.HTTPSConnection(server, timeout=40, context=ssl._create_unverified_context())
+                conn = http.client.HTTPSConnection(server, timeout=40, context=ssl._create_unverified_context())
             else:
                 log.debug("Connection: HTTP")
-                conn = httplib.HTTPConnection(server, timeout=40)
+                conn = http.client.HTTPConnection(server, timeout=40)
 
             head = self.getAuthHeader(authenticate)
 
@@ -722,7 +722,7 @@ class DownloadUtils:
                 contentType = data.getheader('content-encoding')
                 log.debug("Data Len Before: {0}", len(retData))
                 if (contentType == "gzip"):
-                    retData = StringIO.StringIO(retData)
+                    retData = BytesIO(retData)
                     gzipper = gzip.GzipFile(fileobj=retData)
                     return_data = gzipper.read()
                 else:
@@ -754,6 +754,7 @@ class DownloadUtils:
 
         except Exception as msg:
             log.error("Unable to connect to {0} : {1}", server, msg)
+            raise
             if suppress is False:
                 xbmcgui.Dialog().notification(string_load(30316),
                                               str(msg),

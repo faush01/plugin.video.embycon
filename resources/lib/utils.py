@@ -303,8 +303,12 @@ def single_urlencode(text):
 
 def send_event_notification(method, data):
     next_data = json.dumps(data)
+    log.debug("send_event_notification:Sending:{0}", next_data)
     source_id = "embycon"
-    data = '\\"[\\"{0}\\"]\\"'.format(binascii.hexlify(next_data))
+    data_packet = next_data.encode("utf-8").hex()
+    log.debug("send_event_notification:Sending:{0}", data_packet)
+    data = '\\"[\\"{0}\\"]\\"'.format(data_packet)
+    log.debug("send_event_notification:Sending:{0}", data)
     command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, data)
     log.debug("Sending notification event data: {0}", command)
     xbmc.executebuiltin(command)

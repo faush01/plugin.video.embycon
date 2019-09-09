@@ -1,7 +1,7 @@
 
 import sys
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import time
 import calendar
@@ -151,10 +151,10 @@ def extract_item_info(item, gui_options):
             nameInfo["SeriesName"] = season_name
         else:
             nameInfo["SeriesName"] = ""
-        nameInfo["SeasonIndex"] = u"%02d" % item_details.season_number
-        nameInfo["EpisodeIndex"] = u"%02d" % item_details.episode_number
+        nameInfo["SeasonIndex"] = "%02d" % item_details.season_number
+        nameInfo["EpisodeIndex"] = "%02d" % item_details.episode_number
         log.debug("FormatName: {0} | {1}", name_format, nameInfo)
-        item_details.name = unicode(name_format).format(**nameInfo).strip()
+        item_details.name = str(name_format).format(**nameInfo).strip()
 
     year = item["ProductionYear"]
     prem_date = item["PremiereDate"]
@@ -293,7 +293,7 @@ def extract_item_info(item, gui_options):
 
     runtime = item["RunTimeTicks"]
     if item_details.is_folder == False and runtime is not None:
-        item_details.duration = long(runtime) / 10000000
+        item_details.duration = int(runtime) / 10000000
 
     child_count = item["ChildCount"]
     if child_count is not None:
@@ -345,9 +345,9 @@ def add_gui_item(url, item_details, display_options, folder=True):
 
     # Create the URL to pass to the item
     if folder:
-        u = sys.argv[0] + "?url=" + urllib.quote(url) + mode + "&media_type=" + item_details.item_type
+        u = sys.argv[0] + "?url=" + urllib.parse.quote(url) + mode + "&media_type=" + item_details.item_type
         if item_details.name_format:
-            u += '&name_format=' + urllib.quote(item_details.name_format)
+            u += '&name_format=' + urllib.parse.quote(item_details.name_format)
     else:
         u = sys.argv[0] + "?item_id=" + url + "&mode=PLAY"# + "&session_id=" + home_window.getProperty("session_id")
 
@@ -472,8 +472,8 @@ def add_gui_item(url, item_details, display_options, folder=True):
     if item_details.genres is not None and len(item_details.genres) > 0:
         genres_list = []
         for genre in item_details.genres:
-            genres_list.append(urllib.quote(genre.encode('utf8')))
-        item_properties["genres"] = urllib.quote("|".join(genres_list))
+            genres_list.append(urllib.parse.quote(genre.encode('utf8')))
+        item_properties["genres"] = urllib.parse.quote("|".join(genres_list))
 
         info_labels["genre"] = " / ".join(item_details.genres)
 
@@ -590,7 +590,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
     if kodi_version > 17:
         list_item.setProperties(item_properties)
     else:
-        for key, value in item_properties.iteritems():
+        for key, value in item_properties.items():
             list_item.setProperty(key, value)
 
     return (u, list_item, folder)

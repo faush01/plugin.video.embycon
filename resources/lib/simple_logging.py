@@ -41,9 +41,10 @@ class SimpleLogging():
         new_args = []
         # convert any unicode to utf-8 strings
         for arg in args:
-            if isinstance(arg, unicode):
-                new_args.append(arg.encode("utf-8"))
-            else:
-                new_args.append(arg)
+            new_args.append(arg)
+            #if isinstance(arg, unicode):
+            #    new_args.append(arg.encode("utf-8"))
+            #else:
+            #    new_args.append(arg)
         log_line = fmt.format(*new_args)
         return log_line

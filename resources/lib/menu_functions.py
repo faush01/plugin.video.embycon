@@ -3,7 +3,7 @@
 
 import sys
 import json
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import xbmcplugin
 import xbmcaddon
@@ -93,7 +93,7 @@ def showMoviePages(params):
         start_index = start_index + page_limit
 
     for collection in collections:
-        content_url = urllib.quote(collection['path'])
+        content_url = urllib.parse.quote(collection['path'])
         url = sys.argv[0] + ("?url=" + content_url +
                              "&mode=GET_CONTENT" +
                              "&media_type=" + collection["media_type"])
@@ -165,7 +165,7 @@ def showGenreList(params):
         collections.append(item_data)
 
     for collection in collections:
-        url = sys.argv[0] + ("?url=" + urllib.quote(collection['path']) +
+        url = sys.argv[0] + ("?url=" + urllib.parse.quote(collection['path']) +
                              "&mode=GET_CONTENT" +
                              "&media_type=" + collection["media_type"])
         log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), url, collection.get("art"))
@@ -216,7 +216,7 @@ def showMovieAlphaList():
         collections.append(item_data)
 
     for collection in collections:
-        url = (sys.argv[0] + "?url=" + urllib.quote(collection['path']) +
+        url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
                "&mode=GET_CONTENT&media_type=" + collection["media_type"])
         log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
         addMenuDirectoryItem(collection.get('title', string_load(30250)), url)
@@ -267,7 +267,7 @@ def showTvShowAlphaList():
         collections.append(item_data)
 
     for collection in collections:
-        url = (sys.argv[0] + "?url=" + urllib.quote(collection['path']) +
+        url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
                "&mode=GET_CONTENT&media_type=" + collection["media_type"])
         log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
         addMenuDirectoryItem(collection.get('title', string_load(30250)), url)
@@ -294,10 +294,10 @@ def displaySections():
                                      plugin_path,
                                      art=collection.get("art"))
             else:
-                url = (sys.argv[0] + "?url=" + urllib.quote(collection['path']) +
+                url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
                        "&mode=GET_CONTENT&media_type=" + collection["media_type"])
                 if collection.get("name_format") is not None:
-                    url += "&name_format=" + urllib.quote(collection.get("name_format"))
+                    url += "&name_format=" + urllib.parse.quote(collection.get("name_format"))
                 if not collection.get("use_cache", True):
                     url += "&use_cache=false"
                 log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
@@ -1115,7 +1115,7 @@ def showWidgets():
            "&IsPlayed=false" +
            "&IsMissing=False")
     addMenuDirectoryItem(string_load(30324) + " (" + show_x_filtered_items + ")",
-                         "plugin://plugin.video.embycon/?mode=GET_CONTENT&use_cache=false&media_type=Movies&url=" + urllib.quote(url))
+                         "plugin://plugin.video.embycon/?mode=GET_CONTENT&use_cache=false&media_type=Movies&url=" + urllib.parse.quote(url))
 
     url = ("{server}/emby/Users/{userid}/Items" +
            "?Limit={ItemLimit}" +
@@ -1123,7 +1123,7 @@ def showWidgets():
            "&Fields={field_filters}" +
            "&ImageTypeLimit=1")
     addMenuDirectoryItem(string_load(30269) + " (" + show_x_filtered_items + ")",
-                         "plugin://plugin.video.embycon/?mode=GET_CONTENT&use_cache=false&media_type=Movies&url=" + urllib.quote(url))
+                         "plugin://plugin.video.embycon/?mode=GET_CONTENT&use_cache=false&media_type=Movies&url=" + urllib.parse.quote(url))
 
     addMenuDirectoryItem(" - " + string_load(30257) + " (" + show_x_filtered_items + ")", 'plugin://plugin.video.embycon/?mode=WIDGET_CONTENT&type=recent_movies')
     addMenuDirectoryItem(" - " + string_load(30258) + " (" + show_x_filtered_items + ")", 'plugin://plugin.video.embycon/?mode=WIDGET_CONTENT&type=inprogress_movies')
