@@ -231,7 +231,7 @@ _MAX_CHAR_BYTE = (1<<8) -1
 
 def _create_sec_websocket_key():
     uid = uuid.uuid4()
-    return base64.encodebytes(uid.bytes).hex().strip()
+    return base64.encodebytes(uid.bytes).decode("utf-8").strip()
 
 
 _HEADERS_TO_CHECK = {
@@ -342,6 +342,7 @@ class ABNF(object):
 
     def _get_masked(self, mask_key):
         s = ABNF.mask(mask_key, self.data)
+        print (s)
         return mask_key + "".join(s)
 
     @staticmethod
@@ -354,7 +355,7 @@ class ABNF(object):
         data: data to mask/unmask.
         """
         _m = array.array("B", mask_key)
-        _d = array.array("B", data)
+        _d = array.array("B", data.encode("utf-8"))
         for i in range(len(_d)):
             _d[i] ^= _m[i % 4]
         return _d.tostring()
@@ -533,6 +534,7 @@ class WebSocket(object):
     def _validate_header(self, headers, key):
         for k, v in list(_HEADERS_TO_CHECK.items()):
             r = headers.get(k, None)
+            print("Checking Header : " + k + " = " + r)
             if not r:
                 return False
             r = r.lower()
@@ -545,7 +547,8 @@ class WebSocket(object):
         result = result.lower()
 
         value = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-        hashed = base64.encodestring(hashlib.sha1(value).digest()).strip().lower()
+        hash_bytes = hashlib.sha1(value.encode("utf-8")).digest()
+        hashed = base64.encodebytes(hash_bytes).decode("utf-8").strip().lower()
         return hashed == result
 
     def _read_headers(self):
