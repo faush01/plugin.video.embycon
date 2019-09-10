@@ -275,11 +275,12 @@ class ABNF(object):
     LENGTH_63 = 1 << 63
 
     def __init__(self, fin=0, rsv1=0, rsv2=0, rsv3=0,
-                 opcode=OPCODE_TEXT, mask=1, data=""):
+                 opcode=OPCODE_TEXT, mask=1, data=b""):
         """
         Constructor for ABNF.
         please check RFC for arguments.
         """
+        print("ABNF Data Type __init__ : " + str(type(data)))
         self.fin = fin
         self.rsv1 = rsv1
         self.rsv2 = rsv2
@@ -305,8 +306,11 @@ class ABNF(object):
 
         opcode: operation code. please see OPCODE_XXX.
         """
-        if opcode == ABNF.OPCODE_TEXT and isinstance(data, str):
+        #if opcode == ABNF.OPCODE_TEXT and isinstance(data, str):
+        if isinstance(data, str):
             data = data.encode("utf-8")
+            print ("Converted Data To Bytes")
+        print("ABNF Data Type : " + str(type(data)))
         # mask must be set if send data from client
         return ABNF(1, 0, 0, 0, opcode, 1, data)
 
@@ -319,14 +323,17 @@ class ABNF(object):
         if self.opcode not in ABNF.OPCODES:
             raise ValueError("Invalid OPCODE")
         length = len(self.data)
+        print("Data Length : " + str(length))
         if length >= ABNF.LENGTH_63:
             raise ValueError("data is too long")
 
-        frame_header = chr(self.fin << 7
+        frame_header = bytes(self.fin << 7
                            | self.rsv1 << 6 | self.rsv2 << 5 | self.rsv3 << 4
                            | self.opcode)
         if length < ABNF.LENGTH_7:
-            frame_header += chr(self.mask_value << 7 | length)
+            frame_header += bytes(self.mask_value << 7 | length)
+            print("frame_header Data : " + str(type(frame_header)))
+            print("frame_header Data : " + str(frame_header))
         elif length < ABNF.LENGTH_16:
             frame_header += chr(self.mask_value << 7 | 0x7e)
             frame_header += struct.pack("!H", length)
@@ -338,12 +345,19 @@ class ABNF(object):
             return frame_header + self.data
         else:
             mask_key = self.get_mask_key(4)
+            print("MASK TYPE : " + str(type(mask_key)))
+            print("HEADER FRAME : " + str(type(frame_header)))
             return frame_header + self._get_masked(mask_key)
 
     def _get_masked(self, mask_key):
         s = ABNF.mask(mask_key, self.data)
-        print (s)
-        return mask_key + "".join(s)
+        print ("Masked Data : " + str(s))
+        print ("Masked Data Type : " + str(type(s)))
+        #return mask_key + "".join(s)
+        masked_data = mask_key + s
+        print ("Masked Data : " + str(masked_data))
+        print ("Masked Data Type : " + str(type(masked_data)))
+        return masked_data
 
     @staticmethod
     def mask(mask_key, data):
@@ -355,10 +369,19 @@ class ABNF(object):
         data: data to mask/unmask.
         """
         _m = array.array("B", mask_key)
-        _d = array.array("B", data.encode("utf-8"))
+        _d = array.array("B", data)
         for i in range(len(_d)):
             _d[i] ^= _m[i % 4]
-        return _d.tostring()
+
+        print("MASK Data : " + str(_d))
+        print("MASK Data : " + str(type(_d)))
+
+        _d = _d.tostring()
+
+        print("MASK Data : " + str(_d))
+        print("MASK Data : " + str(type(_d)))
+
+        return _d
 
 
 class WebSocket(object):
@@ -513,7 +536,7 @@ class WebSocket(object):
 
         header_str = "\r\n".join(headers)
         print("WebSocket Request Header : " + header_str)
-        self._send(header_str)
+        self._send(header_str.encode("utf-8"))
         if traceEnabled:
             logger.debug("--- request header ---")
             logger.debug(header_str)
@@ -761,7 +784,7 @@ class WebSocket(object):
 
     def _send(self, data):
         try:
-            return self.sock.send(data.encode("utf-8"))
+            return self.sock.send(data)
         except socket.timeout as e:
             raise WebSocketTimeoutException(e.args[0])
         except Exception as e:
@@ -792,6 +815,7 @@ class WebSocket(object):
             self._recv_buffer.append(bytes)
             shortage -= len(bytes)
         unified = "".join(self._recv_buffer)
+        print("unified data type : " + str(type(unified)))
         if shortage == 0:
             self._recv_buffer = []
             return unified
