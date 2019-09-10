@@ -97,7 +97,7 @@ class WebSocketTimeoutException(WebSocketException):
     pass
 
 default_timeout = None
-traceEnabled = False
+traceEnabled = True
 
 
 def enableTrace(tracable):
@@ -231,7 +231,7 @@ _MAX_CHAR_BYTE = (1<<8) -1
 
 def _create_sec_websocket_key():
     uid = uuid.uuid4()
-    return base64.encodestring(uid.bytes).strip()
+    return base64.encodebytes(uid.bytes).hex().strip()
 
 
 _HEADERS_TO_CHECK = {
@@ -511,6 +511,7 @@ class WebSocket(object):
         headers.append("")
 
         header_str = "\r\n".join(headers)
+        print("WebSocket Request Header : " + header_str)
         self._send(header_str)
         if traceEnabled:
             logger.debug("--- request header ---")
@@ -530,7 +531,7 @@ class WebSocket(object):
         self.connected = True
 
     def _validate_header(self, headers, key):
-        for k, v in _HEADERS_TO_CHECK.items():
+        for k, v in list(_HEADERS_TO_CHECK.items()):
             r = headers.get(k, None)
             if not r:
                 return False
@@ -553,8 +554,11 @@ class WebSocket(object):
         if traceEnabled:
             logger.debug("--- response header ---")
 
+        print("GOT_HERE : _read_headers")
+
         while True:
             line = self._recv_line()
+            print("GOT_HERE : _recv_line : " + line)
             if line == "\r\n":
                 break
             line = line.strip()
@@ -773,8 +777,8 @@ class WebSocket(object):
                 raise WebSocketTimeoutException(e.args[0])
             else:
                 raise
-        if not bytes:
-            raise WebSocketConnectionClosedException()
+        #if not bytes:
+        #    raise WebSocketConnectionClosedException()
         return bytes
 
 
@@ -797,10 +801,11 @@ class WebSocket(object):
         line = []
         while True:
             c = self._recv(1)
-            line.append(c)
-            if c == "\n":
+            line.append(c.decode('utf-8'))
+            if c == b'\n':
                 break
-        return "".join(line)
+        line = "".join(line)
+        return line
 
 
 class WebSocketApp(object):
@@ -888,9 +893,9 @@ class WebSocketApp(object):
         try:
             self.sock = WebSocket(self.get_mask_key, sockopt=sockopt, sslopt=sslopt)
             self.sock.settimeout(default_timeout)
+
             self.sock.connect(self.url, header=self.header)
             self._callback(self.on_open)
-
             if ping_interval:
                 thread = threading.Thread(target=self._send_ping, args=(ping_interval,))
                 thread.setDaemon(True)
@@ -906,6 +911,7 @@ class WebSocketApp(object):
                     self._callback(self.on_message, data)                    
                     
                 except Exception as e:
+                    '''
                     found_timeout = False
                     for arg in e.args:
                         if isinstance(arg, str):
@@ -913,7 +919,8 @@ class WebSocketApp(object):
                                 found_timeout = True
                     if not found_timeout:
                         raise e
-
+                    '''
+                    raise
         except Exception as e:
             self._callback(self.on_error, e)
             raise

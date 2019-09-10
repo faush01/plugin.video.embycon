@@ -590,7 +590,7 @@ def add_gui_item(url, item_details, display_options, folder=True):
     if kodi_version > 17:
         list_item.setProperties(item_properties)
     else:
-        for key, value in item_properties.items():
+        for key, value in list(item_properties.items()):
             list_item.setProperty(key, value)
 
     return (u, list_item, folder)

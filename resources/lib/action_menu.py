@@ -56,7 +56,7 @@ class ActionMenu(xbmcgui.WindowXMLDialog):
 
     def __init__(self, *args, **kwargs):
         log.debug("ActionMenu: __init__")
-        xbmcgui.WindowXML.__init__(self, *args, **kwargs)
+        xbmcgui.WindowXML.__init__(self)
         self.auto_close_thread = ActionAutoClose(self)
         self.auto_close_thread.start()
 

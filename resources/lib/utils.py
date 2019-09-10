@@ -6,7 +6,7 @@ import xbmc
 
 import string
 import random
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import binascii
 import time
@@ -296,7 +296,7 @@ def double_urlencode(text):
 
 def single_urlencode(text):
     # urlencode needs a utf- string
-    text = urllib.urlencode({'blahblahblah': text.encode('utf-8')})
+    text = urllib.parse.urlencode({'blahblahblah': text.encode('utf-8')})
     text = text[13:]
     return text.decode('utf-8') #return the result again as unicode
 
