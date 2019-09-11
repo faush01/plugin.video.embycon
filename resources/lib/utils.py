@@ -295,10 +295,10 @@ def double_urlencode(text):
 
 
 def single_urlencode(text):
-    # urlencode needs a utf- string
-    text = urllib.parse.urlencode({'blahblahblah': text.encode('utf-8')})
-    text = text[13:]
-    return text.decode('utf-8') #return the result again as unicode
+    print ("URL ENCODE DATA :" + text)
+    text = urllib.parse.urlencode({"1": text})
+    text = text[2:]
+    return text
 
 
 def send_event_notification(method, data):

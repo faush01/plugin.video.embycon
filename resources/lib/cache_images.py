@@ -20,6 +20,7 @@ from .translation import string_load
 from .datamanager import DataManager
 from .utils import getArt, double_urlencode
 from .kodi_utils import HomeWindow
+from .widgets import checkForNewContent
 
 downloadUtils = DownloadUtils()
 log = SimpleLogging(__name__)
@@ -42,23 +43,34 @@ class CacheArtwork(threading.Thread):
         last_update = 0
         home_window = HomeWindow()
         settings = xbmcaddon.Addon()
-        latest_content_hash = "never"
         check_interval = int(settings.getSetting('cacheImagesOnScreenSaver_interval'))
         check_interval = check_interval * 60
         monitor = xbmc.Monitor()
         monitor.waitForAbort(5)
+        first_run = True
 
-        while not self.stop_all_activity and not monitor.abortRequested() and xbmc.getCondVisibility("System.ScreenSaverActive"):
-            content_hash = home_window.getProperty("embycon_widget_reload")
-            if (check_interval != 0 and (time.time() - last_update) > check_interval) or (latest_content_hash != content_hash):
-                log.debug("CacheArtwork background thread - triggered")
+        if check_interval == 0:
+            log.debug("CacheArtwork background thread - check_interval == 0 so exiting")
+            return
+
+        while (not self.stop_all_activity
+               and not monitor.abortRequested()
+               and xbmc.getCondVisibility("System.ScreenSaverActive")):
+
+            if (time.time() - last_update) > check_interval:
+
                 if monitor.waitForAbort(10):
                     break
                 if self.stop_all_activity or monitor.abortRequested():
                     break
-                self.cache_artwork_background()
+
+                content_changed = checkForNewContent()
+                if first_run or content_changed:
+                    first_run = False
+                    log.debug("CacheArtwork background thread - new content trigger")
+                    self.cache_artwork_background()
+
                 last_update = time.time()
-                latest_content_hash = content_hash
 
             monitor.waitForAbort(5)
 
@@ -206,6 +218,7 @@ class CacheArtwork(threading.Thread):
             result_text = self.cache_artwork(dp)
         except Exception as err:
             log.error("Cache Images Failed : {0}", err)
+            raise
         dp.close()
         del dp
         if result_text is not None:
