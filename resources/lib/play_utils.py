@@ -829,7 +829,7 @@ def prompt_for_stop_actions(item_id, data):
     prompt_delete_episode_percentage = int(settings.getSetting('promptDeleteEpisodePercentage'))
     prompt_delete_movie_percentage = int(settings.getSetting('promptDeleteMoviePercentage'))
 
-    jsonData = download_utils.downloadUrl("{server}/emby/Users/{userid}/Items/" + item_id + "?format=json")
+    jsonData = download_utils.downloadUrl("{server}/emby/Users/{userid}/Items/" + str(item_id) + "?format=json")
     result = json.loads(jsonData)
 
     if result is None:
