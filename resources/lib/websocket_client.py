@@ -257,7 +257,12 @@ class WebSocketClient(threading.Thread):
         websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (server, token, self.device_id)
         log.debug("websocket url: {0}", websocket_url)
 
-        enableTrace(True)
+        params = {"setting": "debug.showloginfo"}
+        setting_result = json_rpc('Settings.getSettingValue').execute(params)
+        current_value = setting_result.get("result", None)
+        if current_value is not None and current_value.get("value", False):
+            enableTrace(True)
+
         self._client = WebSocketApp(websocket_url,
                                               on_open=self.on_open,
                                               on_message=self.on_message,
