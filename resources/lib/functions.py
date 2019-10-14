@@ -34,6 +34,7 @@ from .widgets import getWidgetContent, get_widget_content_cast, checkForNewConte
 from . import trakttokodi
 from .cache_images import CacheArtwork
 from .dir_functions import getContent, processDirectory
+from .tracking import timer
 
 __addon__ = xbmcaddon.Addon()
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
@@ -48,6 +49,7 @@ downloadUtils = DownloadUtils()
 dataManager = DataManager()
 
 
+@timer
 def mainEntryPoint():
     log.debug("===== EmbyCon START =====")
 
@@ -323,7 +325,7 @@ def show_menu(params):
         li.setProperty('menu_id', 'play')
         action_items.append(li)
 
-    if result["Type"] in ["Season", "MusicAlbum"]:
+    if result["Type"] in ["Season", "MusicAlbum", "Playlist"]:
         li = xbmcgui.ListItem(string_load(30317))
         li.setProperty('menu_id', 'play_all')
         action_items.append(li)
@@ -331,6 +333,11 @@ def show_menu(params):
     if result["Type"] in ["Episode", "Movie", "Video", "TvChannel", "Program"]:
         li = xbmcgui.ListItem(string_load(30275))
         li.setProperty('menu_id', 'transcode')
+        action_items.append(li)
+
+    if result["Type"] in ["Episode", "Movie", "Music", "Video", "Audio"]:
+        li = xbmcgui.ListItem(string_load(30402))
+        li.setProperty('menu_id', 'add_to_playlist')
         action_items.append(li)
 
     if result["Type"] in ("Movie", "Series"):
@@ -450,6 +457,10 @@ def show_menu(params):
 
     elif selected_action == "transcode":
         params['force_transcode'] = 'true'
+        PLAY(params)
+
+    elif selected_action == "add_to_playlist":
+        params["action"] = "add_to_playlist"
         PLAY(params)
 
     elif selected_action == "emby_set_favorite":
@@ -814,6 +825,8 @@ def PLAY(params):
     audio_stream_index = params.get("audio_stream_index")
     log.debug("audio_stream_index: {0}", audio_stream_index)
 
+    action = params.get("action", "play")
+
     # set the current playing item id
     # set all the playback info, this will be picked up by the service
     # the service will then start the playback
@@ -821,6 +834,7 @@ def PLAY(params):
     xbmc.Player().stop()
 
     play_info = {}
+    play_info["action"] = action
     play_info["item_id"] = item_id
     play_info["auto_resume"] = str(auto_resume)
     play_info["force_transcode"] = forceTranscode
