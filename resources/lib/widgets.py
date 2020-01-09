@@ -274,7 +274,6 @@ def getWidgetContent(handle, params):
                       "&Filters=IsUnplayed,IsNotFolder" +
                       "&IsPlayed=false" +
                       "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
                       "&IncludeItemTypes=Movie")
 
     elif widget_type == "inprogress_movies":
@@ -284,7 +283,6 @@ def getWidgetContent(handle, params):
                       "&SortOrder=Descending" +
                       "&Filters=IsResumable" +
                       "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
                       "&IncludeItemTypes=Movie")
 
     elif widget_type == "random_movies":
@@ -303,7 +301,6 @@ def getWidgetContent(handle, params):
                      '&Fields={field_filters}' +
                      '&IsPlayed=false' +
                      '&IsVirtualUnaired=false' +
-                     '&IsMissing=False' +
                      '&IncludeItemTypes=Episode' +
                      '&ImageTypeLimit=1' +
                      '&format=json')
@@ -316,7 +313,6 @@ def getWidgetContent(handle, params):
                       "&Filters=IsUnplayed,IsNotFolder" +
                       "&IsPlayed=false" +
                       "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
                       "&IncludeItemTypes=Episode")
 
     elif widget_type == "inprogress_episodes":
@@ -326,7 +322,6 @@ def getWidgetContent(handle, params):
                       "&SortOrder=Descending" +
                       "&Filters=IsResumable" +
                       "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
                       "&IncludeItemTypes=Episode")
 
     elif widget_type == "nextup_episodes":
