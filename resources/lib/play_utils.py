@@ -1215,7 +1215,7 @@ class PlaybackService(xbmc.Monitor):
         message_data = data_json[0]
         log.debug("PlaybackService:onNotification:{0}", message_data)
         decoded_data = base64.b64decode(message_data)
-        play_info = json.loads(decoded_data)
+        play_info = json.loads(decoded_data.decode("utf-8"))
 
         if signal == "embycon_play_action":
             log.info("Received embycon_play_action : {0}", play_info)
