@@ -10,7 +10,7 @@ import random
 import sys
 
 from .downloadutils import DownloadUtils
-from .utils import getArt
+from .utils import getArt, get_emby_url
 from .datamanager import DataManager
 from .simple_logging import SimpleLogging
 from .kodi_utils import HomeWindow
@@ -30,14 +30,17 @@ background_current_item = 0
 def set_random_movies():
     log.debug("set_random_movies Called")
 
-    url = ('{server}/emby/Users/{userid}/Items' +
-           '?Recursive=true' +
-           '&limit=20' +
-           '&Filters=IsUnplayed' +
-           '&IsPlayed=false' +
-           '&SortBy=Random' +
-           '&IncludeItemTypes=Movie' +
-           '&ImageTypeLimit=0')
+    url_params = {}
+    url_params["Recursive"] = True
+    url_params["limit"] = 20
+    url_params["Filters"] = "IsUnplayed"
+    url_params["IsPlayed"] = False
+    url_params["SortBy"] = "Random"
+    url_params["IncludeItemTypes"] = "Movie"
+    url_params["ImageTypeLimit"] = 0
+
+    url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
+
     results = downloadUtils.downloadUrl(url, suppress=True)
     results = json.loads(results)
 
@@ -74,12 +77,15 @@ def set_background_image(force=False):
     if len(background_items) == 0:
         log.debug("set_background_image: Need to load more backgrounds {0} - {1}",
                   len(background_items), background_current_item)
-        url = ('{server}/emby/Users/{userid}/Items' +
-               '?Recursive=true' +
-               # '&limit=60' +
-               '&SortBy=Random' +
-               '&IncludeItemTypes=Movie,Series' +
-               '&ImageTypeLimit=1')
+
+        url_params = {}
+        url_params["Recursive"] = True
+        # url_params["limit"] = 60
+        url_params["SortBy"] = "Random"
+        url_params["IncludeItemTypes"] = "Movie,Series"
+        url_params["ImageTypeLimit"] = 1
+
+        url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
         server = downloadUtils.getServer()
         results = downloadUtils.downloadUrl(url, suppress=True)
@@ -118,15 +124,17 @@ def set_background_image(force=False):
 def checkForNewContent():
     log.debug("checkForNewContent Called")
 
-    added_url = ('{server}/emby/Users/{userid}/Items' +
-                 '?Recursive=true' +
-                 '&limit=1' +
-                 '&Fields=DateCreated,Etag' +
-                 '&SortBy=DateCreated' +
-                 '&SortOrder=Descending' +
-                 '&IncludeItemTypes=Movie,Episode' +
-                 '&ImageTypeLimit=0' +
-                 '&format=json')
+    url_params = {}
+    url_params["Recursive"] = True
+    url_params["limit"] = 1
+    url_params["Fields"] = "DateCreated,Etag"
+    url_params["SortBy"] = "DateCreated"
+    url_params["SortOrder"] = "Descending"
+    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["ImageTypeLimit"] = 0
+    url_params["format"] = "json"
+
+    added_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
     added_result = downloadUtils.downloadUrl(added_url, suppress=True)
     result = json.loads(added_result)
@@ -140,15 +148,17 @@ def checkForNewContent():
             last_added_date = item.get("Etag", "")
     log.debug("last_added_date: {0}", last_added_date)
 
-    played_url = ('{server}/emby/Users/{userid}/Items' +
-                  '?Recursive=true' +
-                  '&limit=1' +
-                  '&Fields=DateCreated,Etag' +
-                  '&SortBy=DatePlayed' +
-                  '&SortOrder=Descending' +
-                  '&IncludeItemTypes=Movie,Episode' +
-                  '&ImageTypeLimit=0' +
-                  '&format=json')
+    url_params = {}
+    url_params["Recursive"] = True
+    url_params["limit"] = 1
+    url_params["Fields"] = "DateCreated,Etag"
+    url_params["SortBy"] = "DatePlayed"
+    url_params["SortOrder"] = "Descending"
+    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["ImageTypeLimit"] = 0
+    url_params["format"] = "json"
+
+    played_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
     played_result = downloadUtils.downloadUrl(played_url, suppress=True)
     result = json.loads(played_result)
@@ -260,85 +270,164 @@ def getWidgetContent(handle, params):
 
     log.debug("widget_type: {0}", widget_type)
 
-    items_url = ("{server}/emby/Users/{userid}/Items" +
-                 "?Limit={ItemLimit}" +
-                 "&format=json" +
-                 '&Fields={field_filters}' +
-                 "&ImageTypeLimit=1" +
-                 "&IsMissing=False")
+    url_verb = "{server}/emby/Users/{userid}/Items"
+    url_params = {}
+    url_params["Limit"] = "{ItemLimit}"
+    url_params["format"] = "json"
+    url_params["Fields"] = "{field_filters}"
+    url_params["ImageTypeLimit"] = 1
+    url_params["IsMissing"] = False
 
     if widget_type == "recent_movies":
         xbmcplugin.setContent(handle, 'movies')
-        items_url += ("&Recursive=true" +
-                      "&SortBy=DateCreated" +
-                      "&SortOrder=Descending" +
-                      "&Filters=IsUnplayed,IsNotFolder" +
-                      "&IsPlayed=false" +
-                      "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
-                      "&IncludeItemTypes=Movie")
+        url_params["Recursive"] = True
+        url_params["SortBy"] = "DateCreated"
+        url_params["SortOrder"] = "Descending"
+        url_params["Filters"] = "IsUnplayed,IsNotFolder"
+        url_params["IsPlayed"] = False
+        url_params["IsVirtualUnaired"] = False
+        url_params["IncludeItemTypes"] = "Movie"
 
     elif widget_type == "inprogress_movies":
         xbmcplugin.setContent(handle, 'movies')
-        items_url += ("&Recursive=true" +
-                      "&SortBy=DatePlayed" +
-                      "&SortOrder=Descending" +
-                      "&Filters=IsResumable" +
-                      "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
-                      "&IncludeItemTypes=Movie")
+        url_params["Recursive"] = True
+        url_params["SortBy"] = "DatePlayed"
+        url_params["SortOrder"] = "Descending"
+        url_params["Filters"] = "IsResumable"
+        url_params["IsVirtualUnaired"] = False
+        url_params["IncludeItemTypes"] = "Movie"
 
     elif widget_type == "random_movies":
         xbmcplugin.setContent(handle, 'movies')
-        items_url += "&Ids={random_movies}"
+        url_params["Ids"] = "{random_movies}"
 
     elif widget_type == "recent_tvshows":
         xbmcplugin.setContent(handle, 'episodes')
-        items_url = ('{server}/emby/Users/{userid}/Items/Latest' +
-                     '?GroupItems=true' +
-                     '&Limit=45' +
-                     '&Recursive=true' +
-                     '&SortBy=DateCreated' +
-                     '&SortOrder=Descending' +
-                     '&Filters=IsUnplayed' +
-                     '&Fields={field_filters}' +
-                     '&IsPlayed=false' +
-                     '&IsVirtualUnaired=false' +
-                     '&IsMissing=False' +
-                     '&IncludeItemTypes=Episode' +
-                     '&ImageTypeLimit=1' +
-                     '&format=json')
+        url_verb = '{server}/emby/Users/{userid}/Items/Latest'
+        url_params["GroupItems"] = True
+        url_params["Limit"] = 45
+        url_params["Recursive"] = True
+        url_params["SortBy"] = "DateCreated"
+        url_params["SortOrder"] = "Descending"
+        url_params["Filters"] = "IsUnplayed"
+        url_params["Fields"] = "{field_filters}"
+        url_params["IsPlayed"] = False
+        url_params["IsVirtualUnaired"] = False
+        url_params["IncludeItemTypes"] = "Episode"
+        url_params["ImageTypeLimit"] = 1
+        url_params["format"] = "json"
 
     elif widget_type == "recent_episodes":
         xbmcplugin.setContent(handle, 'episodes')
-        items_url += ("&Recursive=true" +
-                      "&SortBy=DateCreated" +
-                      "&SortOrder=Descending" +
-                      "&Filters=IsUnplayed,IsNotFolder" +
-                      "&IsPlayed=false" +
-                      "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
-                      "&IncludeItemTypes=Episode")
+        url_params["Recursive"] = True
+        url_params["SortBy"] = "DateCreated"
+        url_params["SortOrder"] = "Descending"
+        url_params["Filters"] = "IsUnplayed,IsNotFolder"
+        url_params["IsPlayed"] = False
+        url_params["IsVirtualUnaired"] = False
+        url_params["IncludeItemTypes"] = "Episode"
 
     elif widget_type == "inprogress_episodes":
         xbmcplugin.setContent(handle, 'episodes')
-        items_url += ("&Recursive=true" +
-                      "&SortBy=DatePlayed" +
-                      "&SortOrder=Descending" +
-                      "&Filters=IsResumable" +
-                      "&IsVirtualUnaired=false" +
-                      "&IsMissing=False" +
-                      "&IncludeItemTypes=Episode")
+        url_params["Recursive"] = True
+        url_params["SortBy"] = "DatePlayed"
+        url_params["SortOrder"] = "Descending"
+        url_params["Filters"] = "IsResumable"
+        url_params["IsVirtualUnaired"] = False
+        url_params["IncludeItemTypes"] = "Episode"
 
     elif widget_type == "nextup_episodes":
         xbmcplugin.setContent(handle, 'episodes')
-        items_url = ("{server}/emby/Shows/NextUp" +
-                     "?Limit={ItemLimit}"
-                     "&userid={userid}" +
-                     "&Recursive=true" +
-                     '&Fields={field_filters}' +
-                     "&format=json" +
-                     "&ImageTypeLimit=1")
+        url_verb = "{server}/emby/Shows/NextUp"
+        url_params["Limit"] = "{ItemLimit}"
+        url_params["userid"] = "{userid}"
+        url_params["Recursive"] = True
+        url_params["Fields"] = "{field_filters}"
+        url_params["format"] = "json"
+        url_params["ImageTypeLimit"] = 1
+
+    elif widget_type == "movie_recommendations":
+        '''
+        recent_movies = ("{server}/emby/Users/{userid}/Items" +
+                         "?Limit=10" +
+                         "&format=json" +
+                         # "&Fields={field_filters}" +
+                         "&ImageTypeLimit=0" +
+                         "&IsMissing=False" +
+                         "&Recursive=true" +
+                         "&SortBy=DatePlayed" +
+                         "&SortOrder=Descending" +
+                         "&Filters=IsPlayed,IsNotFolder" +
+                         "&IsPlayed=true" +
+                         "&IsMissing=False" +
+                         "&IncludeItemTypes=Movie" +
+                         "&EnableTotalRecordCount=false")
+        data_manager = DataManager()
+        recent_movie_list = data_manager.GetContent(recent_movies)
+        recent_movie_items = recent_movie_list.get("Items")
+        similar_ids = []
+        for movie in recent_movie_items:
+            item_id = movie.get("Id")
+            similar_movies_url = ("{server}/emby/Movies/" + item_id + "/Similar?userId={userid}" +
+                                  "&limit=10" +
+                                  "&IncludeItemTypes=Movies" +
+                                  "&EnableImages=false"
+                                  "&EnableTotalRecordCount=false")
+            similar_movie_list = data_manager.GetContent(similar_movies_url)
+            similar_movie_items = similar_movie_list.get("Items")
+            for similar in similar_movie_items:
+                log.debug("Similar Movie : {0} {1} - {2} {3} {4}", movie.get("Id"), movie.get("Name"), similar.get("Id"), similar.get("Name"), similar["UserData"]["Played"])
+                if similar["Type"] == "Movie" and similar.get("Id") not in similar_ids and not similar["UserData"]["Played"]:
+                    similar_ids.append(similar.get("Id"))
+
+            log.debug("Similar Ids : {0}", similar_ids)
+
+        random.shuffle(similar_ids)
+        random.shuffle(similar_ids)
+        similar_ids = similar_ids[0:20]
+        log.debug("Similar Ids : {0}", similar_ids)
+        id_list = ",".join(similar_ids)
+        log.debug("Recommended Items : {0}", len(similar_ids), id_list)
+        items_url += "&Ids=" + id_list
+        '''
+
+        suggested_items_url_params = {}
+        suggested_items_url_params["userId"] = "{userid}"
+        suggested_items_url_params["categoryLimit"] = 15
+        suggested_items_url_params["ItemLimit"] = 20
+        suggested_items_url_params["ImageTypeLimit"] = 0
+        suggested_items_url = get_emby_url("{server}/emby/Movies/Recommendations", suggested_items_url_params)
+
+        data_manager = DataManager()
+        suggested_items = data_manager.GetContent(suggested_items_url)
+        ids = []
+        set_id = 0
+        while len(ids) < 20 and suggested_items:
+            items = suggested_items[set_id]
+            log.debug("BaselineItemName : {0} - {1}", set_id, items.get("BaselineItemName"))
+            items = items["Items"]
+            rand = random.randint(0, len(items) - 1)
+            #log.debug("random suggestions index : {0} {1}", rand, set_id)
+            item = items[rand]
+            if item["Type"] == "Movie" and item["Id"] not in ids and not item["UserData"]["Played"]:
+                #log.debug("random suggestions adding : {0}", item["Id"])
+                ids.append(item["Id"])
+            #else:
+            #    log.debug("random suggestions not valid : {0} - {1} - {2}", item["Id"], item["Type"], item["UserData"]["Played"])
+            del items[rand]
+            #log.debug("items len {0}", len(items))
+            if len(items) == 0:
+                #log.debug("Removing Set {0}", set_id)
+                del suggested_items[set_id]
+            set_id += 1
+            if set_id >= len(suggested_items):
+                set_id = 0
+
+        id_list = ",".join(ids)
+        log.debug("Recommended Items : {0}", len(ids), id_list)
+        url_params["Ids"] = id_list
+
+    items_url = get_emby_url(url_verb, url_params)
 
     list_items, detected_type, total_records = processDirectory(items_url, None, params, False)
 
@@ -352,6 +441,23 @@ def getWidgetContent(handle, params):
         list_items = filtered_list
 
     #list_items = populateWidgetItems(items_url, widget_type)
+
+    if detected_type is not None:
+        # if the media type is not set then try to use the detected type
+        log.debug("Detected content type: {0}", detected_type)
+        content_type = None
+
+        if detected_type == "Movie":
+            content_type = 'movies'
+        elif detected_type == "Episode":
+            content_type = 'episodes'
+        elif detected_type == "Series":
+            content_type = 'tvshows'
+        elif detected_type == "Music" or detected_type == "Audio" or detected_type == "Musicalbum":
+            content_type = 'songs'
+
+        if content_type:
+            xbmcplugin.setContent(handle, content_type)
 
     xbmcplugin.addDirectoryItems(handle, list_items)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)

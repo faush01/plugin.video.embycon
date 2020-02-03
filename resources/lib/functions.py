@@ -8,11 +8,6 @@ import cProfile
 import pstats
 import json
 import io
-import encodings
-import binascii
-import re
-import hashlib
-import pickle
 
 import xbmcplugin
 import xbmcgui
@@ -26,7 +21,7 @@ from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
 from .server_detect import checkServer
 from .simple_logging import SimpleLogging
-from .menu_functions import displaySections, showMovieAlphaList, showTvShowAlphaList, showGenreList, showWidgets, show_search, showMoviePages
+from .menu_functions import displaySections, display_main_menu, display_menu, show_movie_alpha_list, show_tvshow_alpha_list, show_genre_list, show_search, show_movie_pages
 from .translation import string_load
 from .server_sessions import showServerSessions
 from .action_menu import ActionMenu
@@ -35,6 +30,7 @@ from . import trakttokodi
 from .cache_images import CacheArtwork
 from .dir_functions import getContent, processDirectory
 from .tracking import timer
+from .skin_cloner import clone_default_skin
 
 __addon__ = xbmcaddon.Addon()
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
@@ -54,13 +50,13 @@ def mainEntryPoint():
     log.debug("===== EmbyCon START =====")
 
     settings = xbmcaddon.Addon()
-    profile_code = settings.getSetting('profile') == "true"
+    profile_count = int(settings.getSetting('profile_count'))
     pr = None
-    if profile_code:
-        return_value = xbmcgui.Dialog().yesno("Profiling Enabled", "Do you want to run profiling?")
-        if return_value:
-            pr = cProfile.Profile()
-            pr.enable()
+    if profile_count > 0:
+        profile_count = profile_count - 1
+        settings.setSetting('profile_count', str(profile_count))
+        pr = cProfile.Profile()
+        pr.enable()
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().getVersion())
@@ -68,10 +64,7 @@ def mainEntryPoint():
     log.debug("Kodi Version: {0}", kodi_version)
     log.debug("Script argument data: {0}", sys.argv)
 
-    try:
-        params = get_params(sys.argv[2])
-    except:
-        params = {}
+    params = get_params()
 
     home_window = HomeWindow()
 
@@ -87,6 +80,7 @@ def mainEntryPoint():
 
     log.debug("Script params: {0}", params)
 
+    request_path = params.get("request_path", None)
     param_url = params.get('url', None)
 
     if param_url:
@@ -94,7 +88,13 @@ def mainEntryPoint():
 
     mode = params.get("mode", None)
 
-    if mode == "CHANGE_USER":
+    if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
+        checkServer()
+        new_params = {}
+        new_params["item_type"] = "Movie"
+        new_params["media_type"] = "movies"
+        showContent(sys.argv[0], int(sys.argv[1]), new_params)
+    elif mode == "CHANGE_USER":
         checkServer(change_user=True, notify=False)
     elif mode == "CACHE_ARTWORK":
         CacheArtwork().cache_artwork_interactive()
@@ -106,19 +106,19 @@ def mainEntryPoint():
         item_id = params["id"]
         playTrailer(item_id)
     elif mode == "MOVIE_ALPHA":
-        showMovieAlphaList()
+        show_movie_alpha_list(params)
     elif mode == "TVSHOW_ALPHA":
-        showTvShowAlphaList()
+        show_tvshow_alpha_list(params)
     elif mode == "GENRES":
-        showGenreList(params)
+        show_genre_list(params)
     elif mode == "MOVIE_PAGES":
-        showMoviePages(params)
-    elif mode == "WIDGETS":
-        showWidgets()
+        show_movie_pages(params)
     elif mode == "TOGGLE_WATCHED":
         toggle_watched(params)
     elif mode == "SHOW_MENU":
         show_menu(params)
+    elif mode == "CLONE_SKIN":
+        clone_default_skin()
     elif mode == "SHOW_SETTINGS":
         __addon__.openSettings()
         WINDOW = xbmcgui.getCurrentWindowId()
@@ -147,6 +147,8 @@ def mainEntryPoint():
         showServerSessions()
     elif mode == "TRAKTTOKODI":
         trakttokodi.entry_point(params)
+    elif mode == "SHOW_ADDON_MENU":
+        display_menu(params)
     else:
         log.debug("EmbyCon -> Mode: {0}", mode)
         log.debug("EmbyCon -> URL: {0}", param_url)
@@ -157,9 +159,10 @@ def mainEntryPoint():
             PLAY(params)
         else:
             checkServer()
-            displaySections()
+            #displaySections()
+            display_main_menu()
 
-    if (pr):
+    if pr:
         pr.disable()
 
         fileTimeStamp = time.strftime("%Y%m%d-%H%M%S")
@@ -278,9 +281,20 @@ def delete(item):
         xbmc.executebuiltin("Container.Refresh")
 
 
-def get_params(paramstring):
+def get_params():
+
+    plugin_path = sys.argv[0]
+    paramstring = sys.argv[2]
+
     log.debug("Parameter string: {0}", paramstring)
+    log.debug("Plugin Path string: {0}", plugin_path)
+
     param = {}
+
+    #add plugin path
+    request_path = plugin_path.replace("plugin://plugin.video.embycon", "")
+    param["request_path"] = request_path
+
     if len(paramstring) >= 2:
         params = paramstring
 
@@ -308,6 +322,7 @@ def get_params(paramstring):
 def show_menu(params):
     log.debug("showMenu(): {0}", params)
 
+    settings = xbmcaddon.Addon()
     item_id = params["item_id"]
 
     url = "{server}/emby/Users/{userid}/Items/" + item_id + "?format=json"
@@ -391,14 +406,24 @@ def show_menu(params):
     li.setProperty('menu_id', 'refresh_images')
     action_items.append(li)
 
-    if result["Type"] in ["Movie", "Series"]:
-        li = xbmcgui.ListItem(string_load(30399))
-        li.setProperty('menu_id', 'hide')
-        action_items.append(li)
+    # if result["Type"] in ["Movie", "Series"]:
+    #     li = xbmcgui.ListItem(string_load(30399))
+    #     li.setProperty('menu_id', 'hide')
+    #     action_items.append(li)
 
     li = xbmcgui.ListItem(string_load(30401))
     li.setProperty('menu_id', 'info')
     action_items.append(li)
+
+    window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+    container_view_id = window.getFocusId()
+    container_content_type = xbmc.getInfoLabel("Container.Content")
+    log.debug("View ID:{0} Content type:{1}", container_view_id, container_content_type)
+
+    if container_content_type in ["movies", "tvshows", "seasons", "episodes", "sets"]:
+        li = xbmcgui.ListItem("Set as defalt view")
+        li.setProperty('menu_id', 'set_view')
+        action_items.append(li)
 
     #xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
 
@@ -419,6 +444,11 @@ def show_menu(params):
         #log.debug("xbmcgui.Dialog().info: {0}", result)
         PLAY(params)
 
+    elif selected_action == "set_view":
+        view_key = "view-" + container_content_type
+        log.debug("Settign view type for {0} to {1}", view_key, container_view_id)
+        settings.setSetting(view_key, str(container_view_id))
+
     elif selected_action == "refresh_server":
         url = ("{server}/emby/Items/" + item_id + "/Refresh" +
                "?Recursive=true" +
@@ -430,7 +460,6 @@ def show_menu(params):
         log.debug("Refresh Server Responce: {0}", res)
 
     elif selected_action == "hide":
-        settings = xbmcaddon.Addon()
         user_details = load_user_details(settings)
         user_name = user_details["username"]
         hide_tag_string = "hide-" + user_name
