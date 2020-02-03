@@ -52,7 +52,7 @@ def clone_skin():
 
     kodi_path = xbmc.translatePath("special://xbmc")
     kodi_skin_source = os.path.join(kodi_path, "addons", "skin.estuary")
-    log.debug("Kodi Skin Source: {0}", kodi_skin_source)
+    log.debug("Kodi Skin Source : {0}", kodi_skin_source)
 
     pdialog = xbmcgui.DialogProgress()
     pdialog.create("EmbyCon Skin Cloner", "")
@@ -64,7 +64,7 @@ def clone_skin():
 
     kodi_home_path = xbmc.translatePath("special://home")
     kodi_skin_destination = os.path.join(kodi_home_path, "addons", "skin.estuary_embycon")
-    log.debug("Kodi Skin Destination: {0}", kodi_skin_destination)
+    log.debug("Kodi Skin Destination : {0}", kodi_skin_destination)
 
     # copy all skin files (clone)
     count = 0
@@ -81,7 +81,8 @@ def clone_skin():
 
     # alter skin addon.xml
     addon_xml_path = os.path.join(kodi_skin_destination, "addon.xml")
-    with open(addon_xml_path, "r") as addon_file:
+    log.debug("Addon XML file path : {0}", addon_xml_path)
+    with open(addon_xml_path, "r", encoding="utf-8") as addon_file:
         addon_xml_data = addon_file.read()
 
     addon_xml_data = addon_xml_data.replace("id=\"skin.estuary\"", "id=\"skin.estuary_embycon\"")
@@ -90,7 +91,7 @@ def clone_skin():
     #log.debug("{0}", addon_xml_data)
 
     # update the addon.xml
-    with open(addon_xml_path, "w") as addon_file:
+    with open(addon_xml_path, "w", encoding="utf-8") as addon_file:
         addon_file.write(addon_xml_data)
 
     # get embycon path
@@ -107,6 +108,7 @@ def clone_skin():
     for file_name in file_list:
         source = os.path.join(embycon_path, "resources", "skins", "skin.estuary", ver, "xml", file_name)
         destination = os.path.join(kodi_skin_destination, "xml", file_name)
+        log.debug("Copying modified skin files : source:{0} destination:{1}", source, destination)
         xbmcvfs.copy(source, destination)
 
     xbmc.executebuiltin("UpdateLocalAddons")
