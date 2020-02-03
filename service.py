@@ -2,10 +2,7 @@
 # Gnu General Public License - see LICENSE.TXT
 
 import time
-import json
 import traceback
-import binascii
-from threading import Timer
 
 import xbmc
 import xbmcaddon
@@ -23,6 +20,7 @@ from resources.lib.server_detect import checkServer
 from resources.lib.library_change_monitor import LibraryChangeMonitor
 from resources.lib.datamanager import clear_old_cache_data
 from resources.lib.tracking import set_timing_enabled
+from resources.lib.image_server import HttpImageServerThread
 
 settings = xbmcaddon.Addon()
 
@@ -63,6 +61,10 @@ try:
 except Exception as error:
     log.error("Error with initial service auth: {0}", error)
 
+
+image_server = HttpImageServerThread()
+image_server.start()
+
 # set up all the services
 monitor = Service()
 playback_service = PlaybackService(monitor)
@@ -99,6 +101,13 @@ background_interval = int(settings.getSetting('background_interval'))
 newcontent_interval = int(settings.getSetting('new_content_check_interval'))
 random_movie_list_interval = int(settings.getSetting('random_movie_refresh_interval'))
 random_movie_list_interval = random_movie_list_interval * 60
+
+enable_logging = settings.getSetting('log_debug') == "true"
+if enable_logging:
+    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
+                                  "Debug logging enabled!",
+                                  time=8000,
+                                  icon=xbmcgui.NOTIFICATION_WARNING)
 
 # monitor.abortRequested() is causes issues, it currently triggers for all addon cancelations which causes
 # the service to exit when a user cancels an addon load action. This is a bug in Kodi.
@@ -154,6 +163,8 @@ while not xbmc.abortRequested:
         log.error("{0}", traceback.format_exc())
 
     xbmc.sleep(1000)
+
+image_server.stop()
 
 # call stop on the library update monitor
 library_change_monitor.stop()

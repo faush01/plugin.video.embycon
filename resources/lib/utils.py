@@ -1,14 +1,12 @@
 # Gnu General Public License - see LICENSE.TXT
 import xbmcaddon
-import xbmcgui
-import xbmcplugin
 import xbmc
 
 import string
 import random
 import urllib.request, urllib.parse, urllib.error
 import json
-import binascii
+import base64
 import time
 from datetime import datetime
 import _strptime
@@ -25,6 +23,16 @@ throwaway = time.strptime('20110101','%Y%m%d')
 # define our global download utils
 downloadUtils = DownloadUtils()
 log = SimpleLogging(__name__)
+
+
+def get_emby_url(base_url, params):
+    params["format"] = "json"
+    param_list = []
+    for key in params:
+        if params[key] is not None:
+            param_list.append(key + "=" + str(params[key]))
+    param_string = "&".join(param_list)
+    return base_url + "?" + param_string
 
 
 ###########################################################################
@@ -113,23 +121,22 @@ class PlayUtils():
         # do direct path playback
         elif playback_type == "0":
             playurl = media_source.get("Path")
+            playurl = playurl.replace("\\", "/")
+            playurl = playurl.strip()
 
             # handle DVD structure
-            if (media_source.get("VideoType") == "Dvd"):
+            if media_source.get("VideoType") == "Dvd":
                 playurl = playurl + "/VIDEO_TS/VIDEO_TS.IFO"
-            elif (media_source.get("VideoType") == "BluRay"):
+            elif media_source.get("VideoType") == "BluRay":
                 playurl = playurl + "/BDMV/index.bdmv"
 
-            smb_username = addonSettings.getSetting('smbusername')
-            smb_password = addonSettings.getSetting('smbpassword')
-
-            # add smb creds
-            if smb_username == '':
-                playurl = playurl.replace("\\\\", "smb://")
-            else:
-                playurl = playurl.replace("\\\\", "smb://" + smb_username + ':' + smb_password + '@')
-
-            playurl = playurl.replace("\\", "/")
+            if playurl.startswith("//"):
+                smb_username = addonSettings.getSetting('smbusername')
+                smb_password = addonSettings.getSetting('smbpassword')
+                if not smb_username:
+                    playurl = "smb://" + playurl[2:]
+                else:
+                    playurl = "smb://" + smb_username + ':' + smb_password + '@' + playurl[2:]
 
         # do direct http streaming playback
         elif playback_type == "1":
@@ -295,21 +302,17 @@ def double_urlencode(text):
 
 
 def single_urlencode(text):
-    print ("URL ENCODE DATA :" + text)
     text = urllib.parse.urlencode({"1": text})
     text = text[2:]
     return text
 
 
 def send_event_notification(method, data):
-    next_data = json.dumps(data)
-    log.debug("send_event_notification:Sending:{0}", next_data)
+    message_data = json.dumps(data)
     source_id = "embycon"
-    data_packet = next_data.encode("utf-8").hex()
-    log.debug("send_event_notification:Sending:{0}", data_packet)
-    data = '\\"[\\"{0}\\"]\\"'.format(data_packet)
-    log.debug("send_event_notification:Sending:{0}", data)
-    command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, data)
+    base64_data = base64.b64encode(message_data)
+    escaped_data = '\\"[\\"{0}\\"]\\"'.format(base64_data)
+    command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
     log.debug("Sending notification event data: {0}", command)
     xbmc.executebuiltin(command)
 

@@ -1,6 +1,9 @@
+# Gnu General Public License - see LICENSE.TXT
+
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
+import xbmc
 
 import urllib.request, urllib.parse, urllib.error
 import sys
@@ -157,11 +160,22 @@ def getContent(url, params):
     xbmcplugin.addDirectoryItems(pluginhandle, dir_items)
     xbmcplugin.endOfDirectory(pluginhandle, cacheToDisc=False)
 
-    # send display items event
-    display_items_notification = {"view_type": view_type}
-    send_event_notification("display_items", display_items_notification)
+    # set the view based on saved value
+    view_key = "view-" + content_type
+    view_id = settings.getSetting(view_key)
+    if view_id:
+        log.debug("Setting view for type:{0} to id:{1}", view_key, view_id)
+        display_items_notification = {"view_id": view_id}
+        send_event_notification("set_view", display_items_notification)
+    else:
+        log.debug("No view id for view type:{0}", view_key)
 
-    if (progress != None):
+    # send display items event
+    # display_items_notification = {"view_type": view_type}
+    # log.debug("Sending display_items with data {0}", display_items_notification)
+    # send_event_notification("display_items", display_items_notification)
+
+    if progress is not None:
         progress.update(100, string_load(30125))
         progress.close()
 
@@ -275,7 +289,7 @@ def processDirectory(url, progress, params, use_cache_data=False):
             detected_type = item_details.item_type
 
         if item_details.item_type == "Season" and first_season_item is None:
-            log.debug("Setting First Season to : {0}", item_details)
+            log.debug("Setting First Season to : {0}", item_details.__dict__)
             first_season_item = item_details
 
         total_unwatched += item_details.unwatched_episodes
@@ -318,6 +332,8 @@ def processDirectory(url, progress, params, use_cache_data=False):
                 gui_item = add_gui_item(u, item_details, display_options)
                 if gui_item:
                     dir_items.append(gui_item)
+            else:
+                log.debug("Dropping empty folder item : {0}", item_details.__dict__)
 
         elif item_details.item_type == "MusicArtist":
             u = ('{server}/emby/Users/{userid}/items' +

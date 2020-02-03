@@ -1,16 +1,13 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import binascii
-
 import xbmc
 import xbmcgui
 import xbmcaddon
-import xbmcvfs
 
 from datetime import timedelta
-from datetime import datetime
 import json
 import os
+import base64
 
 from .simple_logging import SimpleLogging
 from .downloadutils import DownloadUtils
@@ -809,7 +806,7 @@ def audioSubsPref(url, list_item, media_source, item_id, audio_stream_index, sub
     else:
         playurlprefs += "&AudioBitrate=192000"
 
-    if url.find("|verifypeer=false"):
+    if url.find("|verifypeer=false") != -1:
         new_url = url.replace("|verifypeer=false", playurlprefs + "|verifypeer=false")
     else:
         new_url = url + playurlprefs
@@ -883,8 +880,9 @@ def sendProgress(monitor):
 
     log.debug("Sending Progress Update")
 
-    play_time = xbmc.Player().getTime()
-    total_play_time = xbmc.Player().getTotalTime()
+    player = xbmc.Player()
+    play_time = player.getTime()
+    total_play_time = player.getTotalTime()
     play_data["currentPossition"] = play_time
     play_data["duration"] = total_play_time
     play_data["currently_playing"] = True
@@ -905,6 +903,8 @@ def sendProgress(monitor):
     playlist_position = playlist.getposition()
     playlist_size = playlist.size()
 
+    volume, muted = get_volume()
+
     postdata = {
         'QueueableMediaTypes': "Video",
         'CanSeek': True,
@@ -913,17 +913,30 @@ def sendProgress(monitor):
         'PositionTicks': ticks,
         'RunTimeTicks': duration,
         'IsPaused': paused,
-        'IsMuted': False,
+        'IsMuted': muted,
         'PlayMethod': playback_type,
         'PlaySessionId': play_session_id,
         'PlaylistIndex': playlist_position,
-        'PlaylistLength': playlist_size
+        'PlaylistLength': playlist_size,
+        'VolumeLevel': volume
     }
 
     log.debug("Sending POST progress started: {0}", postdata)
 
     url = "{server}/emby/Sessions/Playing/Progress"
     download_utils.downloadUrl(url, postBody=postdata, method="POST")
+
+
+def get_volume():
+
+    json_data = xbmc.executeJSONRPC(
+        '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume", "muted"]}, "id": 1 }')
+    result = json.loads(json_data)
+    result = result.get('result', {})
+    volume = result.get('volume')
+    muted = result.get('muted')
+
+    return volume, muted
 
 
 def prompt_for_stop_actions(item_id, data):
@@ -1195,13 +1208,13 @@ class PlaybackService(xbmc.Monitor):
             return
 
         signal = method.split('.', 1)[-1]
-        if signal not in ("embycon_play_action", "embycon_play_youtube_trailer_action"):
+        if signal not in ("embycon_play_action", "embycon_play_youtube_trailer_action", "set_view"):
             return
 
         data_json = json.loads(data)
-        hex_data = data_json[0]
-        log.debug("PlaybackService:onNotification:{0}", hex_data)
-        decoded_data = binascii.unhexlify(hex_data)
+        message_data = data_json[0]
+        log.debug("PlaybackService:onNotification:{0}", message_data)
+        decoded_data = base64.b64decode(message_data)
         play_info = json.loads(decoded_data)
 
         if signal == "embycon_play_action":
@@ -1211,6 +1224,10 @@ class PlaybackService(xbmc.Monitor):
             log.info("Received embycon_play_trailer_action : {0}", play_info)
             trailer_link = play_info["url"]
             xbmc.executebuiltin(trailer_link)
+        elif signal == "set_view":
+            view_id = play_info["view_id"]
+            log.debug("Setting view id: {0}", view_id)
+            xbmc.executebuiltin("Container.SetViewMode(%s)" % int(view_id))
 
     def screensaver_activated(self):
         log.debug("Screen Saver Activated")
