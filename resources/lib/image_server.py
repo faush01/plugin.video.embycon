@@ -84,7 +84,7 @@ def build_image(path):
     if request_path == "favicon.ico":
         return []
 
-    decoded_url = base64.b64decode(request_path)
+    decoded_url = base64.b64decode(request_path).decode("utf-8")
     log.debug("decoded_url : {0}", decoded_url)
 
     image_urls = get_image_links(decoded_url)

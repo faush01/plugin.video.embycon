@@ -72,7 +72,7 @@ def show_movie_tags(params):
 
         item_url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url)}
+        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
 
         content_url = urllib.parse.quote(item_url)
         url = sys.argv[0] + ("?url=" +
@@ -158,7 +158,7 @@ def show_movie_years(params):
 
         item_url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url)}
+        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
 
         content_url = urllib.parse.quote(item_url)
         url = sys.argv[0] + ("?url=" +
@@ -239,7 +239,7 @@ def show_movie_pages(params):
         item_data['path'] = item_url
         item_data['media_type'] = 'movies'
 
-        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url)}
+        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
 
         collections.append(item_data)
         start_index = start_index + page_limit
@@ -320,7 +320,7 @@ def show_genre_list(params):
 
         url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url)}
+        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url.encode("utf-8")).decode("utf-8")}
         item_data['art'] = art
 
         item_data['path'] = url
@@ -398,7 +398,7 @@ def show_movie_alpha_list(params):
         url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
         item_data['path'] = url
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url)}
+        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url.encode("utf-8")).decode("utf-8")}
         item_data['art'] = art
 
         collections.append(item_data)
@@ -470,7 +470,7 @@ def show_tvshow_alpha_list(params):
 
         item_data['path'] = path
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(path)}
+        art = {"thumb": "http://localhost:24276/" + base64.b64encode(path.encode("utf-8")).decode("utf-8")}
         item_data['art'] = art
 
         collections.append(item_data)
