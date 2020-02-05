@@ -124,7 +124,7 @@ def _get_handshake_headers(resource, host, port, options):
         if isinstance(header, dict):
             header = [
                 ": ".join([k, v])
-                for k, v in header.items()
+                for k, v in list(header.items())
                 if v is not None
             ]
         headers.extend(header)
@@ -132,7 +132,7 @@ def _get_handshake_headers(resource, host, port, options):
     server_cookie = CookieJar.get(host)
     client_cookie = options.get("cookie", None)
 
-    cookie = "; ".join(filter(None, [server_cookie, client_cookie]))
+    cookie = "; ".join([_f for _f in [server_cookie, client_cookie] if _f])
 
     if cookie:
         headers.append("Cookie: %s" % cookie)
@@ -157,7 +157,7 @@ _HEADERS_TO_CHECK = {
 
 def _validate(headers, key, subprotocols):
     subproto = None
-    for k, v in _HEADERS_TO_CHECK.items():
+    for k, v in list(_HEADERS_TO_CHECK.items()):
         r = headers.get(k, None)
         if not r:
             return False, None

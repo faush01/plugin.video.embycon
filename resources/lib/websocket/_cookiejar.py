@@ -1,7 +1,4 @@
-try:
-    import Cookie
-except:
-    import http.cookies as Cookie
+import http.cookies as Cookie
 
 
 class SimpleCookieJar(object):
@@ -15,7 +12,7 @@ class SimpleCookieJar(object):
             except:
                 simpleCookie = Cookie.SimpleCookie(set_cookie.encode('ascii', 'ignore'))
 
-            for k, v in simpleCookie.items():
+            for k, v in list(simpleCookie.items()):
                 domain = v.get("domain")
                 if domain:
                     if not domain.startswith("."):
@@ -31,7 +28,7 @@ class SimpleCookieJar(object):
             except:
                 simpleCookie = Cookie.SimpleCookie(set_cookie.encode('ascii', 'ignore'))
 
-            for k, v in simpleCookie.items():
+            for k, v in list(simpleCookie.items()):
                 domain = v.get("domain")
                 if domain:
                     if not domain.startswith("."):
@@ -43,10 +40,10 @@ class SimpleCookieJar(object):
             return ""
 
         cookies = []
-        for domain, simpleCookie in self.jar.items():
+        for domain, simpleCookie in list(self.jar.items()):
             host = host.lower()
             if host.endswith(domain) or host == domain[1:]:
                 cookies.append(self.jar.get(domain))
 
-        return "; ".join(filter(None, ["%s=%s" % (k, v.value) for cookie in filter(None, sorted(cookies)) for k, v in
-                                       sorted(cookie.items())]))
+        return "; ".join([_f for _f in ["%s=%s" % (k, v.value) for cookie in [_f for _f in sorted(cookies) if _f] for k, v in
+                                       sorted(cookie.items())] if _f])
