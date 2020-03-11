@@ -1,3 +1,4 @@
+# coding: utf-8
 # Gnu General Public License - see LICENSE.TXT
 import xbmcaddon
 import xbmc
@@ -26,12 +27,40 @@ log = SimpleLogging(__name__)
 
 
 def get_emby_url(base_url, params):
+    """Forge an url with the given form fields
+
+    The resulting params is a series of key=value pairs separated by '&'
+    characters, where both key and value are quoted using percent-encoding.
+
+    :Example:
+
+    >>> params = {
+    ... "unicodeChar": u'\xc6',
+    ... "spaced String": "spaced String",
+    ... "unicodeInt": u'-1',
+    ... "boolean": True,
+    ... "none": None,
+    ... "int": 1,
+    ... }
+    >>> get_emby_url("https://127.0.0.1/.../Items", params)
+    'https://127.0.0.1/.../Items?unicodeChar=%C3%86&format=json&int=1&boolean=True&spaced+String=spaced+String&unicodeInt=-1'
+
+    :param base_url: Emby server url.
+    :param params: Dictionary of form fields.
+        Note: values can be str, unicode, boolean, int, None.
+    :type base_url: <str>
+    :type params: <dict>
+    :return: Url
+    :rtype: <str>
+    """
     params["format"] = "json"
-    param_list = []
-    for key in params:
-        if params[key] is not None:
-            param_list.append(key + "=" + str(params[key]))
-    param_string = "&".join(param_list)
+    param_string = urllib.urlencode(
+        {
+            key: value.encode("utf8") if isinstance(value, unicode) else value
+            for key, value in params.items()
+            if value
+        }
+    )
     return base_url + "?" + param_string
 
 
