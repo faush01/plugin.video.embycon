@@ -60,7 +60,7 @@ def get_emby_url(base_url, params):
     params = {
         key: val.encode("utf8") if isinstance(val, unicode) else str(val)
         for key, val in params.items()
-        if val
+        if val is not None
     }
 
     # Escape keys and values except for placeholders
