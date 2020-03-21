@@ -168,7 +168,7 @@ class WebSocketClient(threading.Thread):
 
             elif command == 'SetRepeatMode':
                 mode = arguments['RepeatMode']
-                xbmc.executebuiltin('xbmc.PlayerControl(%s)' % mode)
+                xbmc.executebuiltin('PlayerControl(%s)' % mode)
 
         elif command == 'DisplayMessage':
 
