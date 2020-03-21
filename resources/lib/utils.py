@@ -313,7 +313,7 @@ def send_event_notification(method, data):
     base64_data = base64.b64encode(message_data.encode("utf-8"))
     base64_data = base64_data.decode("utf-8")
     escaped_data = '\\"[\\"{0}\\"]\\"'.format(base64_data)
-    command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
+    command = 'NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
     log.debug("Sending notification event data: {0}", command)
     xbmc.executebuiltin(command)
 
