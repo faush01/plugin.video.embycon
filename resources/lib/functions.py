@@ -185,7 +185,9 @@ def __rencode_search_term(url):
     if len(params) > 1:
         for token in params[1].split("&"):
             if token.startswith("searchTerm"):
-                result = result.replace(token, token.replace("+", "%2B"))
+                token_parts = token.split("=")
+                encoded_token = "=".join([token_parts[0],  urllib.quote(token_parts[1])])
+                result = result.replace(token, encoded_token)
         log.debug("SearchTerm parameters rencoded: {0}", result)
     return result
 
