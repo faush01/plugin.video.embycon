@@ -84,7 +84,8 @@ def mainEntryPoint():
     param_url = params.get('url', None)
 
     if param_url:
-        param_url = __rencode_search_term(urllib.unquote(param_url))
+        param_url = urllib.unquote(param_url)
+
     mode = params.get("mode", None)
 
     if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
@@ -177,19 +178,6 @@ def mainEntryPoint():
             f.write(s.getvalue())
 
     log.debug("===== EmbyCon FINISHED =====")
-
-
-def __rencode_search_term(url):
-    result = url
-    params = url.split("?")
-    if len(params) > 1:
-        for token in params[1].split("&"):
-            if token.startswith("searchTerm"):
-                token_parts = token.split("=")
-                encoded_token = "=".join([token_parts[0],  urllib.quote(token_parts[1])])
-                result = result.replace(token, encoded_token)
-        log.debug("SearchTerm parameters rencoded: {0}", result)
-    return result
 
 
 def toggle_watched(params):
