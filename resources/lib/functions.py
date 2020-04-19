@@ -15,7 +15,7 @@ import xbmcaddon
 import xbmc
 
 from .downloadutils import DownloadUtils, load_user_details
-from .utils import getArt, send_event_notification
+from .utils import getArt, send_event_notification, convert_size
 from .kodi_utils import HomeWindow
 from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
@@ -25,6 +25,7 @@ from .menu_functions import displaySections, display_main_menu, display_menu, sh
 from .translation import string_load
 from .server_sessions import showServerSessions
 from .action_menu import ActionMenu
+from .safe_delete_dialog import SafeDeleteDialog
 from .widgets import getWidgetContent, get_widget_content_cast, checkForNewContent
 from . import trakttokodi
 from .cache_images import CacheArtwork
@@ -370,6 +371,7 @@ def get_params():
 def show_menu(params):
     log.debug("showMenu(): {0}", params)
 
+    home_window = HomeWindow()
     settings = xbmcaddon.Addon()
     item_id = params["item_id"]
 
@@ -418,6 +420,11 @@ def show_menu(params):
         li.setProperty('menu_id', 'view_series')
         action_items.append(li)
 
+    if result["Type"] == "Movie":
+        li = xbmcgui.ListItem("Show Extras")
+        li.setProperty('menu_id', 'show_extras')
+        action_items.append(li)
+
     user_data = result.get("UserData", None)
     if user_data:
         progress = user_data.get("PlaybackPositionTicks", 0) != 0
@@ -444,6 +451,12 @@ def show_menu(params):
     if can_delete:
         li = xbmcgui.ListItem(string_load(30274))
         li.setProperty('menu_id', 'delete')
+        action_items.append(li)
+
+    safe_delete = home_window.getProperty("safe_delete_plugin_available") == "true"
+    if safe_delete:
+        li = xbmcgui.ListItem("Safe Delete")
+        li.setProperty('menu_id', 'safe_delete')
         action_items.append(li)
 
     li = xbmcgui.ListItem(string_load(30398))
@@ -529,7 +542,6 @@ def show_menu(params):
 
         checkForNewContent()
 
-        home_window = HomeWindow()
         last_url = home_window.getProperty("last_content_url")
         if last_url:
             log.debug("markUnwatched_lastUrl: {0}", last_url)
@@ -565,6 +577,69 @@ def show_menu(params):
 
     elif selected_action == "delete":
         delete(item_id)
+
+    elif selected_action == "safe_delete":
+        url = "{server}/emby_safe_delete/delete_item/" + item_id
+        delete_action = downloadUtils.downloadUrl(url)
+        result = json.loads(delete_action)
+        dialog = xbmcgui.Dialog()
+        if result:
+            log.debug("Safe_Delete_Action: {0}", result)
+            action_token = result["action_token"]
+
+            message = "You are about to delete the following item[CR][CR]"
+
+            message += "Type: " + result["item_info"]["Item_type"] + "[CR]"
+
+            if result["item_info"]["Item_type"] == "Series":
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+            elif result["item_info"]["Item_type"] == "Season":
+                message += "Season: " + str(result["item_info"]["season_number"]) + "[CR]"
+                message += "Name: " + result["item_info"]["season_name"] + "[CR]"
+            elif result["item_info"]["Item_type"] == "Episode":
+                message += "Series: " + result["item_info"]["series_name"] + "[CR]"
+                message += "Season: " + result["item_info"]["season_name"] + "[CR]"
+                message += "Episode: " + str(result["item_info"]["episode_number"]) + "[CR]"
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+            else:
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+
+            message += "[CR]File List[CR][CR]"
+
+            for file_info in result["file_list"]:
+                message += " - " + file_info["Key"] + " (" + convert_size(file_info["Value"]) + ")[CR]"
+            message += "[CR][CR]Are you sure?[CR][CR]"
+
+            confirm_dialog = SafeDeleteDialog("SafeDeleteDialog.xml", PLUGINPATH, "default", "720p")
+            confirm_dialog.message = message
+            confirm_dialog.heading = "Confirm delete files?"
+            confirm_dialog.doModal()
+            log.debug("safe_delete_confirm_dialog: {0}", confirm_dialog.confirm)
+
+            if confirm_dialog.confirm:
+                url = "{server}/emby_safe_delete/delete_item_action"
+                playback_info = {
+                    'item_id': item_id,
+                    'action_token': action_token
+                }
+                delete_action = downloadUtils.downloadUrl(url, method="POST", postBody=playback_info)
+                log.debug("Delete result action: {0}", delete_action)
+                delete_action_result = json.loads(delete_action)
+                if not delete_action_result:
+                    dialog.ok("Error", "Error deleteing files", "Error in responce from server")
+                elif not delete_action_result["result"]:
+                    dialog.ok("Error", "Error deleteing files", delete_action_result["message"])
+                else:
+                    dialog.ok("Deleted", "Files deleted")
+        else:
+            dialog.ok("Error", "Error getting safe delete confirmation")
+
+    elif selected_action == "show_extras":
+        # "http://localhost:8096/emby/Users/3138bed521e5465b9be26d2c63be94af/Items/78/SpecialFeatures"
+        u = "{server}/emby/Users/{userid}/Items/" + item_id + "/SpecialFeatures"
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Videos")
+        built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
+        xbmc.executebuiltin(built_in_command)
 
     elif selected_action == "view_season":
         xbmc.executebuiltin("Dialog.Close(all,true)")
