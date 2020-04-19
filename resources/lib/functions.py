@@ -198,7 +198,7 @@ def __enrich_url(param_url, params):
 
 def __get_parent_id_from(params):
     result = None
-    show_provider_ids = params.get("showIds")
+    show_provider_ids = params.get("show_ids")
     if show_provider_ids is not None:
         log.debug("TV show providers IDs: {}", show_provider_ids)
         get_show_url = "{server}/emby/Users/{userid}/Items?fields=MediaStreams&Recursive=true" \
