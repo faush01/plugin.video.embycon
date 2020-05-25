@@ -20,7 +20,7 @@ class ContextMonitor(threading.Thread):
         context_up = False
         is_embycon_item = False
 
-        while not xbmc.abortRequested and not self.stop_thread:
+        while not xbmc.Monitor().abortRequested() and not self.stop_thread:
 
             if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"):
                 xbmc.sleep(1000)
@@ -39,7 +39,7 @@ class ContextMonitor(threading.Thread):
 
         '''
 
-        while not xbmc.abortRequested and not self.stop_thread:
+        while not xbmc.Monitor().abortRequested() and not self.stop_thread:
 
             if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"):
                 xbmc.sleep(1000)

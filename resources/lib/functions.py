@@ -585,7 +585,7 @@ def populate_listitem(item_id):
     server = downloadUtils.getServer()
 
     art = getArt(result, server=server)
-    list_item.setIconImage(art['thumb'])  # back compat
+    listItem.setArt({ 'icon': art['thumb'] }) # changed to setArt due to setIconImage removed from v19
     list_item.setProperty('fanart_image', art['fanart'])  # back compat
     list_item.setProperty('discart', art['discart'])  # not avail to setArt
     list_item.setArt(art)

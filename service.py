@@ -114,7 +114,7 @@ if enable_logging:
 # I am switching back to xbmc.abortRequested approach until kodi is fixed or I find a work arround
 prev_user_id = home_window.getProperty("userid")
 
-while not xbmc.abortRequested:
+while not xbmc.Monitor().abortRequested():
 
     try:
         if xbmc.Player().isPlaying():
@@ -162,7 +162,9 @@ while not xbmc.abortRequested:
         log.error("Exception in Playback Monitor: {0}", error)
         log.error("{0}", traceback.format_exc())
 
-    xbmc.sleep(1000)
+    #xbmc.sleep(1000)
+    if xbmc.Monitor().waitForAbort( 1 ):
+        break
 
 image_server.stop()
 

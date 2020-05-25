@@ -628,7 +628,7 @@ def setListItemProps(id, listItem, result, server, extra_props, title):
     # set up item and item info
 
     art = getArt(result, server=server)
-    listItem.setIconImage(art['thumb'])  # back compat
+    listItem.setArt({ 'icon': art['thumb'] }) # changed to setArt due to setIconImage removed from v19
     listItem.setProperty('fanart_image', art['fanart'])  # back compat
     listItem.setProperty('discart', art['discart'])  # not avail to setArt
     listItem.setArt(art)
@@ -1271,4 +1271,3 @@ class PlaybackService(xbmc.Monitor):
             if skip_select_user is not None and skip_select_user == "true":
                 return
             xbmc.executebuiltin("RunScript(plugin.video.embycon,0,?mode=CHANGE_USER)")
-
