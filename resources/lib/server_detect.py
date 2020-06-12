@@ -23,6 +23,32 @@ __addon__ = xbmcaddon.Addon()
 __addon_name__ = __addon__.getAddonInfo('name')
 
 
+def check_safe_delete_available():
+    log.debug("check_safe_delete_available")
+
+    du = DownloadUtils()
+    json_data = du.downloadUrl("{server}/emby/Plugins")
+    result = json.loads(json_data)
+    if result is not None:
+        log.debug("Server Plugin List: {0}", result)
+
+        safe_delete_found = False
+        for plugin in result:
+            if plugin["Name"] == "Safe Delete":
+                safe_delete_found = True
+                break
+
+        log.debug("Safe Delete Plugin Available: {0}", safe_delete_found)
+        home_window = HomeWindow()
+        if safe_delete_found:
+            home_window.setProperty("safe_delete_plugin_available", "true")
+        else:
+            home_window.clearProperty("safe_delete_plugin_available")
+
+    else:
+        log.debug("Error getting server plugin list")
+
+
 def getServerDetails():
     log.debug("Getting Server Details from Network")
     servers = []
@@ -112,7 +138,7 @@ def checkServer(force=False, change_user=False, notify=False):
                 server_url = server_info[return_index]["Address"]
 
         if not server_url:
-            return_index = xbmcgui.Dialog().yesno(__addon_name__, string_load(30282), string_load(30370))
+            return_index = xbmcgui.Dialog().yesno(__addon_name__, string_load(30282))
             if not return_index:
                 xbmc.executebuiltin("ActivateWindow(Home)")
                 return
@@ -156,9 +182,8 @@ def checkServer(force=False, change_user=False, notify=False):
                                         "%s://%s:%s/" % (server_protocol, server_address, server_port))
                     break
                 else:
-                    return_index = xbmcgui.Dialog().yesno(__addon_name__ + " : " + string_load(30135),
-                                                          server_url,
-                                                          string_load(30371))
+                    message = server_url + "\n" + string_load(30371)
+                    return_index = xbmcgui.Dialog().yesno(__addon_name__ + " : " + string_load(30135), message)
                     if not return_index:
                         xbmc.executebuiltin("ActivateWindow(Home)")
                         return
@@ -211,9 +236,8 @@ def checkServer(force=False, change_user=False, notify=False):
             result = None
 
         if result is None:
-            xbmcgui.Dialog().ok(string_load(30135),
-                                string_load(30201),
-                                string_load(30169) + server_url)
+            message = string_load(30201) + "\n" + string_load(30169) + server_url
+            xbmcgui.Dialog().ok(string_load(30135), message)
 
         else:
             selected_id = -1
@@ -330,7 +354,7 @@ def checkServer(force=False, change_user=False, notify=False):
                 if secured:
                     # we need a password, check the settings first
                     m = hashlib.md5()
-                    m.update(selected_user_name)
+                    m.update(selected_user_name.encode("utf-8"))
                     hashed_username = m.hexdigest()
                     saved_password = settings.getSetting("saved_user_password_" + hashed_username)
                     allow_password_saving = settings.getSetting("allow_password_saving") == "true"

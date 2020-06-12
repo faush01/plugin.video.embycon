@@ -8,6 +8,7 @@ import urllib.request, urllib.parse, urllib.error
 import json
 import base64
 import time
+import math
 from datetime import datetime
 import _strptime
 import calendar
@@ -30,7 +31,10 @@ def get_emby_url(base_url, params):
     param_list = []
     for key in params:
         if params[key] is not None:
-            param_list.append(key + "=" + str(params[key]))
+            value = params[key]
+            if not isinstance(value, str):
+                value = str(value)
+            param_list.append(key + "=" + urllib.parse.quote_plus(str(value), safe="{}"))
     param_string = "&".join(param_list)
     return base_url + "?" + param_string
 
@@ -95,26 +99,36 @@ class PlayUtils():
             playback_max_width = addonSettings.getSetting("playback_max_width")
             playback_video_force_8 = addonSettings.getSetting("playback_video_force_8") == "true"
 
+            audio_codec = addonSettings.getSetting("audio_codec")
+            audio_playback_bitrate = addonSettings.getSetting("audio_playback_bitrate")
+            audio_max_channels = addonSettings.getSetting("audio_max_channels")
+
+            audio_bitrate = int(audio_playback_bitrate) * 1000
+            bitrate = int(playback_bitrate) * 1000
+
             clientInfo = ClientInformation()
             deviceId = clientInfo.getDeviceId()
-            bitrate = int(playback_bitrate) * 1000
             user_token = downloadUtils.authenticate()
 
-            playurl = ("%s/emby/Videos/%s/master.m3u8" +
-                       "?MediaSourceId=%s" +
-                       "&PlaySessionId=%s" +
-                       "&VideoCodec=h264" +
-                       "&AudioCodec=ac3" +
-                       "&MaxAudioChannels=6" +
-                       "&deviceId=%s" +
-                       "&VideoBitrate=%s" +
-                       "&maxWidth=%s")
-            playurl = playurl % (server, id, media_source_id, play_session_id, deviceId, bitrate, playback_max_width)
+            transcode_params = []
+            transcode_params.append("MediaSourceId=%s" % media_source_id)
+            transcode_params.append("DeviceId=%s" % deviceId)
+            transcode_params.append("PlaySessionId=%s" % play_session_id)
+            transcode_params.append("api_key=%s" % user_token)
+            transcode_params.append("SegmentContainer=ts")
 
+            transcode_params.append("VideoCodec=h264")
+            transcode_params.append("VideoBitrate=%s" % bitrate)
+            transcode_params.append("MaxWidth=%s" % playback_max_width)
             if playback_video_force_8:
-                playurl += "&MaxVideoBitDepth=8"
-            playurl += "&api_key=" + user_token
+                transcode_params.append("MaxVideoBitDepth=8")
 
+            transcode_params.append("AudioCodec=%s" % audio_codec)
+            transcode_params.append("TranscodingMaxAudioChannels=%s" % audio_max_channels)
+            transcode_params.append("AudioBitrate=%s" % audio_bitrate)
+
+            playurl = "%s/emby/Videos/%s/master.m3u8?" % (server, id)
+            playurl += "&".join(transcode_params)
             if use_https and not verify_cert:
                 playurl += "|verifypeer=false"
 
@@ -332,3 +346,13 @@ def datetime_from_string(time_string):
     local_dt = datetime.fromtimestamp(timestamp)
     local_dt.replace(microsecond=dt.microsecond)
     return local_dt
+
+
+def convert_size(size_bytes):
+   if size_bytes == 0:
+       return "0B"
+   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+   i = int(math.floor(math.log(size_bytes, 1024)))
+   p = math.pow(1024, i)
+   s = round(size_bytes / p, 2)
+   return "%s %s" % (s, size_name[i])

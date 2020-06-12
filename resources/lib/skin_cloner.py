@@ -17,9 +17,8 @@ def clone_default_skin():
     xbmc.executebuiltin("Dialog.Close(all,true)")
     xbmc.executebuiltin("ActivateWindow(Home)")
 
-    response = xbmcgui.Dialog().yesno("EmbyCon Skin Cloner",
-                                      "This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.",
-                                      "Do you want to continue?")
+    message = "This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.\nDo you want to continue?"
+    response = xbmcgui.Dialog().yesno("EmbyCon Skin Cloner", message)
     if not response:
         return
 
@@ -52,7 +51,7 @@ def clone_skin():
 
     kodi_path = xbmc.translatePath("special://xbmc")
     kodi_skin_source = os.path.join(kodi_path, "addons", "skin.estuary")
-    log.debug("Kodi Skin Source : {0}", kodi_skin_source)
+    log.debug("Kodi Skin Source: {0}", kodi_skin_source)
 
     pdialog = xbmcgui.DialogProgress()
     pdialog.create("EmbyCon Skin Cloner", "")
@@ -64,7 +63,7 @@ def clone_skin():
 
     kodi_home_path = xbmc.translatePath("special://home")
     kodi_skin_destination = os.path.join(kodi_home_path, "addons", "skin.estuary_embycon")
-    log.debug("Kodi Skin Destination : {0}", kodi_skin_destination)
+    log.debug("Kodi Skin Destination: {0}", kodi_skin_destination)
 
     # copy all skin files (clone)
     count = 0

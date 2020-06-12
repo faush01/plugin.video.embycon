@@ -27,7 +27,7 @@ class SimpleLogging():
 
     def info(self, fmt, *args, **kwargs):
         log_line = self.name + "|INFO|" + self.log_line(fmt, *args)
-        xbmc.log(log_line, level=xbmc.LOGNOTICE)
+        xbmc.log(log_line, level=xbmc.LOGINFO)
 
     def error(self, fmt, *args, **kwargs):
         log_line = self.name + "|ERROR|" + self.log_line(fmt, *args)
@@ -36,7 +36,7 @@ class SimpleLogging():
     def debug(self, fmt, *args, **kwargs):
         if self.enable_logging:
             log_line = self.name + "|DEBUG|" + self.log_line(fmt, *args)
-            xbmc.log(log_line, level=xbmc.LOGNOTICE)
+            xbmc.log(log_line, level=xbmc.LOGINFO)
 
     @staticmethod
     def log_line(fmt, *args):

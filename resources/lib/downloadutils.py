@@ -267,6 +267,7 @@ class DownloadUtils:
         }
 
         url = "{server}/emby/Items/%s/PlaybackInfo" % item_id
+        # url = "{server}/emby/Items/%s/PlaybackInfo?EnableDirectPlay=false&EnableDirectStream=false" % item_id
         log.debug("PlaybackInfo : {0}", url)
         log.debug("PlaybackInfo : {0}", profile)
         play_info_result = self.downloadUrl(url, postBody=playback_info, method="POST")
@@ -622,6 +623,8 @@ class DownloadUtils:
         username = user_details.get("username", "")
         server = None
 
+        http_timeout = int(settings.getSetting("http_timeout"))
+
         if authenticate and username == "":
             return return_data
 
@@ -683,13 +686,13 @@ class DownloadUtils:
 
             if local_use_https and self.verify_cert:
                 log.debug("Connection: HTTPS, Cert checked")
-                conn = http.client.HTTPSConnection(server, timeout=40)
+                conn = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
-                conn = http.client.HTTPSConnection(server, timeout=40, context=ssl._create_unverified_context())
+                conn = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
             else:
                 log.debug("Connection: HTTP")
-                conn = http.client.HTTPConnection(server, timeout=40)
+                conn = http.client.HTTPConnection(server, timeout=http_timeout)
 
             head = self.getAuthHeader(authenticate)
 

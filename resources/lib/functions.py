@@ -15,16 +15,17 @@ import xbmcaddon
 import xbmc
 
 from .downloadutils import DownloadUtils, load_user_details
-from .utils import getArt, send_event_notification
+from .utils import getArt, send_event_notification, convert_size
 from .kodi_utils import HomeWindow
 from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
 from .server_detect import checkServer
 from .simple_logging import SimpleLogging
-from .menu_functions import displaySections, display_main_menu, display_menu, show_movie_alpha_list, show_tvshow_alpha_list, show_genre_list, show_search, show_movie_pages
+from .menu_functions import display_main_menu, display_menu, show_movie_alpha_list, show_tvshow_alpha_list, show_genre_list, show_search, show_movie_pages
 from .translation import string_load
 from .server_sessions import showServerSessions
 from .action_menu import ActionMenu
+from .safe_delete_dialog import SafeDeleteDialog
 from .widgets import getWidgetContent, get_widget_content_cast, checkForNewContent
 from . import trakttokodi
 from .cache_images import CacheArtwork
@@ -149,6 +150,13 @@ def mainEntryPoint():
         trakttokodi.entry_point(params)
     elif mode == "SHOW_ADDON_MENU":
         display_menu(params)
+    elif mode == "GET_CONTENT_BY_TV_SHOW":
+        parent_id = __get_parent_id_from(params)
+        if parent_id is not None:
+            enriched_url = param_url + "&ParentId=" + parent_id
+            getContent(enriched_url, params)
+        else:
+            log.info("Unable to find TV show parent ID.")
     else:
         log.debug("EmbyCon -> Mode: {0}", mode)
         log.debug("EmbyCon -> URL: {0}", param_url)
@@ -159,7 +167,6 @@ def mainEntryPoint():
             PLAY(params)
         else:
             checkServer()
-            #displaySections()
             display_main_menu()
 
     if pr:
@@ -178,6 +185,33 @@ def mainEntryPoint():
             f.write(s.getvalue())
 
     log.debug("===== EmbyCon FINISHED =====")
+
+
+def __enrich_url(param_url, params):
+    enriched_url = param_url
+    parent_id = __get_parent_id_from(params)
+    if parent_id is not None:
+        enriched_url = param_url + "&ParentId=" + parent_id
+    return enriched_url
+
+
+def __get_parent_id_from(params):
+    result = None
+    show_provider_ids = params.get("show_ids")
+    if show_provider_ids is not None:
+        log.debug("TV show providers IDs: {}", show_provider_ids)
+        get_show_url = "{server}/emby/Users/{userid}/Items?fields=MediaStreams&Recursive=true" \
+                       "&IncludeItemTypes=series&IncludeMedia=true&ImageTypeLimit=1&Limit=16" \
+                       "&AnyProviderIdEquals=" + show_provider_ids
+        content = dataManager.GetContent(get_show_url)
+        show = content.get("Items")
+        if len(show) == 1:
+            result = content.get("Items")[0].get("Id")
+        else:
+            log.debug("TV show not found for ids: {}", show_provider_ids)
+    else:
+        log.error("TV show parameter not found in request.")
+    return result
 
 
 def toggle_watched(params):
@@ -254,17 +288,33 @@ def unmarkFavorite(item_id):
     xbmc.executebuiltin("Container.Refresh")
 
 
-def delete(item):
+def delete(item_id):
+
+    json_data = downloadUtils.downloadUrl("{server}/emby/Users/{userid}/Items/" + item_id + "?format=json")
+    item = json.loads(json_data)
 
     item_id = item.get("Id")
-    item_name = item.get("Name")
-    series_name = item.get("SeriesName")
-    if series_name:
-        final_name = series_name + " - " + item_name
-    else:
-        final_name = item_name
+    item_name = item.get("Name", "")
+    series_name = item.get("SeriesName", "")
+    ep_number = item.get("IndexNumber", -1)
 
-    return_value = xbmcgui.Dialog().yesno(string_load(30091), final_name, string_load(30092))
+    final_name = ""
+
+    if series_name:
+        final_name += series_name + " - "
+
+    if ep_number != -1:
+        final_name += "Episode %02d - " % (ep_number,)
+
+    final_name += item_name
+
+    if not item.get("CanDelete", False):
+        message = string_load(30417) + "\n" + final_name
+        xbmcgui.Dialog().ok(string_load(30135), message)
+        return
+
+    message = final_name + "\n" + string_load(30092)
+    return_value = xbmcgui.Dialog().yesno(string_load(30091), message)
     if return_value:
         log.debug('Deleting Item: {0}', item_id)
         url = '{server}/emby/Items/' + item_id
@@ -322,6 +372,7 @@ def get_params():
 def show_menu(params):
     log.debug("showMenu(): {0}", params)
 
+    home_window = HomeWindow()
     settings = xbmcaddon.Addon()
     item_id = params["item_id"]
 
@@ -370,6 +421,11 @@ def show_menu(params):
         li.setProperty('menu_id', 'view_series')
         action_items.append(li)
 
+    if result["Type"] == "Movie":
+        li = xbmcgui.ListItem("Show Extras")
+        li.setProperty('menu_id', 'show_extras')
+        action_items.append(li)
+
     user_data = result.get("UserData", None)
     if user_data:
         progress = user_data.get("PlaybackPositionTicks", 0) != 0
@@ -398,6 +454,12 @@ def show_menu(params):
         li.setProperty('menu_id', 'delete')
         action_items.append(li)
 
+    safe_delete = home_window.getProperty("safe_delete_plugin_available") == "true"
+    if safe_delete:
+        li = xbmcgui.ListItem("Safe Delete")
+        li.setProperty('menu_id', 'safe_delete')
+        action_items.append(li)
+
     li = xbmcgui.ListItem(string_load(30398))
     li.setProperty('menu_id', 'refresh_server')
     action_items.append(li)
@@ -416,14 +478,22 @@ def show_menu(params):
     action_items.append(li)
 
     window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-    container_view_id = window.getFocusId()
+    container_view_id = str(window.getFocusId())
     container_content_type = xbmc.getInfoLabel("Container.Content")
+    view_key = "view-" + container_content_type
+    current_default_view = settings.getSetting(view_key)
+    view_match = container_view_id == current_default_view
     log.debug("View ID:{0} Content type:{1}", container_view_id, container_content_type)
 
     if container_content_type in ["movies", "tvshows", "seasons", "episodes", "sets"]:
-        li = xbmcgui.ListItem("Set as defalt view")
-        li.setProperty('menu_id', 'set_view')
-        action_items.append(li)
+        if view_match:
+            li = xbmcgui.ListItem("Unset as defalt view")
+            li.setProperty('menu_id', 'unset_view')
+            action_items.append(li)
+        else:
+            li = xbmcgui.ListItem("Set as defalt view")
+            li.setProperty('menu_id', 'set_view')
+            action_items.append(li)
 
     #xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
 
@@ -445,9 +515,12 @@ def show_menu(params):
         PLAY(params)
 
     elif selected_action == "set_view":
-        view_key = "view-" + container_content_type
         log.debug("Settign view type for {0} to {1}", view_key, container_view_id)
-        settings.setSetting(view_key, str(container_view_id))
+        settings.setSetting(view_key, container_view_id)
+
+    elif selected_action == "unset_view":
+        log.debug("Un-Settign view type for {0} to {1}", view_key, container_view_id)
+        settings.setSetting(view_key, "")
 
     elif selected_action == "refresh_server":
         url = ("{server}/emby/Items/" + item_id + "/Refresh" +
@@ -470,7 +543,6 @@ def show_menu(params):
 
         checkForNewContent()
 
-        home_window = HomeWindow()
         last_url = home_window.getProperty("last_content_url")
         if last_url:
             log.debug("markUnwatched_lastUrl: {0}", last_url)
@@ -505,7 +577,70 @@ def show_menu(params):
         markUnwatched(item_id)
 
     elif selected_action == "delete":
-        delete(result)
+        delete(item_id)
+
+    elif selected_action == "safe_delete":
+        url = "{server}/emby_safe_delete/delete_item/" + item_id
+        delete_action = downloadUtils.downloadUrl(url)
+        result = json.loads(delete_action)
+        dialog = xbmcgui.Dialog()
+        if result:
+            log.debug("Safe_Delete_Action: {0}", result)
+            action_token = result["action_token"]
+
+            message = "You are about to delete the following item[CR][CR]"
+
+            message += "Type: " + result["item_info"]["Item_type"] + "[CR]"
+
+            if result["item_info"]["Item_type"] == "Series":
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+            elif result["item_info"]["Item_type"] == "Season":
+                message += "Season: " + str(result["item_info"]["season_number"]) + "[CR]"
+                message += "Name: " + result["item_info"]["season_name"] + "[CR]"
+            elif result["item_info"]["Item_type"] == "Episode":
+                message += "Series: " + result["item_info"]["series_name"] + "[CR]"
+                message += "Season: " + result["item_info"]["season_name"] + "[CR]"
+                message += "Episode: " + str(result["item_info"]["episode_number"]) + "[CR]"
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+            else:
+                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
+
+            message += "[CR]File List[CR][CR]"
+
+            for file_info in result["file_list"]:
+                message += " - " + file_info["Key"] + " (" + convert_size(file_info["Value"]) + ")[CR]"
+            message += "[CR][CR]Are you sure?[CR][CR]"
+
+            confirm_dialog = SafeDeleteDialog("SafeDeleteDialog.xml", PLUGINPATH, "default", "720p")
+            confirm_dialog.message = message
+            confirm_dialog.heading = "Confirm delete files?"
+            confirm_dialog.doModal()
+            log.debug("safe_delete_confirm_dialog: {0}", confirm_dialog.confirm)
+
+            if confirm_dialog.confirm:
+                url = "{server}/emby_safe_delete/delete_item_action"
+                playback_info = {
+                    'item_id': item_id,
+                    'action_token': action_token
+                }
+                delete_action = downloadUtils.downloadUrl(url, method="POST", postBody=playback_info)
+                log.debug("Delete result action: {0}", delete_action)
+                delete_action_result = json.loads(delete_action)
+                if not delete_action_result:
+                    dialog.ok("Error", "Error deleteing files\nError in responce from server")
+                elif not delete_action_result["result"]:
+                    dialog.ok("Error", "Error deleteing files\n" + delete_action_result["message"])
+                else:
+                    dialog.ok("Deleted", "Files deleted")
+        else:
+            dialog.ok("Error", "Error getting safe delete confirmation")
+
+    elif selected_action == "show_extras":
+        # "http://localhost:8096/emby/Users/3138bed521e5465b9be26d2c63be94af/Items/78/SpecialFeatures"
+        u = "{server}/emby/Users/{userid}/Items/" + item_id + "/SpecialFeatures"
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Videos")
+        built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
+        xbmc.executebuiltin(built_in_command)
 
     elif selected_action == "view_season":
         xbmc.executebuiltin("Dialog.Close(all,true)")
@@ -517,7 +652,7 @@ def show_menu(params):
              '&seasonId=' + parent_id +
              '&IsVirtualUnAired=false' +
              '&IsMissing=false' +
-             '&Fields={field_filters}' +
+             '&Fields=SpecialEpisodeNumbers,{field_filters}' +
              '&format=json')
         action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Season")
         built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'

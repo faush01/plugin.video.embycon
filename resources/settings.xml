@@ -31,6 +31,9 @@
 		<setting id="playback_bitrate" type="slider" label="30208" default="6400" range="400,100,20000" option="int" visible="true"/>
 		<setting id="playback_max_width" type="select" label="30212" values="640|720|1024|1280|1440|1600|1920|2600|4096" default="1920" visible="true"/>
 		<setting id="playback_video_force_8" type="bool" label="30213" default="false" visible="true" enable="true"/>
+		<setting id="audio_codec" type="select" label="30419" values="ac3|aac" default="ac3"/>
+		<setting id="audio_playback_bitrate" type="select" label="30418" values="128|160|192|256|320|384|448|640" default="256" visible="true"/>
+		<setting id="audio_max_channels" type="slider" label="30420" default="8" range="2,1,8" option="int" visible="true"/>
 
 		<setting label="30238" type="lsep"/>
 		<setting type="sep" />
@@ -82,6 +85,7 @@
 		<setting id="flatten_single_season" type="bool" label="30020" default="true" visible="true" enable="true" />
 		<setting id="show_all_episodes" type="bool" label="30021" default="true" visible="true" enable="true" />
 		<setting id="show_empty_folders" type="bool" label="30328" default="false" visible="true" enable="true" />
+		<setting id="hide_watched" type="bool" label="30432" default="true" visible="true" enable="true" />
 
 		<setting label="30223" type="lsep"/>
 		<setting type="sep" />
@@ -106,12 +110,31 @@
 	<category label="30022">
 
 		<setting id="deviceName" type="text" label="30016" default="EmbyCon" visible="true" enable="true" />
+		<setting id="http_timeout" type="slider" label="30416" default="60" range="5,1,300" option="int" visible="true" />
 		<setting id="profile_count" type="slider" label="30010" default="0" range="0,1,20" option="int" visible="true" />
 		<setting id="log_debug" type="bool" label="30027" default="false" visible="true" enable="true" />
 		<setting id="log_timing" type="bool" label="30015" default="false" visible="true" enable="true" />
 		<setting id="use_cache" type="bool" label="30345" default="true" visible="true" enable="true" />
 		<setting id="showLoadProgress" type="bool" label="30120" default="false" visible="true" enable="true" />
 		<setting id="suppressErrors" type="bool" label="30315" default="false" visible="true" enable="true" />
+
+	</category>
+	<category label="30421">
+
+		<setting id="view-movies" type="text" label="Movies view ID" default="" visible="true" enable="false" />
+		<setting id="view-tvshows" type="text" label="TV Shows view ID" default="" visible="true" enable="false" />
+		<setting id="view-seasons" type="text" label="Seasons view ID" default="" visible="true" enable="false" />
+		<setting id="view-episodes" type="text" label="Episodes view ID" default="" visible="true" enable="false" />
+		<setting id="view-sets" type="text" label="Collections view ID" default="" visible="true" enable="false" />
+
+	</category>
+	<category label="30422">
+
+		<setting id="sort-Movies" type="select" label="30231" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
+		<setting id="sort-BoxSets" type="select" label="30260" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
+		<setting id="sort-Series" type="select" label="30229" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
+		<setting id="sort-Seasons" type="select" label="30431" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
+		<setting id="sort-Episodes" type="select" label="30235" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
 
 	</category>
 </settings>

@@ -16,7 +16,7 @@ from resources.lib.widgets import set_background_image, set_random_movies
 from resources.lib.websocket_client import WebSocketClient
 from resources.lib.menu_functions import set_library_window_values
 from resources.lib.context_monitor import ContextMonitor
-from resources.lib.server_detect import checkServer
+from resources.lib.server_detect import checkServer, check_safe_delete_available
 from resources.lib.library_change_monitor import LibraryChangeMonitor
 from resources.lib.datamanager import clear_old_cache_data
 from resources.lib.tracking import set_timing_enabled
@@ -74,6 +74,7 @@ last_progress_update = time.time()
 last_content_check = time.time()
 last_background_update = 0
 last_random_movie_update = 0
+safe_delete_check = False
 
 # session id
 # TODO: this is used to append to the end of PLAY urls, this is to stop mark watched from overriding the Emby ones
@@ -109,9 +110,6 @@ if enable_logging:
                                   time=8000,
                                   icon=xbmcgui.NOTIFICATION_WARNING)
 
-# monitor.abortRequested() is causes issues, it currently triggers for all addon cancelations which causes
-# the service to exit when a user cancels an addon load action. This is a bug in Kodi.
-# I am switching back to xbmc.abortRequested approach until kodi is fixed or I find a work arround
 prev_user_id = home_window.getProperty("userid")
 
 while not xbmc.Monitor().abortRequested():
@@ -152,6 +150,10 @@ while not xbmc.Monitor().abortRequested():
                     websocket_client = WebSocketClient(library_change_monitor)
                     websocket_client.start()
 
+                if user_changed or not safe_delete_check:
+                    check_safe_delete_available()
+                    safe_delete_check = True
+
             elif screen_saver_active:
                 last_random_movie_update = time.time() - (random_movie_list_interval - 15)
                 if background_interval != 0 and ((time.time() - last_background_update) > background_interval):
@@ -165,6 +167,8 @@ while not xbmc.Monitor().abortRequested():
     #xbmc.sleep(1000)
     if xbmc.Monitor().waitForAbort( 1 ):
         break
+
+image_server.stop()
 
 image_server.stop()
 

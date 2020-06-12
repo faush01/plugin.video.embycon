@@ -235,7 +235,7 @@ msgid "Playback"
 msgstr ""
 
 msgctxt "#30208"
-msgid "Transcode Bitrate (Kbits)"
+msgid "Video Bitrate (Kbits)"
 msgstr ""
 
 msgctxt "#30209"
@@ -251,11 +251,11 @@ msgid "HTTP transcode"
 msgstr ""
 
 msgctxt "#30212"
-msgid "Transcode max width"
+msgid "Video max width"
 msgstr ""
 
 msgctxt "#30213"
-msgid "Transcode force 8 bit"
+msgid "Video force 8 bit"
 msgstr ""
 
 msgctxt "#30214"
@@ -467,15 +467,11 @@ msgid "Refresh Cached Images"
 msgstr ""
 
 msgctxt "#30282"
-msgid "No Emby servers detected on your local network."
+msgid "No Emby servers detected on your local network.\nDo you want to manually enter a server url?"
 msgstr ""
 
 msgctxt "#30283"
-msgid "Play Next Episode"
-msgstr ""
-
-msgctxt "#30284"
-msgid "Do you want to play the next episode?"
+msgid "Play Next Episode?"
 msgstr ""
 
 msgctxt "#30285"
@@ -519,7 +515,7 @@ msgid "Notice"
 msgstr ""
 
 msgctxt "#30295"
-msgid "To use this feature you need HTTP control enabled"
+msgid "To use this feature you need HTTP control enabled.\nKodi Settings->Services->Allow remote control via HTTP"
 msgstr ""
 
 msgctxt "#30296"
@@ -738,10 +734,6 @@ msgctxt "#30354"
 msgid "Go To Series"
 msgstr ""
 
-msgctxt "#30355"
-msgid "Kodi Settings->Services->Allow remote control via HTTP"
-msgstr ""
-
 msgctxt "#30356"
 msgid "Loading existing image list"
 msgstr ""
@@ -796,10 +788,6 @@ msgstr ""
 
 msgctxt "#30369"
 msgid "Do you want to clear your saved password?"
-msgstr ""
-
-msgctxt "#30370"
-msgid "Do you want to manually enter a server url?"
 msgstr ""
 
 msgctxt "#30371"
@@ -976,4 +964,72 @@ msgstr ""
 
 msgctxt "#30415"
 msgid " - Favorite Collections"
+msgstr ""
+
+msgctxt "#30416"
+msgid "HTTP timeout seconds"
+msgstr ""
+
+msgctxt "#30417"
+msgid "You do not have permision to delete this item"
+msgstr ""
+
+msgctxt "#30418"
+msgid "Audio bitrate (Kbits)"
+msgstr ""
+
+msgctxt "#30419"
+msgid "Audio codec"
+msgstr ""
+
+msgctxt "#30420"
+msgid "Audio max channels"
+msgstr ""
+
+msgctxt "#30421"
+msgid "Views"
+msgstr ""
+
+msgctxt "#30422"
+msgid "Sorting"
+msgstr ""
+
+msgctxt "#30423"
+msgid "NotSet"
+msgstr ""
+
+msgctxt "#30424"
+msgid "Default"
+msgstr ""
+
+msgctxt "#30425"
+msgid "Year"
+msgstr ""
+
+msgctxt "#30426"
+msgid "Title"
+msgstr ""
+
+msgctxt "#30427"
+msgid "Added"
+msgstr ""
+
+msgctxt "#30428"
+msgid "Rating"
+msgstr ""
+
+msgctxt "#30429"
+msgid "Genre"
+msgstr ""
+
+msgctxt "#30430"
+msgid "Label"
+msgstr ""
+
+msgctxt "#30431"
+msgid "Seasons"
+msgstr ""
+
+msgctxt "#30432"
+msgid "Hide watched items in lists"
 msgstr ""

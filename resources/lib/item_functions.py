@@ -40,6 +40,8 @@ class ItemDetails():
     series_name = None
     episode_number = 0
     season_number = 0
+    episode_sort_number = 0
+    season_sort_number = 0
     track_number = 0
     series_id = None
     art = None
@@ -111,6 +113,22 @@ def extract_item_info(item, gui_options):
         item_details.episode_number = item["IndexNumber"]
         item_details.season_number = item["ParentIndexNumber"]
         item_details.series_id = item["SeriesId"]
+
+        if item_details.season_number != 0:
+            item_details.season_sort_number = item_details.season_number
+            item_details.episode_sort_number = item_details.episode_number
+        else:
+            special_after_season = item["AirsAfterSeasonNumber"]
+            special_before_season = item["AirsBeforeSeasonNumber"]
+            special_before_episode = item["AirsBeforeEpisodeNumber"]
+
+            if special_after_season:
+                item_details.season_sort_number = special_after_season + 1
+            elif special_before_season:
+                item_details.season_sort_number = special_before_season - 1
+
+            if special_before_episode:
+                item_details.episode_sort_number = special_before_episode - 1
 
     elif item_details.item_type == "Season":
         item_details.season_number = item["IndexNumber"]
@@ -331,7 +349,7 @@ def extract_item_info(item, gui_options):
     return item_details
 
 
-def add_gui_item(url, item_details, display_options, folder=True):
+def add_gui_item(url, item_details, display_options, folder=True, default_sort=False):
 
     #log.debug("item_details: {0}", item_details.__dict__)
 
@@ -348,6 +366,8 @@ def add_gui_item(url, item_details, display_options, folder=True):
         u = sys.argv[0] + "?url=" + urllib.parse.quote(url) + mode + "&media_type=" + item_details.item_type
         if item_details.name_format:
             u += '&name_format=' + urllib.parse.quote(item_details.name_format)
+        if default_sort:
+            u += '&sort=none'
     else:
         u = sys.argv[0] + "?item_id=" + url + "&mode=PLAY"# + "&session_id=" + home_window.getProperty("session_id")
 
@@ -501,6 +521,8 @@ def add_gui_item(url, item_details, display_options, folder=True):
     if item_type == 'episode':
         info_labels["episode"] = item_details.episode_number
         info_labels["season"] = item_details.season_number
+        info_labels["sortseason"] = item_details.season_sort_number
+        info_labels["sortepisode"] = item_details.episode_sort_number
         info_labels["tvshowtitle"] = item_details.series_name
         if item_details.season_number == 0:
             item_properties["IsSpecial"] = "true"
