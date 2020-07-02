@@ -1,7 +1,9 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import http.client
 import base64
 import sys

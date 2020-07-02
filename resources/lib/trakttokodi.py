@@ -1,7 +1,8 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib.request, urllib.parse, urllib.error
-import encodings
+import urllib.request
+import urllib.parse
+import urllib.error
 
 import xbmc
 import xbmcgui

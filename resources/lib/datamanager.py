@@ -73,7 +73,7 @@ class DataManager:
         cache_file = os.path.join(self.addon_dir, "cache_" + url_hash + ".pickle")
 
         # changed_url = url + "&MinDateLastSavedForUser=" + urllib.unquote("2019-09-16T13:45:30")
-        # results = self.GetContent(changed_url)
+        # results = self.get_content(changed_url)
         # log.debug("DataManager Changes Since Date : {0}", results)
 
         item_list = None

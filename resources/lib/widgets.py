@@ -3,7 +3,6 @@ import xbmcplugin
 import xbmcgui
 import xbmc
 import json
-import urllib.request, urllib.parse, urllib.error
 import hashlib
 import random
 

@@ -11,7 +11,6 @@ import gzip
 import json
 from urllib.parse import urlparse
 import urllib.request, urllib.parse, urllib.error
-from datetime import datetime
 from base64 import b64encode
 from collections import defaultdict
 
@@ -79,7 +78,8 @@ def get_details_string():
         "PremiereDate",
         "ProductionYear",
         "AirTime",
-        "Status"
+        "Status",
+        "Tags"
     ]
 
     if include_media:
@@ -153,23 +153,51 @@ class DownloadUtils:
         self.download_url(url, post_body=data, method="POST")
         log.debug("Posted Capabilities: {0}", data)
 
-    def get_item_playback_info(self, item_id):
+    def get_item_playback_info(self, item_id, force_transcode):
+
+        addon_settings = xbmcaddon.Addon()
+
+        # ["hevc", "h265", "h264", "mpeg4", "msmpeg4v3", "mpeg2video", "vc1"]
+        filtered_codecs = []
+        if addon_settings.getSetting("force_transcode_h265") == "true":
+            filtered_codecs.append("hevc")
+            filtered_codecs.append("h265")
+        if addon_settings.getSetting("force_transcode_mpeg2") == "true":
+            filtered_codecs.append("mpeg2video")
+        if addon_settings.getSetting("force_transcode_msmpeg4v3") == "true":
+            filtered_codecs.append("msmpeg4v3")
+        if addon_settings.getSetting("force_transcode_mpeg4") == "true":
+            filtered_codecs.append("mpeg4")
+
+        playback_bitrate = addon_settings.getSetting("max_stream_bitrate")
+        force_playback_bitrate = addon_settings.getSetting("force_max_stream_bitrate")
+        if force_transcode:
+            playback_bitrate = force_playback_bitrate
+
+        audio_codec = addon_settings.getSetting("audio_codec")
+        audio_playback_bitrate = addon_settings.getSetting("audio_playback_bitrate")
+        audio_max_channels = addon_settings.getSetting("audio_max_channels")
+
+        audio_bitrate = int(audio_playback_bitrate) * 1000
+        bitrate = int(playback_bitrate) * 1000
 
         profile = {
             "Name": "Kodi",
-            "MaxStreamingBitrate": 100000000,
-            "MusicStreamingTranscodingBitrate": 1280000,
+            "MaxStaticBitrate": bitrate,
+            "MaxStreamingBitrate": bitrate,
+            "MusicStreamingTranscodingBitrate": audio_bitrate,
             "TimelineOffsetSeconds": 5,
             "TranscodingProfiles": [
                 {
                     "Type": "Audio"
                 },
                 {
-                    "Container": "m3u8",
+                    "Container": "ts",
+                    "Protocol": "hls",
                     "Type": "Video",
-                    "AudioCodec": "aac,mp3,ac3,opus,flac,vorbis",
-                    "VideoCodec": "h264,mpeg4,mpeg2video",
-                    "MaxAudioChannels": "6"
+                    "AudioCodec": audio_codec,
+                    "VideoCodec": "h264",
+                    "MaxAudioChannels": audio_max_channels
                 },
                 {
                     "Container": "jpeg",
@@ -258,14 +286,52 @@ class DownloadUtils:
             ]
         }
 
+        if len(filtered_codecs) > 0:
+            profile['DirectPlayProfiles'][0]['VideoCodec'] = "-%s" % ",".join(filtered_codecs)
+
+        if force_transcode:
+            profile['DirectPlayProfiles'] = []
+
+        if addon_settings.getSetting("playback_video_force_8") == "true":
+            profile['CodecProfiles'].append(
+                {
+                    "Type": "Video",
+                    "Codec": "h264",
+                    "Conditions": [
+                        {
+                            "Condition": "LessThanEqual",
+                            "Property": "VideoBitDepth",
+                            "Value": "8",
+                            "IsRequired": False
+                        }
+                    ]
+                }
+            )
+            profile['CodecProfiles'].append(
+                {
+                    "Type": "Video",
+                    "Codec": "h265,hevc",
+                    "Conditions": [
+                        {
+                            "Condition": "EqualsAny",
+                            "Property": "VideoProfile",
+                            "Value": "main"
+                        }
+                    ]
+                }
+            )
+
         playback_info = {
             'UserId': self.get_user_id(),
             'DeviceProfile': profile,
             'AutoOpenLiveStream': True
         }
 
-        url = "{server}/emby/Items/%s/PlaybackInfo" % item_id
-        # url = "{server}/emby/Items/%s/PlaybackInfo?EnableDirectPlay=false&EnableDirectStream=false" % item_id
+        if force_transcode:
+            url = "{server}/emby/Items/%s/PlaybackInfo?MaxStreamingBitrate=%s&EnableDirectPlay=false&EnableDirectStream=false" % (item_id, bitrate)
+        else:
+            url = "{server}/emby/Items/%s/PlaybackInfo?MaxStreamingBitrate=%s" % (item_id, bitrate)
+
         log.debug("PlaybackInfo : {0}", url)
         log.debug("PlaybackInfo : {0}", profile)
         play_info_result = self.download_url(url, post_body=playback_info, method="POST")
@@ -758,7 +824,6 @@ class DownloadUtils:
 
         except Exception as msg:
             log.error("Unable to connect to {0} : {1}", server, msg)
-            raise
             if suppress is False:
                 xbmcgui.Dialog().notification(string_load(30316),
                                               str(msg),

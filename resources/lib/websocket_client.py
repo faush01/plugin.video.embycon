@@ -104,7 +104,6 @@ class WebSocketClient(threading.Thread):
             params["audio_stream_index"] = audio_stream_index
             play_action(params)
 
-
     def _playstate(self, data):
 
         command = data['Command']
@@ -259,7 +258,7 @@ class WebSocketClient(threading.Thread):
         log.debug("websocket url: {0}", websocket_url)
 
         params = {"setting": "debug.showloginfo"}
-        setting_result = json_rpc('Settings.getSettingValue').execute(params)
+        setting_result = JsonRpc('Settings.getSettingValue').execute(params)
         current_value = setting_result.get("result", None)
         if current_value is not None and current_value.get("value", False):
             enableTrace(True)

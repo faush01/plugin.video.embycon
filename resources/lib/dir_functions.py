@@ -4,7 +4,9 @@ import xbmcaddon
 import xbmcplugin
 import xbmcgui
 
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import sys
 import re
 
@@ -106,7 +108,7 @@ def get_content(url, params):
             log.debug("ADDING NEXT URL: {0}", url_next)
 
     # use the data manager to get the data
-    # result = dataManager.GetContent(url)
+    # result = dataManager.get_content(url)
 
     # total_records = 0
     # if result is not None and isinstance(result, dict):
