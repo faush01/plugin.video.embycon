@@ -88,7 +88,8 @@ class DataManager:
         if clear_cache and os.path.isfile(cache_file):
             log.debug("Clearing cache data and loading new data")
             home_window.clear_property("skip_cache_for_" + url)
-            os.remove(cache_file)
+            with FileLock(cache_file + ".locked", timeout=5):
+                xbmcvfs.delete(cache_file)
 
         # try to load the list item data from the cache
         if os.path.isfile(cache_file) and use_cache:
@@ -190,14 +191,12 @@ class CacheManagerThread(threading.Thread):
             is_fresh = True
 
         if is_fresh and self.cached_item.item_list is not None and len(self.cached_item.item_list) > 0:
-            log.debug("CacheManagerThread : Saving fresh data")
+            log.debug("CacheManagerThread : Data is still fresh, not reloading from server")
             cached_hash = self.get_data_hash(self.cached_item.item_list)
             self.cached_item.item_list_hash = cached_hash
             self.cached_item.last_action = "cached_data"
             self.cached_item.date_saved = time.time()
             self.cached_item.date_last_used = time.time()
-
-            log.debug("CacheManagerThread : Saving New Data loops")
 
             with FileLock(self.cached_item.file_path + ".locked", timeout=5):
                 with open(self.cached_item.file_path, 'wb') as handle:
@@ -276,8 +275,10 @@ def clear_cached_server_data():
     del_count = 0
     for filename in files:
         if filename.startswith("cache_") and filename.endswith(".pickle"):
-            log.debug("Deleteing CacheFile: {0}", filename)
-            xbmcvfs.delete(os.path.join(addon_dir, filename))
+            cache_file = os.path.join(addon_dir, filename)
+            log.debug("Deleteing CacheFile: {0}", cache_file)
+            with FileLock(cache_file + ".locked", timeout=5):
+                xbmcvfs.delete(cache_file)
             del_count += 1
 
     msg = string_load(30394) % del_count
