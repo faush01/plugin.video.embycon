@@ -15,7 +15,7 @@ class LibraryChangeMonitor(threading.Thread):
     last_library_change_check = 0
     library_check_triggered = False
     exit_now = False
-    time_between_checks = 10
+    time_between_checks = 1
 
     def __init__(self):
         threading.Thread.__init__(self)
