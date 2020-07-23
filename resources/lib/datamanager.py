@@ -88,14 +88,14 @@ class DataManager:
         if clear_cache and os.path.isfile(cache_file):
             log.debug("Clearing cache data and loading new data")
             home_window.clear_property("skip_cache_for_" + url)
-            with FileLock(cache_file + ".locked", timeout=5):
+            with FileLock(cache_file, timeout=5):
                 xbmcvfs.delete(cache_file)
 
         # try to load the list item data from the cache
         if os.path.isfile(cache_file) and use_cache:
             log.debug("Loading url data from cached pickle data")
 
-            with FileLock(cache_file + ".locked", timeout=5):
+            with FileLock(cache_file, timeout=5):
                 with open(cache_file, 'rb') as handle:
                     try:
                         cache_item = cPickle.load(handle)
@@ -198,7 +198,7 @@ class CacheManagerThread(threading.Thread):
             self.cached_item.date_saved = time.time()
             self.cached_item.date_last_used = time.time()
 
-            with FileLock(self.cached_item.file_path + ".locked", timeout=5):
+            with FileLock(self.cached_item.file_path, timeout=5):
                 with open(self.cached_item.file_path, 'wb') as handle:
                     cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
 
@@ -244,7 +244,7 @@ class CacheManagerThread(threading.Thread):
                 self.cached_item.date_last_used = time.time()
                 self.cached_item.total_records = total_records
 
-                with FileLock(self.cached_item.file_path + ".locked", timeout=5):
+                with FileLock(self.cached_item.file_path, timeout=5):
                     with open(self.cached_item.file_path, 'wb') as handle:
                         cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
 
@@ -258,7 +258,7 @@ class CacheManagerThread(threading.Thread):
 
             else:
                 self.cached_item.date_last_used = time.time()
-                with FileLock(self.cached_item.file_path + ".locked", timeout=5):
+                with FileLock(self.cached_item.file_path, timeout=5):
                     with open(self.cached_item.file_path, 'wb') as handle:
                         cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
                 log.debug("CacheManagerThread : Updating last used date for cache data")
@@ -274,11 +274,14 @@ def clear_cached_server_data():
 
     del_count = 0
     for filename in files:
+        if filename.endswith(".lock"):
+            lock_file = os.path.join(addon_dir, filename)
+            log.debug("Deleteing lock File: {0}", lock_file)
+            xbmcvfs.delete(lock_file)
         if filename.startswith("cache_") and filename.endswith(".pickle"):
             cache_file = os.path.join(addon_dir, filename)
             log.debug("Deleteing CacheFile: {0}", cache_file)
-            with FileLock(cache_file + ".locked", timeout=5):
-                xbmcvfs.delete(cache_file)
+            xbmcvfs.delete(cache_file)
             del_count += 1
 
     msg = string_load(30394) % del_count
@@ -300,7 +303,7 @@ def clear_old_cache_data():
             for x in range(0, 5):
                 try:
                     data_file = os.path.join(addon_dir, filename)
-                    with FileLock(data_file + ".locked", timeout=5):
+                    with FileLock(data_file, timeout=5):
                         with open(data_file, 'rb') as handle:
                             cache_item = cPickle.load(handle)
                     break
@@ -318,13 +321,13 @@ def clear_old_cache_data():
                 if item_last_used == -1 or item_last_used > (3600 * 24 * 7):
                     log.debug("clear_old_cache_data() : Deleting cache item age : {0}", item_last_used)
                     data_file = os.path.join(addon_dir, filename)
-                    with FileLock(data_file + ".locked", timeout=5):
+                    with FileLock(data_file, timeout=5):
                         xbmcvfs.delete(data_file)
                     del_count += 1
             else:
                 log.debug("clear_old_cache_data() : Deleting unloadable cache item")
                 data_file = os.path.join(addon_dir, filename)
-                with FileLock(data_file + ".locked", timeout=5):
+                with FileLock(data_file, timeout=5):
                     xbmcvfs.delete(data_file)
 
     log.debug("clear_old_cache_data() : Cache items deleted : {0}", del_count)
