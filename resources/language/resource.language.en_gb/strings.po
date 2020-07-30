@@ -235,7 +235,7 @@ msgid "Playback"
 msgstr ""
 
 msgctxt "#30208"
-msgid "Max stream bitrate (Kbits)"
+msgid "Max stream bitrate (kbs)"
 msgstr ""
 
 msgctxt "#30209"
@@ -983,7 +983,7 @@ msgid "You do not have permision to delete this item"
 msgstr ""
 
 msgctxt "#30418"
-msgid "Audio bitrate (Kbits)"
+msgid "Audio bitrate (kbs)"
 msgstr ""
 
 msgctxt "#30419"
@@ -1047,7 +1047,7 @@ msgid "Allow direct file playback"
 msgstr ""
 
 msgctxt "#30434"
-msgid "Force transcode stream bitrate (Kbits)"
+msgid "Force transcode stream bitrate (kbs)"
 msgstr ""
 
 msgctxt "#30435"
