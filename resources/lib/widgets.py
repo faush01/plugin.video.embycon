@@ -126,15 +126,6 @@ def check_for_new_content():
     log.debug("checkForNewContent Called")
 
     home_window = HomeWindow()
-    settings = xbmcaddon.Addon()
-    simple_new_content_check = settings.getSetting("simple_new_content_check") == "true"
-
-    if simple_new_content_check:
-        log.debug("Using simple new content check")
-        current_time_stamp = str(time.time())
-        home_window.set_property("embycon_widget_reload", current_time_stamp)
-        log.debug("Setting New Widget Hash: {0}", current_time_stamp)
-        return
 
     url_params = {}
     url_params["Recursive"] = True
@@ -276,7 +267,6 @@ def get_widget_content(handle, params):
 
     settings = xbmcaddon.Addon()
     hide_watched = settings.getSetting("hide_watched") == "true"
-    use_cached_widget_data = settings.getSetting("use_cached_widget_data") == "true"
 
     widget_type = params.get("type")
     if widget_type is None:
@@ -402,7 +392,7 @@ def get_widget_content(handle, params):
 
     items_url = get_emby_url(url_verb, url_params)
 
-    list_items, detected_type, total_records = process_directory(items_url, None, params, use_cached_widget_data)
+    list_items, detected_type, total_records = process_directory(items_url, None, params, False)
 
     # remove resumable items from next up
     if widget_type == "nextup_episodes":

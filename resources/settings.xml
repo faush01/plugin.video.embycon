@@ -118,7 +118,6 @@
 		<setting id="override_contextmenu" type="bool" label="30334" default="true" visible="true"/>
 		<setting id="background_interval" type="slider" label="30341" default="20" range="0,1,120" option="int" visible="true"/>
 		<setting id="new_content_check_interval" type="slider" label="30342" default="0" range="0,1,300" option="int" visible="true"/>
-		<setting id="simple_new_content_check" type="bool" label="30442" default="true" visible="true" enable="true" />
 		<setting id="random_movie_refresh_interval" type="slider" label="30384" default="5" range="0,1,60" option="int" visible="true"/>
 
 	</category>
@@ -130,7 +129,6 @@
 		<setting id="log_debug" type="bool" label="30027" default="false" visible="true" enable="true" />
 		<setting id="log_timing" type="bool" label="30015" default="false" visible="true" enable="true" />
 		<setting id="use_cache" type="bool" label="30345" default="true" visible="true" enable="true" />
-		<setting id="use_cached_widget_data" type="bool" label="30441" default="false" visible="true" enable="true" />
 		<setting id="showLoadProgress" type="bool" label="30120" default="false" visible="true" enable="true" />
 		<setting id="suppressErrors" type="bool" label="30315" default="false" visible="true" enable="true" />
 		<setting id="speed_test_data_size" type="slider" label="30436" default="15" range="5,1,100" option="int" visible="true"/>
