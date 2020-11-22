@@ -13,13 +13,21 @@
 			<left>0</left>
 			<top>0</top>
 			<width>1280</width>
-			<height>52</height>
-			<texture border="0" colordiffuse="90FFFFFF">bg.png</texture>
+			<height>65</height>
+			<texture border="0" colordiffuse="FFFFFFFF">bg.png</texture>
+		</control>
+
+		<control type="image" id="3009">
+			<left>0</left>
+			<top>64</top>
+			<width>1280</width>
+			<height>2</height>
+			<texture border="0" colordiffuse="FFFFFFFF">white.png</texture>
 		</control>
 
 		<control type="label" id="3011">
 			<left>20</left>
-			<top>0</top>
+			<top>10</top>
 			<width>390</width>
 			<height>45</height>
 			<label></label>
@@ -29,7 +37,7 @@
 
 		<control type="label" id="3012">
 			<left>390</left>
-			<top>5</top>
+			<top>15</top>
 			<width>500</width>
 			<height>35</height>
 			<label></label>
@@ -39,7 +47,7 @@
 
 		<control type="button" id="3013">
 			<left>1020</left>
-			<top>-8</top>
+			<top>0</top>
 			<width>150</width>
 			<height>65</height>
 			<visible>true</visible>
@@ -52,7 +60,7 @@
 
 		<control type="button" id="3014">
 			<left>1140</left>
-			<top>-8</top>
+			<top>0</top>
 			<width>150</width>
 			<height>65</height>
 			<visible>true</visible>

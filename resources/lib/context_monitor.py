@@ -16,10 +16,11 @@ class ContextMonitor(threading.Thread):
         item_id = None
         log.debug("ContextMonitor Thread Started")
 
-        while not xbmc.Monitor().abortRequested() and not self.stop_thread:
+        kodi_monitor = xbmc.Monitor()
+        while not kodi_monitor.abortRequested() and not self.stop_thread:
 
             if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"):
-                xbmc.sleep(1000)
+                kodi_monitor.waitForAbort(1)
             else:
                 if xbmc.getCondVisibility("Window.IsVisible(contextmenu)"):
                     if item_id:
@@ -31,7 +32,7 @@ class ContextMonitor(threading.Thread):
                 container_id = xbmc.getInfoLabel("System.CurrentControlID")
                 item_id = xbmc.getInfoLabel("Container(" + str(container_id) + ").ListItem.Property(id)")
 
-                xbmc.sleep(100)
+                kodi_monitor.waitForAbort(0.2)
 
         '''
         context_up = False

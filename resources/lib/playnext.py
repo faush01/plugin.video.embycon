@@ -6,8 +6,8 @@ import xbmcgui
 import xbmcaddon
 
 from .simple_logging import SimpleLogging
-from .play_utils import get_playing_data, send_event_notification
-
+from .play_utils import send_event_notification
+from .action_menu import ActionAutoClose
 log = SimpleLogging(__name__)
 
 
@@ -22,6 +22,7 @@ class PlayNextService(threading.Thread):
 
     def run(self):
 
+        from .play_utils import get_playing_data
         settings = xbmcaddon.Addon()
         play_next_trigger_time = int(settings.getSetting('play_next_trigger_time'))
 
@@ -70,6 +71,7 @@ class PlayNextService(threading.Thread):
             else:
                 play_next_triggered = False
                 if play_next_dialog is not None:
+                    play_next_dialog.stop_auto_close()
                     play_next_dialog.close()
                     del play_next_dialog
                     play_next_dialog = None
@@ -88,10 +90,14 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
 
     action_exitkeys_id = None
     episode_info = None
+    play_called = False
+    auto_close_thread = None
 
     def __init__(self, *args, **kwargs):
         log.debug("PlayNextDialog: __init__")
         xbmcgui.WindowXML.__init__(self, *args, **kwargs)
+        self.auto_close_thread = ActionAutoClose(self)
+        self.auto_close_thread.start()
 
     def onInit(self):
         log.debug("PlayNextDialog: onInit")
@@ -119,15 +125,20 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
     def onAction(self, action):
 
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
+            self.auto_close_thread.stop()
             self.close()
         elif action.getId() == 92:  # ACTION_NAV_BACK
+            self.auto_close_thread.stop()
             self.close()
         else:
+            self.auto_close_thread.set_last()
             log.debug("PlayNextDialog: onAction: {0}", action.getId())
 
     def onClick(self, control_id):
         if control_id == 3013:
             log.debug("PlayNextDialog: Play Next Episode")
+            self.play_called
+            self.auto_close_thread.stop()
             self.close()
             next_item_id = self.episode_info.get("Id")
             log.debug("Playing Next Episode: {0}", next_item_id)
@@ -137,7 +148,14 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
             play_info["force_transcode"] = False
             send_event_notification("embycon_play_action", play_info)
         elif control_id == 3014:
+            self.auto_close_thread.stop()
             self.close()
 
     def set_episode_info(self, info):
         self.episode_info = info
+
+    def get_play_called(self):
+        return self.play_called
+
+    def stop_auto_close(self):
+        self.auto_close_thread.stop()
