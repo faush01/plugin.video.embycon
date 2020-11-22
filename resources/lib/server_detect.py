@@ -154,7 +154,7 @@ def get_server_details():
 
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 3)  # timeout
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
+    #sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
     sock.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
 
     log.debug("MutliGroup: {0}", multi_group)
