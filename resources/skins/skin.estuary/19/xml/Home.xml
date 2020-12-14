@@ -42,7 +42,8 @@
 			<texture background="true" colordiffuse="37FFFFFF">$INFO[ListItem.Art(fanart)]</texture>
 			<visible>!String.IsEmpty(ListItem.Art(fanart))</visible>
 		</control>		
-		<!-- End of EmbyCon Backgrounds -->
+		<!-- End of EmbyCon Backgrounds -->		
+		
 		
 		<control type="multiimage">
 			<depth>DepthBackground</depth>
@@ -58,7 +59,7 @@
 		</control>
 		<control type="group">
 			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
-			<control type="group" id="2000">				
+			<control type="group" id="2000">
 				<left>0</left>
 				<animation type="Conditional" condition="Control.IsVisible(20000)" reversible="false">
 					<effect type="slide" end="0,20" time="60" tween="sine" />
@@ -69,14 +70,15 @@
 					<effect type="slide" end="0,20" time="180" tween="sine" delay="80" />
 				</animation>
 				<include>OpenClose_Right</include>
-                <!-- Start of Emby Widget Items -->
+				
+<!-- Start of Emby Widget Items -->
 				<control type="group" id="3000">
 					<visible>String.IsEqual(Container(9000).ListItem.Property(id),emby_movies)</visible>
 					<include content="Visible_Right_Delayed">
 						<param name="id" value="emby_movies"/>
 					</include>
 					<control type="grouplist" id="3001">
-                        <include>WidgetGroupListCommon</include>
+						<include>WidgetGroupListCommon</include>
 						<include content="WidgetListPoster" condition="true">
 							<param name="content_path" value="plugin://plugin.video.embycon?mode=WIDGET_CONTENT&amp;type=recent_movies&amp;reload=$INFO[Window(Home).Property(plugin.video.embycon-embycon_widget_reload)]"/>
 							<param name="widget_header" value="Recently Added Movies"/>
@@ -103,7 +105,7 @@
 						<param name="id" value="emby_tvshows"/>
 					</include>
 					<control type="grouplist" id="4001">
-                        <include>WidgetGroupListCommon</include>
+						<include>WidgetGroupListCommon</include>
 						<include content="WidgetListEpisodes" condition="true">
 							<param name="content_path" value="plugin://plugin.video.embycon?mode=WIDGET_CONTENT&amp;type=recent_tvshows&amp;reload=$INFO[Window(Home).Property(plugin.video.embycon-embycon_widget_reload)]"/>
 							<param name="widget_header" value="Recently Updated Shows"/>
@@ -124,7 +126,8 @@
 						</include>  
 					</control>
 				</control>            
-                <!-- End of Emby Widget Items -->				
+<!-- End of Emby Widget Items -->				
+				
 				<control type="group" id="5000">
 					<visible>String.IsEqual(Container(9000).ListItem.Property(id),movies)</visible>
 					<include content="Visible_Right_Delayed">
@@ -135,6 +138,7 @@
 						<pagecontrol>5010</pagecontrol>
 						<include content="WidgetListCategories" condition="Library.HasContent(movies) + !Skin.HasSetting(home_no_categories_widget)">
 							<param name="content_path" value="library://video/movies/"/>
+							<param name="additional_movie_items" value="true"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
 							<param name="widget_target" value="videos"/>
 							<param name="list_id" value="5900"/>
@@ -200,6 +204,7 @@
 						<pagecontrol>6010</pagecontrol>
 						<include content="WidgetListCategories" condition="Library.HasContent(tvshows) + !Skin.HasSetting(home_no_categories_widget)">
 							<param name="content_path" value="library://video/tvshows/"/>
+							<param name="additional_tvshow_items" value="true"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
 							<param name="widget_target" value="videos"/>
 							<param name="list_id" value="6900"/>
@@ -482,11 +487,12 @@
 							</control>
 						</control>
 						<include content="WidgetListCategories" condition="System.HasPVRAddon">
+							<param name="content_path" value="pvr://tv/"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
+							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="12900"/>
-							<param name="pvr_submenu" value="true"/>
-							<param name="pvr_type" value="TV"/>
 						</include>
+
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
 							<param name="content_path" value="pvr://channels/tv/*?view=lastplayed"/>
 							<param name="sortby" value="lastplayed"/>
@@ -505,11 +511,18 @@
 							<param name="label" value="$INFO[ListItem.ChannelName]"/>
 							<param name="label2" value="$INFO[ListItem.Title]$INFO[ListItem.EpisodeName, (,)]"/>
 						</include>
+						<include content="WidgetListChannels" condition="System.HasPVRAddon">
+							<param name="content_path" value="pvr://channels/tv"/>
+							<param name="widget_header" value="$LOCALIZE[19173]"/>
+							<param name="widget_target" value="tvguide"/>
+							<param name="list_id" value="12400"/>
+							<param name="item_treshold" value="1"/>
+						</include>
 					</control>
 					<include content="ImageWidget" condition="!System.HasPVRAddon">
 						<param name="text_label" value="$LOCALIZE[31143]" />
 						<param name="button_label" value="$LOCALIZE[31144]" />
-						<param name="button_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.pvrclient,return)"/>
+						<param name="button_onclick" value="ActivateWindow(addonbrowser,addons://all/kodi.pvrclient,return)"/>
 						<param name="button_id" value="12400"/>
 						<param name="button2_onclick" value="Skin.SetBool(HomeMenuNoTVButton)"/>
 					</include>
@@ -555,10 +568,10 @@
 							</control>
 						</control>
 						<include content="WidgetListCategories" condition="System.HasPVRAddon">
+							<param name="content_path" value="pvr://radio/"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
+							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="13900"/>
-							<param name="pvr_submenu" value="true"/>
-							<param name="pvr_type" value="Radio"/>
 						</include>
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
 							<param name="content_path" value="pvr://channels/radio/*?view=lastplayed"/>
@@ -578,11 +591,18 @@
 							<param name="label" value="$INFO[ListItem.ChannelName]"/>
 							<param name="label2" value="$INFO[ListItem.Title]$INFO[ListItem.EpisodeName, (,)]"/>
 						</include>
+						<include content="WidgetListChannels" condition="System.HasPVRAddon">
+							<param name="content_path" value="pvr://channels/radio"/>
+							<param name="widget_header" value="$LOCALIZE[19174]"/>
+							<param name="widget_target" value="radioguide"/>
+							<param name="list_id" value="13400"/>
+							<param name="item_treshold" value="1"/>
+						</include>
 					</control>
 					<include content="ImageWidget" condition="!System.HasPVRAddon">
 						<param name="text_label" value="$LOCALIZE[31143]" />
 						<param name="button_label" value="$LOCALIZE[31144]" />
-						<param name="button_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.pvrclient,return)"/>
+						<param name="button_onclick" value="ActivateWindow(addonbrowser,addons://all/kodi.pvrclient,return)"/>
 						<param name="button_id" value="13400"/>
 						<param name="button2_onclick" value="Skin.SetBool(HomeMenuNoRadioButton)"/>
 					</include>
@@ -609,7 +629,7 @@
 						<orientation>vertical</orientation>
 						<pagecontrol>14010</pagecontrol>
 						<visible>Integer.IsGreater(Container(14100).NumItems,0) | Container(14100).IsUpdating</visible>
-						<itemlayout width="330" height="396">
+						<itemlayout width="330" height="401">
 							<control type="group">
 								<top>130</top>
 								<include content="InfoWallMusicLayout">
@@ -618,7 +638,7 @@
 								</include>
 							</control>
 						</itemlayout>
-						<focusedlayout width="330" height="396">
+						<focusedlayout width="330" height="401">
 							<control type="group">
 								<depth>DepthContentPopout</depth>
 								<top>130</top>
@@ -757,7 +777,7 @@
 							<param name="widget_target" value="videos"/>
 							<param name="list_id" value="16900"/>
 						</include>
-						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos)">
+						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos) + !Skin.HasSetting(show_musicvideoposter)">
 							<param name="content_path" value="videodb://recentlyaddedmusicvideos/"/>
 							<param name="widget_header" value="$LOCALIZE[20390]"/>
 							<param name="widget_target" value="videos"/>
@@ -767,13 +787,27 @@
 							<param name="fallback_image" value="DefaultMusicSongs.png" />
 							<param name="list_id" value="16300"/>
 						</include>
-						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos)">
+						<include content="WidgetListPoster" condition="Library.HasContent(musicvideos) + Skin.HasSetting(show_musicvideoposter)">
+							<param name="content_path" value="videodb://recentlyaddedmusicvideos/"/>
+							<param name="widget_header" value="$LOCALIZE[20390]"/>
+							<param name="widget_target" value="videos"/>
+							<param name="fallback_image" value="DefaultMusicSongs.png" />
+							<param name="list_id" value="16300"/>
+						</include>
+						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos) + !Skin.HasSetting(show_musicvideoposter)">
 							<param name="content_path" value="special://skin/playlists/unwatched_musicvideos.xsp"/>
 							<param name="widget_header" value="$LOCALIZE[31151]"/>
 							<param name="widget_target" value="videos"/>
 							<param name="main_label" value="$INFO[ListItem.Label]" />
 							<param name="sub_label" value="$INFO[ListItem.Artist]" />
 							<param name="thumb_label" value="$INFO[ListItem.Year]" />
+							<param name="fallback_image" value="DefaultMusicSongs.png" />
+							<param name="list_id" value="16400"/>
+						</include>
+						<include content="WidgetListPoster" condition="Library.HasContent(musicvideos) + Skin.HasSetting(show_musicvideoposter)">
+							<param name="content_path" value="special://skin/playlists/unwatched_musicvideos.xsp"/>
+							<param name="widget_header" value="$LOCALIZE[31151]"/>
+							<param name="widget_target" value="videos"/>
 							<param name="fallback_image" value="DefaultMusicSongs.png" />
 							<param name="list_id" value="16400"/>
 						</include>
@@ -784,13 +818,20 @@
 							<param name="list_id" value="16200"/>
 							<param name="widget_limit" value="10"/>
 						</include>
-						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos)">
+						<include content="WidgetListEpisodes" condition="Library.HasContent(musicvideos) + !Skin.HasSetting(show_musicvideoposter)">
 							<param name="content_path" value="special://skin/playlists/random_musicvideos.xsp"/>
 							<param name="widget_header" value="$LOCALIZE[31152]"/>
 							<param name="widget_target" value="videos"/>
 							<param name="main_label" value="$INFO[ListItem.Label]" />
 							<param name="sub_label" value="$INFO[ListItem.Artist]" />
 							<param name="thumb_label" value="$INFO[ListItem.Year]" />
+							<param name="fallback_image" value="DefaultMusicSongs.png" />
+							<param name="list_id" value="16500"/>
+						</include>
+						<include content="WidgetListPoster" condition="Library.HasContent(musicvideos) + Skin.HasSetting(show_musicvideoposter)">
+							<param name="content_path" value="special://skin/playlists/random_musicvideos.xsp"/>
+							<param name="widget_header" value="$LOCALIZE[31152]"/>
+							<param name="widget_target" value="videos"/>
 							<param name="fallback_image" value="DefaultMusicSongs.png" />
 							<param name="list_id" value="16500"/>
 						</include>
@@ -875,7 +916,7 @@
 						<param name="button2_onclick" value="EjectTray()"/>
 						<param name="button3_label" value="$LOCALIZE[600]"/>
 						<param name="button3_onclick" value="RipCD"/>
-						<param name="visible_3" value="String.IsEqual(System.DVDLabel,Audio-CD)"/>
+						<param name="visible_3" value="System.HasMediaAudioCD"/>
 					</include>
 				</control>
 			</control>
@@ -909,7 +950,7 @@
 								<texture colordiffuse="button_focus">lists/focus.png</texture>
 								<animation effect="fade" start="100" end="0" time="0" condition="[!Control.HasFocus(9000) + !ControlGroup(700).HasFocus] | System.HasActiveModalDialog">Conditional</animation>
 							</control>
-							<!--
+<!--							
 							<control type="image">
 								<left>-3</left>
 								<top>1</top>
@@ -926,9 +967,9 @@
 								<texture colordiffuse="51FFFFFF">colors/black.png</texture>
 								<animation effect="fade" start="100" end="0" time="0" condition="[!Control.HasFocus(9000) + !ControlGroup(700).HasFocus] | System.HasActiveModalDialog">Conditional</animation>
 							</control>
-							-->
+-->							
 						</control>
-						<!--
+<!--						
 						<control type="image">
 							<left>-3</left>
 							<top>1</top>
@@ -936,7 +977,7 @@
 							<height>95</height>
 							<texture>$INFO[ListItem.Art(thumb)]</texture>
 						</control>
-						-->
+-->						
 						<control type="label">
 							<left>15</left>
 							<top>0</top>
@@ -949,7 +990,7 @@
 						</control>
 					</focusedlayout>
 					<itemlayout height="95">
-						<!--
+<!--					
 						<control type="image">
 							<left>-3</left>
 							<top>1</top>
@@ -957,7 +998,7 @@
 							<height>95</height>
 							<texture colordiffuse="44FFFFFF">$INFO[ListItem.Art(thumb)]</texture>
 						</control>
-						-->
+-->
 						<control type="label">
 							<left>15</left>
 							<top>0</top>
@@ -970,7 +1011,7 @@
 						</control>
 					</itemlayout>
 					<content>
-                        <!-- Start Emby Menu Items -->
+<!-- Start Emby Menu Items -->
 						<item>
 							<label>Emby Movies</label>
 							<onclick condition="String.IsEmpty(Window(Home).Property(first_load_done))">ActivateWindow(Videos,videodb://movies/titles/,return)</onclick>
@@ -1003,7 +1044,7 @@
 							<thumb>icons/sidemenu/pictures.png</thumb>
 							<property name="id">change</property>
 						</item>
-                        <!-- End Emby Menu Items -->					
+<!-- End Emby Menu Items -->					
 						<item>
 							<label>$LOCALIZE[342]</label>
 							<onclick condition="Library.HasContent(movies) + Skin.HasSetting(home_no_categories_widget)">ActivateWindow(Videos,videodb://movies/,return)</onclick>
@@ -1113,6 +1154,7 @@
 							<property name="id">weather</property>
 							<visible>!Skin.HasSetting(HomeMenuNoWeatherButton)</visible>
 						</item>
+<!-- Start Emby Menu Items -->						
 						<item>
 							<label>Settings</label>
 							<onclick>ActivateWindow(settings)</onclick>
@@ -1126,10 +1168,11 @@
 							<property name="menu_id">$NUMBER[-1]</property>
 							<thumb>icons/sidemenu/manage.png</thumb>
 							<property name="id">power</property>
-						</item>							
+						</item>	
+<!-- End Emby Menu Items -->												
 					</content>
 				</control>
-				<!--
+<!--				
 				<control type="grouplist" id="700">
 					<orientation>horizontal</orientation>
 					<itemgap>0</itemgap>
@@ -1167,7 +1210,7 @@
 						<param name="visible" value="Player.HasMedia" />
 					</include>
 				</control>
-				-->
+-->				
 			</control>
 			<include>BottomBar</include>
 			<control type="group">
@@ -1214,38 +1257,15 @@
 					<aspectratio>keep</aspectratio>
 					<texture >$INFO[Window(Home).Property(plugin.video.embycon-userimage)]</texture>
 				</control>
-				<!--
-				<control type="image">
-					<aspectratio>keep</aspectratio>
-					<width>60</width>
-					<height>60</height>
-					<top>20</top>
-					<left>120</left>
-					<texture colordiffuse="button_focus">icons/logo.png</texture>
-				</control>
-				-->
 				<control type="image">
 					<left>90</left>
 					<top>30</top>
 					<aspectratio>keep</aspectratio>
 					<width>192</width>
 					<height>36</height>
-					<texture>icons/logo-text.png</texture>
+					<texture>special://xbmc/media/vendor_logo.png</texture>
 				</control>
 			</control>
-			<!--
-			<control type="label">
-				<left>15</left>
-				<top>110</top>
-				<height>95</height>
-				<width>370</width>
-				<aligny>center</aligny>
-				<font>font10</font>
-				<label>$INFO[System.CPUTemperature] - $INFO[System.GPUTemperature]</label>
-				<shadowcolor>text_shadow</shadowcolor>
-				<visible>!String.IsEqual(System.CPUTemperature,Not available)</visible>
-			</control>
-			-->
 		</control>
 	</controls>
 </window>

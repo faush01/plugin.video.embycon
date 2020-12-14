@@ -151,6 +151,7 @@
 	</include>
 	<include name="CategoryLabel">
 		<param name="visible">true</param>
+		<param name="item_treshold">0</param>
 		<definition>
 			<control type="label" id="$PARAM[list_id]666">
 				<left>55</left>
@@ -160,7 +161,7 @@
 				<label>$PARAM[label]</label>
 				<shadowcolor>text_shadow</shadowcolor>
 				<visible>$PARAM[visible]</visible>
-				<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,0) | Container($PARAM[list_id]).IsUpdating</visible>
+				<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,$PARAM[item_treshold]) | [Container($PARAM[list_id]).IsUpdating + Integer.IsEqual(Container($PARAM[list_id]).NumItems,0)]</visible>
 			</control>
 		</definition>
 	</include>
@@ -492,8 +493,8 @@
 		<param name="item_limit">20</param>
 		<param name="icon">$INFO[ListItem.Icon]</param>
 		<param name="icon_height">120</param>
-		<param name="pvr_submenu">false</param>
-		<param name="pvr_type">TV</param>
+		<param name="additional_movie_items">false</param>
+		<param name="additional_tvshow_items">false</param>
 		<param name="visible">true</param>
 		<definition>
 			<include content="CategoryLabel">
@@ -591,55 +592,40 @@
 						</control>
 					</control>
 				</focusedlayout>
-				<include condition="!$PARAM[pvr_submenu]" content="SubmenuContent">
-					<param name="widget_target" value="$PARAM[widget_target]"/>
-					<param name="item_limit" value="$PARAM[item_limit]"/>
-					<param name="content_path" value="$PARAM[content_path]"/>
-				</include>
-				<include condition="$PARAM[pvr_submenu]" content="PVRSubMenuContent">
-					<param name="pvr_type" value="$PARAM[pvr_type]"/>
-				</include>
+				<content target="$PARAM[widget_target]" limit="$PARAM[item_limit]">$PARAM[content_path]</content>
+				<include condition="$PARAM[additional_movie_items]" content="MovieSubmenuItems" />
+				<include condition="$PARAM[additional_tvshow_items]" content="TVShowSubmenuItems" />
 			</control>
 		</definition>
 	</include>
-	<include name="SubmenuContent">
-		<content target="$PARAM[widget_target]" limit="$PARAM[item_limit]">$PARAM[content_path]</content>
-	</include>
-	<include name="PVRSubMenuContent">
+	<include name="MovieSubmenuItems">
 		<content>
 			<item>
-				<label>$LOCALIZE[19019]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]Channels)</onclick>
-				<thumb>DefaultAddonPeripheral.png</thumb>
+				<label>$LOCALIZE[31146]</label>
+				<onclick>ActivateWindow(videos,plugin://script.embuary.info/movie/now_playing,return)</onclick>
+				<thumb>DefaultStudios.png</thumb>
+				<visible>System.AddonIsEnabled(script.embuary.info)</visible>
 			</item>
 			<item>
-				<label>$LOCALIZE[19069]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]Guide)</onclick>
-				<thumb>icons/pvr/epg.png</thumb>
+				<label>$LOCALIZE[31147]</label>
+				<onclick>ActivateWindow(videos,plugin://script.embuary.info/movie/upcoming,return)</onclick>
+				<thumb>DefaultYear.png</thumb>
+				<visible>System.AddonIsEnabled(script.embuary.info)</visible>
 			</item>
+		</content>
+	</include>
+	<include name="TVShowSubmenuItems">
+		<content>
 			<item>
-				<label>$LOCALIZE[19017]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]Recordings)</onclick>
-				<thumb>icons/pvr/recording.png</thumb>
-			</item>
-			<item>
-				<label>$LOCALIZE[19040]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]Timers)</onclick>
-				<thumb>icons/pvr/timer.png</thumb>
-			</item>
-			<item>
-				<label>$LOCALIZE[19138]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]TimerRules)</onclick>
-				<thumb>icons/pvr/timer-rule.png</thumb>
-			</item>
-			<item>
-				<label>$LOCALIZE[137]</label>
-				<onclick>ActivateWindow($PARAM[pvr_type]Search)</onclick>
-				<thumb>DefaultAddonsSearch.png</thumb>
+				<label>$LOCALIZE[31027]</label>
+				<onclick>ActivateWindow(videos,plugin://script.embuary.info/nextaired,return)</onclick>
+				<thumb>DefaultYear.png</thumb>
+				<visible>System.AddonIsEnabled(script.embuary.info)</visible>
 			</item>
 		</content>
 	</include>
 	<include name="WidgetListChannels">
+		<param name="item_treshold">0</param>
 		<param name="item_limit">15</param>
 		<param name="icon">$INFO[ListItem.Icon]</param>
 		<param name="label">$INFO[ListItem.Label]</param>
@@ -648,6 +634,7 @@
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
 				<param name="list_id" value="$PARAM[list_id]"/>
+				<param name="item_treshold" value="$PARAM[item_treshold]"/>
 			</include>
 			<include content="BusyListSpinner">
 				<param name="list_id" value="$PARAM[list_id]"/>
@@ -661,7 +648,7 @@
 				<include content="WidgetListCommon">
 					<param name="list_id" value="$PARAM[list_id]"/>
 				</include>
-				<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,0) | Container($PARAM[list_id]).IsUpdating</visible>
+				<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,$PARAM[item_treshold]) | [Container($PARAM[list_id]).IsUpdating + Integer.IsEqual(Container($PARAM[list_id]).NumItems,0)]</visible>
 				<itemlayout width="310" height="500">
 					<control type="group">
 						<left>70</left>
@@ -949,8 +936,29 @@
 			<item>
 				<icon>resource://resource.images.weathericons.default/na.png</icon>
 				<onclick>noop</onclick>
-				<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched))</visible>
+				<visible>!Weather.IsFetched</visible>
 			</item>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="0" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="1" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="2" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="3" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="4" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="5" />
+			</include>
+			<include content="WeatherDayItem">
+				<param name="item_index" value="6" />
+			</include>
 			<include content="WeatherDailyItem">
 				<param name="item_index" value="1" />
 			</include>
@@ -1021,7 +1029,22 @@
 			<property name="FanartCode">$INFO[Window(weather).Property(Daily.$PARAM[item_index].FanartCode)]</property>
 			<thumb>resource://resource.images.weathericons.default/$INFO[Window(weather).Property(Daily.$PARAM[item_index].OutlookIcon)]</thumb>
 			<onclick>noop</onclick>
-			<visible>!String.IsEmpty(Window(weather).Property(Daily.$PARAM[item_index].Outlook))</visible>
+			<visible>!String.IsEmpty(Window(weather).Property(Daily.IsFetched)) + !String.IsEmpty(Window(weather).Property(Daily.$PARAM[item_index].Outlook))</visible>
+		</item>
+	</include>
+	<include name="WeatherDayItem">
+		<item>
+			<label>$INFO[Window(weather).Property(Day$PARAM[item_index].Title)]</label>
+			<label2>[COLOR blue]$INFO[Window(weather).Property(Day$PARAM[item_index].LowTemp)]$INFO[System.TemperatureUnits][/COLOR] ∙ [COLOR red]$INFO[Window(weather).Property(Day$PARAM[item_index].HighTemp)]$INFO[System.TemperatureUnits][/COLOR]</label2>
+			<property name="LongDay"></property>
+			<property name="TempDay"></property>
+			<property name="Cloudiness"></property>
+			<property name="Outlook"></property>
+			<property name="ShortDate"></property>
+			<property name="FanartCode">$INFO[Window(weather).Property(Day$PARAM[item_index].FanartCode)]</property>
+			<thumb>$INFO[Window(weather).Property(Day$PARAM[item_index].OutlookIcon)]</thumb>
+			<onclick>noop</onclick>
+			<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched)) + !String.IsEmpty(Window(weather).Property(Day$PARAM[item_index].Outlook))</visible>
 		</item>
 	</include>
 	<include name="WeatherMapItem">
@@ -1030,6 +1053,14 @@
 			<visible>Weather.IsFetched + !String.IsEmpty(Window(weather).Property(Map.$PARAM[item_id].Area)) + !String.IsEmpty(Window(weather).Property(Map.IsFetched))</visible>
 			<centerleft>50%</centerleft>
 			<width>1920</width>
+			<control type="button" id="700$PARAM[item_id]0">
+				<left>50</left>
+				<top>100</top>
+				<width>1820</width>
+				<height>920</height>
+				<onup>$PARAM[onup_id]</onup>
+				<ondown>$PARAM[ondown_id]</ondown>
+			</control>
 			<control type="image" id="700$PARAM[item_id]1">
 				<left>50</left>
 				<top>100</top>
@@ -1054,9 +1085,16 @@
 				<height>800</height>
 				<texture>$INFO[Window(weather).Property(Map.$PARAM[item_id].Layer)]</texture>
 				<aspectratio>scale</aspectratio>
-				<colordiffuse>70FFFFFF</colordiffuse>
+				<colordiffuse>B0FFFFFF</colordiffuse>
 			</control>
 			<control type="image" id="700$PARAM[item_id]4">
+				<left>1000</left>
+				<top>858</top>
+				<width>340</width>
+				<height>100</height>
+				<texture border="21">buttons/button-nofo.png</texture>
+			</control>
+			<control type="image" id="700$PARAM[item_id]5">
 				<left>1340</left>
 				<top>880</top>
 				<width>350</width>
@@ -1064,20 +1102,15 @@
 				<texture>$INFO[Window(weather).Property(Map.$PARAM[item_id].Legend)]</texture>
 			</control>
 		</control>
-		<control type="button" id="700$PARAM[item_id]0">
+		<control type="label" id="700$PARAM[item_id]9">
 			<left>1000</left>
 			<top>0</top>
 			<width>340</width>
 			<height>100</height>
 			<align>center</align>
 			<aligny>center</aligny>
-			<textoffsetx>40</textoffsetx>
-			<textoffsety>0</textoffsety>
-			<texturenofocus border="21">buttons/button-nofo.png</texturenofocus>
-			<animation effect="slide" end="0,-90" time="0" condition="true">Conditional</animation>
-			<texturefocus border="21" colordiffuse="button_focus">buttons/button-fo.png</texturefocus>
+			<animation effect="slide" end="0,-92" time="0" condition="true">Conditional</animation>
 			<font>font30_title</font>
-			<onclick>noop</onclick>
 			<label>$INFO[Window(weather).Property(Map.$PARAM[item_id].Heading)]</label>
 			<visible>Weather.IsFetched + !String.IsEmpty(Window(weather).Property(Map.$PARAM[item_id].Area)) + !String.IsEmpty(Window(weather).Property(Map.IsFetched))</visible>
 		</control>
