@@ -531,7 +531,7 @@
 						<param name="label" value="$VAR[VideoInfoPlayButtonLabelVar]" />
 						<param name="visible" value="!String.StartsWith(ListItem.Path,plugin://plugin.video.embycon)" />
 					</include>
-					
+<!-- Start of EmbyCon action buttons -->					
 					<include content="InfoDialogButton">
 						<param name="id" value="6176" />
 						<param name="icon" value="icons/infodialogs/play.png" />
@@ -548,7 +548,7 @@
 						<param name="onclick_2" value="ActivateWindow(Videos, $INFO[ListItem.FileNameAndPath], return)" />
 						<param name="visible" value="[String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,set)] + String.StartsWith(ListItem.Path,plugin://plugin.video.embycon)" />
 					</include>					
-					
+<!-- End of EmbyCon action buttons -->					
 					<include content="InfoDialogButton">
 						<param name="id" value="11" />
 						<param name="icon" value="icons/infodialogs/trailer.png" />

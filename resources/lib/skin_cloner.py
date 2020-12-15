@@ -106,9 +106,12 @@ def clone_skin():
 
     for file_name in file_list:
         source = os.path.join(embycon_path, "resources", "skins", "skin.estuary", ver, "xml", file_name)
-        destination = os.path.join(kodi_skin_destination, "xml", file_name)
-        log.debug("Copying modified skin files : source:{0} destination:{1}", source, destination)
-        xbmcvfs.copy(source, destination)
+        if xbmcvfs.exists(source):
+            destination = os.path.join(kodi_skin_destination, "xml", file_name)
+            log.debug("Copying modified skin files : source:{0} destination:{1}", source, destination)
+            xbmcvfs.copy(source, destination)
+        else:
+            log.debug("Copying modified skin files : source:{0} destination:{1} !Skipping, source not available!", source, destination)
 
     xbmc.executebuiltin("UpdateLocalAddons")
 
