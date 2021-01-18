@@ -3,6 +3,7 @@
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcvfs
 
 from datetime import timedelta
 import json
@@ -285,7 +286,7 @@ def play_file(play_info, monitor):
         play_url = "%s/emby/Items/%s/Images/Primary"
         play_url = play_url % (server, item_id)
 
-        plugin_path = xbmc.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
+        plugin_path = xbmcvfs.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
         action_menu = PictureViewer("PictureViewer.xml", plugin_path, "default", "720p")
         action_menu.setPicture(play_url)
         action_menu.doModal()
@@ -1017,7 +1018,7 @@ def prompt_for_stop_actions(item_id, data):
             # next_epp_name = "Episode %02d - (%s)" % (index, next_episode.get("Name", "n/a"))
 
             plugin_path = settings.getAddonInfo('path')
-            plugin_path_real = xbmc.translatePath(os.path.join(plugin_path))
+            plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
             play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
             play_next_dialog.set_episode_info(next_episode)

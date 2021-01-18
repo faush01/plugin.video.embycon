@@ -1,6 +1,5 @@
 
 import xbmcvfs
-import xbmc
 import base64
 import re
 from urllib.parse import urlparse
@@ -189,7 +188,7 @@ class HttpImageHandler(BaseHTTPRequestHandler):
 
         else:
 
-            image_path = xbmc.translatePath("special://home/addons/plugin.video.embycon/icon.png").decode('utf-8')
+            image_path = xbmcvfs.translatePath("special://home/addons/plugin.video.embycon/icon.png").decode('utf-8')
             self.send_response(200)
             self.send_header('Content-type', 'image/png')
             modified = xbmcvfs.Stat(image_path).st_mtime()

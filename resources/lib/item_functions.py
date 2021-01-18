@@ -12,6 +12,7 @@ from collections import defaultdict
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 
 from .utils import get_art, datetime_from_string
 from .simple_logging import SimpleLogging
@@ -23,7 +24,7 @@ kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
 addon_instance = xbmcaddon.Addon()
 addon_path = addon_instance.getAddonInfo('path')
-PLUGINPATH = xbmc.translatePath(os.path.join(addon_path))
+PLUGINPATH = xbmcvfs.translatePath(os.path.join(addon_path))
 
 download_utils = DownloadUtils()
 home_window = HomeWindow()

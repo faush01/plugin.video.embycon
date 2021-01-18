@@ -6,6 +6,7 @@ import urllib.error
 
 import xbmc
 import xbmcgui
+import xbmcvfs
 
 from .simple_logging import SimpleLogging
 from .datamanager import DataManager
@@ -16,7 +17,7 @@ log = SimpleLogging(__name__)
 dataManager = DataManager()
 
 details_string = 'EpisodeCount,SeasonCount,Path,Etag,MediaStreams'
-icon = xbmc.translatePath('special://home/addons/plugin.video.embycon/icon.png')
+icon = xbmcvfs.translatePath('special://home/addons/plugin.video.embycon/icon.png')
 
 
 def not_found(content_string):

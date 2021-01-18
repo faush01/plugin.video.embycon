@@ -15,6 +15,7 @@ import xbmcplugin
 import xbmcgui
 import xbmcaddon
 import xbmc
+import xbmcvfs
 
 from .downloadutils import DownloadUtils, load_user_details
 from .utils import get_art, send_event_notification, convert_size
@@ -37,9 +38,9 @@ from .tracking import timer
 from .skin_cloner import clone_default_skin
 
 __addon__ = xbmcaddon.Addon()
-__addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
+__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
 __cwd__ = __addon__.getAddonInfo('path')
-PLUGINPATH = xbmc.translatePath(os.path.join(__cwd__))
+PLUGINPATH = xbmcvfs.translatePath(os.path.join(__cwd__))
 
 log = SimpleLogging(__name__)
 

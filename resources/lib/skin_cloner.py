@@ -49,7 +49,7 @@ def walk_path(root_path, relative_path, all_files):
 def clone_skin():
     log.debug("Cloning Estuary Skin")
 
-    kodi_path = xbmc.translatePath("special://xbmc")
+    kodi_path = xbmcvfs.translatePath("special://xbmc")
     kodi_skin_source = os.path.join(kodi_path, "addons", "skin.estuary")
     log.debug("Kodi Skin Source: {0}", kodi_skin_source)
 
@@ -61,7 +61,7 @@ def clone_skin():
     for found in all_files:
         log.debug("Found Path: {0}", found)
 
-    kodi_home_path = xbmc.translatePath("special://home")
+    kodi_home_path = xbmcvfs.translatePath("special://home")
     kodi_skin_destination = os.path.join(kodi_home_path, "addons", "skin.estuary_embycon")
     log.debug("Kodi Skin Destination: {0}", kodi_skin_destination)
 

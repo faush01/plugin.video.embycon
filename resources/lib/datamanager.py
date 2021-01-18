@@ -40,7 +40,7 @@ class CacheItem:
 
 class DataManager:
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
 
     def __init__(self, *args):
         # log.debug("DataManager __init__")
@@ -265,7 +265,7 @@ class CacheManagerThread(threading.Thread):
 def clear_cached_server_data():
     log.debug("clear_cached_server_data() called")
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     dirs, files = xbmcvfs.listdir(addon_dir)
 
     del_count = 0
@@ -287,7 +287,7 @@ def clear_cached_server_data():
 def clear_old_cache_data():
     log.debug("clear_old_cache_data() : called")
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     dirs, files = xbmcvfs.listdir(addon_dir)
 
     del_count = 0
