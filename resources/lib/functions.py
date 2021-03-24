@@ -55,13 +55,15 @@ def main_entry_point():
     log.debug("===== EmbyCon START =====")
 
     settings = xbmcaddon.Addon()
-    profile_count = int(settings.getSetting('profile_count'))
+    profiling_enabled = settings.getSetting('profiling_enabled') == "true"
     pr = None
-    if profile_count > 0:
-        profile_count = profile_count - 1
-        settings.setSetting('profile_count', str(profile_count))
-        pr = cProfile.Profile()
-        pr.enable()
+    if profiling_enabled:
+
+        message = "Enable performance profiling for this request?"
+        response = xbmcgui.Dialog().yesno("Record Performance Data", message)
+        if response:
+            pr = cProfile.Profile()
+            pr.enable()
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().get_version())
@@ -166,7 +168,8 @@ def main_entry_point():
         pr.disable()
 
         file_time_stamp = time.strftime("%Y%m%d-%H%M%S")
-        tab_file_name = __addondir__ + "profile(" + file_time_stamp + ").txt"
+        profile_file_name = "profile(" + file_time_stamp + ").txt"
+        tab_file_name = __addondir__ + profile_file_name
         s = io.StringIO()
         ps = pstats.Stats(pr, stream=s)
         ps = ps.sort_stats('cumulative')
@@ -175,7 +178,9 @@ def main_entry_point():
         ps = ps.sort_stats('tottime')
         ps.print_stats()
         with open(tab_file_name, 'wb') as f:
-            f.write(s.getvalue())
+            if param_url:
+                f.write((param_url + "\r\n").encode("utf-8"))
+            f.write(s.getvalue().encode("utf-8"))
 
     log.debug("===== EmbyCon FINISHED =====")
 
