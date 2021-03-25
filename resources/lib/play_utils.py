@@ -1011,12 +1011,7 @@ def prompt_for_stop_actions(item_id, data):
             item_type == "Episode" and
             percenatge_complete > prompt_next_percentage):
 
-        # resp = True
-        index = next_episode.get("IndexNumber", -1)
         if play_prompt:
-            # series_name = next_episode.get("SeriesName")
-            # next_epp_name = "Episode %02d - (%s)" % (index, next_episode.get("Name", "n/a"))
-
             plugin_path = settings.getAddonInfo('path')
             plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
@@ -1027,24 +1022,14 @@ def prompt_for_stop_actions(item_id, data):
             if not play_next_dialog.get_play_called():
                 xbmc.executebuiltin("Container.Refresh")
 
-            # resp = xbmcgui.Dialog().yesno(string_load(30283),
-            #                              series_name,
-            #                              next_epp_name,
-            #                              autoclose=20000)
-        """
-        if resp:
+        else:
             next_item_id = next_episode.get("Id")
             log.debug("Playing Next Episode: {0}", next_item_id)
-
             play_info = {}
             play_info["item_id"] = next_item_id
             play_info["auto_resume"] = "-1"
             play_info["force_transcode"] = False
             send_event_notification("embycon_play_action", play_info)
-        
-        else:
-            xbmc.executebuiltin("Container.Refresh")
-        """
 
 
 def stop_all_playback(played_information):
