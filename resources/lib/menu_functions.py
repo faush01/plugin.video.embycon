@@ -679,6 +679,7 @@ def display_tvshow_type(menu_params, view):
     params["SortOrder"] = "Descending"
     params["Filters"] = "IsNotFolder"
     params["IncludeItemTypes"] = "Episode"
+    params["Legacynextup"] = "true"
     path = get_emby_url("{server}/emby/Shows/NextUp", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=Episodes&sort=none"
     url += "&name_format=" + urllib.parse.quote('Episode|episode_name_format')

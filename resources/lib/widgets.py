@@ -353,6 +353,7 @@ def get_widget_content(handle, params):
         url_params["Fields"] = "{field_filters}"
         url_params["format"] = "json"
         url_params["ImageTypeLimit"] = 1
+        url_params["Legacynextup"] = "true"
 
     elif widget_type == "movie_recommendations":
         suggested_items_url_params = {}
