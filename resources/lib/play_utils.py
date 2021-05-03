@@ -1094,12 +1094,14 @@ def stop_all_playback(played_information):
 def get_playing_data(play_data_map):
     try:
         playing_file = xbmc.Player().getPlayingFile()
+        playing_file = playing_file.decode('utf-8')
     except Exception as e:
         log.error("get_playing_data : getPlayingFile() : {0}", e)
         return None
     log.debug("get_playing_data : getPlayingFile() : {0}", playing_file)
     if playing_file not in play_data_map:
         infolabel_path_and_file = xbmc.getInfoLabel("Player.Filenameandpath")
+        infolabel_path_and_file = infolabel_path_and_file.decode('utf-8')
         log.debug("get_playing_data : Filenameandpath : {0}", infolabel_path_and_file)
         if infolabel_path_and_file not in play_data_map:
             log.debug("get_playing_data : play data not found")
