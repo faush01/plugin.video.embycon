@@ -253,11 +253,11 @@ def extract_item_info(item, gui_options):
         cast = []
         for person in people:
             person_type = person["Type"]
-            if person_type == "Director":
+            if person_type == "Director" and person["Name"] is not None:
                 item_details.director = item_details.director + person["Name"] + ' '
-            elif person_type == "Writing":
+            elif person_type == "Writing" and person["Name"] is not None:
                 item_details.writer = person["Name"]
-            elif person_type == "Actor":
+            elif person_type == "Actor" and person["Name"] is not None:
                 # log.debug("Person: {0}", person)
                 person_name = person["Name"]
                 person_role = person["Role"]
