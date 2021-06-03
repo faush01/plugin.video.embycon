@@ -33,6 +33,7 @@ from .cache_images import CacheArtwork
 from .dir_functions import get_content, process_directory
 from .tracking import timer
 from .skin_cloner import clone_default_skin
+from .item_functions import extract_media_info
 
 __addon__ = xbmcaddon.Addon()
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
@@ -460,6 +461,11 @@ def show_menu(params):
     li.setProperty('menu_id', 'info')
     action_items.append(li)
 
+    if result["Type"] in ("Movie", "Episode"):
+        li = xbmcgui.ListItem("Media Info")
+        li.setProperty('menu_id', "media_info")
+        action_items.append(li)
+
     window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
     container_view_id = str(window.getFocusId())
     container_content_type = xbmc.getInfoLabel("Container.Content")
@@ -496,6 +502,16 @@ def show_menu(params):
         # result = xbmcgui.Dialog().info(list_item)
         # log.debug("xbmcgui.Dialog().info: {0}", result)
         play_action(params)
+
+    elif selected_action == "media_info":
+        url = "{server}/emby/Users/{userid}/Items/%s?format=json" % (item_id,)
+        data_manager = DataManager()
+        item = data_manager.get_content(url)
+        log.debug("MediaInfo item: {0}", item)
+
+        media_info = extract_media_info(item)
+        msg = "\r\n".join(media_info)
+        xbmcgui.Dialog().textviewer("Media Info", msg, usemono=True)
 
     elif selected_action == "set_view":
         log.debug("Settign view type for {0} to {1}", view_key, container_view_id)

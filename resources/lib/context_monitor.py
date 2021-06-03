@@ -1,5 +1,6 @@
 import threading
 import xbmc
+import traceback
 
 from .simple_logging import SimpleLogging
 from resources.lib.functions import show_menu
@@ -27,7 +28,11 @@ class ContextMonitor(threading.Thread):
                         xbmc.executebuiltin("Dialog.Close(contextmenu,true)")
                         params = {}
                         params["item_id"] = item_id
-                        show_menu(params)
+                        try:
+                            show_menu(params)
+                        except Exception as err:
+                            tb = traceback.format_exc()
+                            log.error("Context Menu Error : {0}\n{1}", err, tb)
 
                 container_id = xbmc.getInfoLabel("System.CurrentControlID")
                 item_id = xbmc.getInfoLabel("Container(" + str(container_id) + ").ListItem.Property(id)")

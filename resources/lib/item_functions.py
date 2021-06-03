@@ -96,6 +96,77 @@ class ItemDetails:
     baseline_itemname = None
 
 
+def extract_media_info(item):
+    media_info = []
+
+    media_sources = item["MediaSources"]
+    if media_sources is not None:
+        for media_source in media_sources:
+            media_info.append("Media Stream (%s)" % (media_source["Name"],))
+            media_info.append(" -Type : %s" % (media_source["Type"],))
+            media_info.append(" -Protocol : %s" % (media_source["Protocol"],))
+            media_info.append(" -Path : %s" % (media_source["Path"],))
+            media_info.append(" -IsRemote : %s" % (media_source["IsRemote"],))
+            media_info.append(" -Container : %s" % (media_source["Container"],))
+            if media_source["BitRate"] is not None:
+                media_info.append(" -Bitrate : {:,}".format(media_source["Bitrate"]))
+            if media_source["Size"] is not None:
+                media_info.append(" -Size : {:,}".format(media_source["Size"]))
+            media_info.append(" -DefaultAudioStreamIndex : %s" % (media_source["DefaultAudioStreamIndex"],))
+
+            media_streams = media_source["MediaStreams"]
+            if media_streams is not None:
+                for mediaStream in media_streams:
+                    stream_type = mediaStream["Type"]
+                    if stream_type == "Video":
+                        media_info.append(" -Video Stream")
+                        media_info.append("   -Index: %s" % (mediaStream["Index"],))
+                        media_info.append("   -Codec: %s" % (mediaStream["Codec"],))
+                        media_info.append("   -Size: %sx%s" % (mediaStream["Width"], mediaStream["Height"]))
+                        media_info.append("   -AspectRatio: %s" % (mediaStream["AspectRatio"],))
+                        media_info.append("   -ColorSpace: %s" % (mediaStream["ColorSpace"],))
+                        media_info.append("   -DisplayTitle: %s" % (mediaStream["DisplayTitle"],))
+                        media_info.append("   -IsInterlaced: %s" % (mediaStream["IsInterlaced"],))
+                        if mediaStream["BitRate"] is not None:
+                            media_info.append("   -BitRate: {:,}".format(mediaStream["BitRate"]))
+                        media_info.append("   -BitDepth: %s" % (mediaStream["BitDepth"],))
+                        media_info.append("   -AverageFrameRate: %s" % (mediaStream["AverageFrameRate"],))
+                        media_info.append("   -RealFrameRate: %s" % (mediaStream["RealFrameRate"],))
+                        media_info.append("   -Profile: %s" % (mediaStream["Profile"],))
+                        media_info.append("   -Level: %s" % (mediaStream["Level"],))
+                        media_info.append("   -PixelFormat: %s" % (mediaStream["PixelFormat"],))
+                        media_info.append("   -IsAnamorphic: %s" % (mediaStream["IsAnamorphic"],))
+
+                    if stream_type == "Audio":
+                        media_info.append(" -Audio Stream")
+                        media_info.append("   -Index: %s" % (mediaStream["Index"],))
+                        media_info.append("   -Title: %s" % (mediaStream["DisplayTitle"],))
+                        media_info.append("   -Codec: %s" % (mediaStream["Codec"],))
+                        media_info.append("   -ChannelLayout: %s" % (mediaStream["ChannelLayout"],))
+                        media_info.append("   -Channels: %s" % (mediaStream["Channels"],))
+                        if mediaStream["BitRate"] is not None:
+                            media_info.append("   -BitRate: {:,}".format(mediaStream["BitRate"]))
+                        media_info.append("   -SampleRate: %s" % (mediaStream["SampleRate"],))
+                        media_info.append("   -IsDefault: %s" % (mediaStream["IsDefault"],))
+                        media_info.append("   -IsForced: %s" % (mediaStream["IsForced"],))
+                        media_info.append("   -IsExternal: %s" % (mediaStream["IsExternal"],))
+                        media_info.append("   -IsExternal: %s" % (mediaStream["IsExternal"],))
+
+                    if stream_type == "Subtitle":
+                        media_info.append(" -Subtitle Stream")
+                        media_info.append("   -Index: %s" % (mediaStream["Index"],))
+                        media_info.append("   -Codec: %s" % (mediaStream["Codec"],))
+                        media_info.append("   -Language: %s" % (mediaStream["Language"],))
+                        media_info.append("   -DisplayTitle: %s" % (mediaStream["DisplayTitle"],))
+                        media_info.append("   -DisplayLanguage: %s" % (mediaStream["DisplayLanguage"],))
+                        media_info.append("   -IsDefault: %s" % (mediaStream["IsDefault"],))
+                        media_info.append("   -IsForced: %s" % (mediaStream["IsForced"],))
+                        media_info.append("   -IsExternal: %s" % (mediaStream["IsExternal"],))
+                        media_info.append("   -IsTextSubtitleStream: %s" % (mediaStream["IsTextSubtitleStream"],))
+
+    return media_info
+
+
 def extract_item_info(item, gui_options):
 
     item_details = ItemDetails()
