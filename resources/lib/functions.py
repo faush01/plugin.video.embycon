@@ -438,12 +438,6 @@ def show_menu(params):
         li.setProperty('menu_id', 'delete')
         action_items.append(li)
 
-    safe_delete = home_window.get_property("safe_delete_plugin_available") == "true"
-    if safe_delete:
-        li = xbmcgui.ListItem("Safe Delete")
-        li.setProperty('menu_id', 'safe_delete')
-        action_items.append(li)
-
     li = xbmcgui.ListItem(string_load(30398))
     li.setProperty('menu_id', 'refresh_server')
     action_items.append(li)
@@ -590,62 +584,6 @@ def show_menu(params):
 
     elif selected_action == "delete":
         delete(item_id)
-
-    elif selected_action == "safe_delete":
-        url = "{server}/emby_safe_delete/delete_item/" + item_id
-        delete_action = downloadUtils.download_url(url)
-        result = json.loads(delete_action)
-        dialog = xbmcgui.Dialog()
-        if result:
-            log.debug("Safe_Delete_Action: {0}", result)
-            action_token = result["action_token"]
-
-            message = "You are about to delete the following item[CR][CR]"
-
-            message += "Type: " + result["item_info"]["Item_type"] + "[CR]"
-
-            if result["item_info"]["Item_type"] == "Series":
-                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
-            elif result["item_info"]["Item_type"] == "Season":
-                message += "Season: " + str(result["item_info"]["season_number"]) + "[CR]"
-                message += "Name: " + result["item_info"]["season_name"] + "[CR]"
-            elif result["item_info"]["Item_type"] == "Episode":
-                message += "Series: " + result["item_info"]["series_name"] + "[CR]"
-                message += "Season: " + result["item_info"]["season_name"] + "[CR]"
-                message += "Episode: " + str(result["item_info"]["episode_number"]) + "[CR]"
-                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
-            else:
-                message += "Name: " + result["item_info"]["item_name"] + "[CR]"
-
-            message += "[CR]File List[CR][CR]"
-
-            for file_info in result["file_list"]:
-                message += " - " + file_info["Key"] + " (" + convert_size(file_info["Value"]) + ")[CR]"
-            message += "[CR][CR]Are you sure?[CR][CR]"
-
-            confirm_dialog = SafeDeleteDialog("SafeDeleteDialog.xml", PLUGINPATH, "default", "720p")
-            confirm_dialog.message = message
-            confirm_dialog.heading = "Confirm delete files?"
-            confirm_dialog.doModal()
-            log.debug("safe_delete_confirm_dialog: {0}", confirm_dialog.confirm)
-
-            if confirm_dialog.confirm:
-                url = "{server}/emby_safe_delete/delete_item_action"
-                playback_info = {
-                    'item_id': item_id,
-                    'action_token': action_token
-                }
-                delete_action = downloadUtils.download_url(url, method="POST", post_body=playback_info)
-                log.debug("Delete result action: {0}", delete_action)
-                delete_action_result = json.loads(delete_action)
-                if not delete_action_result:
-                    dialog.ok("Error", "Error deleteing files", "Error in responce from server")
-                elif not delete_action_result["result"]:
-                    dialog.ok("Error", "Error deleteing files", delete_action_result["message"])
-                else:
-                    dialog.ok("Deleted", "Files deleted")
-        else:
-            dialog.ok("Error", "Error getting safe delete confirmation")
 
     elif selected_action == "show_extras":
         # "http://localhost:8096/emby/Users/3138bed521e5465b9be26d2c63be94af/Items/78/SpecialFeatures"

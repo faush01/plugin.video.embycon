@@ -16,12 +16,13 @@ from resources.lib.widgets import set_background_image, set_random_movies
 from resources.lib.websocket_client import WebSocketClient
 from resources.lib.menu_functions import set_library_window_values
 from resources.lib.context_monitor import ContextMonitor
-from resources.lib.server_detect import check_server, check_safe_delete_available
+from resources.lib.server_detect import check_server
 from resources.lib.library_change_monitor import LibraryChangeMonitor
 from resources.lib.datamanager import clear_old_cache_data
 from resources.lib.tracking import set_timing_enabled
 from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
+from resources.lib.skin_cloner import check_skin_installed
 
 settings = xbmcaddon.Addon()
 
@@ -70,7 +71,9 @@ last_progress_update = time.time()
 last_content_check = time.time()
 last_background_update = 0
 last_random_movie_update = 0
-safe_delete_check = False
+skin_checked = False
+skin_check_delay = 20
+user_last_changed = time.time()
 
 # start the library update monitor
 library_change_monitor = LibraryChangeMonitor()
@@ -104,7 +107,7 @@ enable_logging = settings.getSetting('log_debug') == "true"
 if enable_logging:
     xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
                                   "Debug logging enabled!",
-                                  time=8000,
+                                  time=3000,
                                   icon=xbmcgui.NOTIFICATION_WARNING)
 
 # monitor.abortRequested() is causes issues, it currently triggers for all addon cancelations which causes
@@ -132,6 +135,7 @@ while not kodi_monitor.abortRequested():
                     log.debug("user_change_detected")
                     prev_user_id = home_window.get_property("userid")
                     user_changed = True
+                    user_last_changed = time.time()
 
                 if user_changed or (random_movie_list_interval != 0 and (time.time() - last_random_movie_update) > random_movie_list_interval):
                     last_random_movie_update = time.time()
@@ -151,9 +155,9 @@ while not kodi_monitor.abortRequested():
                     websocket_client = WebSocketClient(library_change_monitor)
                     websocket_client.start()
 
-                if user_changed or not safe_delete_check:
-                    check_safe_delete_available()
-                    safe_delete_check = True
+                if skin_checked is False and (time.time() - user_last_changed) > skin_check_delay and home_window.get_property("userid"):
+                    skin_checked = True
+                    check_skin_installed()
 
             elif screen_saver_active:
                 last_random_movie_update = time.time() - (random_movie_list_interval - 15)

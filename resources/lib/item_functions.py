@@ -103,16 +103,16 @@ def extract_media_info(item):
     if media_sources is not None:
         for media_source in media_sources:
             media_info.append("Media Stream (%s)" % (media_source["Name"],))
-            media_info.append(" -Type : %s" % (media_source["Type"],))
-            media_info.append(" -Protocol : %s" % (media_source["Protocol"],))
-            media_info.append(" -Path : %s" % (media_source["Path"],))
-            media_info.append(" -IsRemote : %s" % (media_source["IsRemote"],))
-            media_info.append(" -Container : %s" % (media_source["Container"],))
+            media_info.append(" -Type: %s" % (media_source["Type"],))
+            media_info.append(" -Protocol: %s" % (media_source["Protocol"],))
+            media_info.append(" -Path: %s" % (media_source["Path"],))
+            media_info.append(" -IsRemote: %s" % (media_source["IsRemote"],))
+            media_info.append(" -Container: %s" % (media_source["Container"],))
             if media_source["BitRate"] is not None:
-                media_info.append(" -Bitrate : {:,}".format(media_source["Bitrate"]))
+                media_info.append(" -Bitrate: {:,}".format(media_source["Bitrate"]))
             if media_source["Size"] is not None:
-                media_info.append(" -Size : {:,}".format(media_source["Size"]))
-            media_info.append(" -DefaultAudioStreamIndex : %s" % (media_source["DefaultAudioStreamIndex"],))
+                media_info.append(" -Size: {:,}".format(media_source["Size"]))
+            media_info.append(" -DefaultAudioStreamIndex: %s" % (media_source["DefaultAudioStreamIndex"],))
 
             media_streams = media_source["MediaStreams"]
             if media_streams is not None:
@@ -163,6 +163,8 @@ def extract_media_info(item):
                         media_info.append("   -IsForced: %s" % (mediaStream["IsForced"],))
                         media_info.append("   -IsExternal: %s" % (mediaStream["IsExternal"],))
                         media_info.append("   -IsTextSubtitleStream: %s" % (mediaStream["IsTextSubtitleStream"],))
+
+            media_info.append("")
 
     return media_info
 
