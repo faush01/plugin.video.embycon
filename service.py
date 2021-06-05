@@ -157,7 +157,7 @@ while not kodi_monitor.abortRequested():
 
                 if skin_checked is False and (time.time() - user_last_changed) > skin_check_delay and home_window.get_property("userid"):
                     skin_checked = True
-                    check_skin_installed()
+                    # check_skin_installed()
 
             elif screen_saver_active:
                 last_random_movie_update = time.time() - (random_movie_list_interval - 15)
