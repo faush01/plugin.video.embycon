@@ -38,6 +38,7 @@ home_window.clear_property("Params")
 
 log = SimpleLogging('service')
 monitor = xbmc.Monitor()
+kodi_monitor = xbmc.Monitor()
 
 # wait for 10 seconds for the Kodi splash screen to close
 i = 0
@@ -46,6 +47,11 @@ while not monitor.abortRequested():
         break
     i += 1
     xbmc.sleep(100)
+
+server = DownloadUtils().get_server()
+if server is None:
+    # wait for 10 sec if server is not set
+    kodi_monitor.waitForAbort(20)
 
 check_server()
 
@@ -114,7 +120,6 @@ if enable_logging:
 # the service to exit when a user cancels an addon load action. This is a bug in Kodi.
 # I am switching back to xbmc.abortRequested approach until kodi is fixed or I find a work arround
 prev_user_id = home_window.get_property("userid")
-kodi_monitor = xbmc.Monitor()
 
 while not kodi_monitor.abortRequested():
 
