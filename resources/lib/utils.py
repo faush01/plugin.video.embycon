@@ -146,7 +146,7 @@ class PlayUtils:
         playurl = None
         listitem_props = []
 
-        contents = media_source.get('Path').encode('utf-8')  # contains contents of strm file with linebreaks
+        contents = media_source.get('Path')  # contains contents of strm file with linebreaks
 
         line_break = '\r'
         if '\r\n' in contents:
