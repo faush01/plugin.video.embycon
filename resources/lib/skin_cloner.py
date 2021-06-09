@@ -13,12 +13,32 @@ log = SimpleLogging(__name__)
 ver = xbmc.getInfoLabel('System.BuildVersion')[:2]
 
 
+def check_skin_installed():
+
+    params = {
+        'addonid': "skin.estuary_embycon",
+        'properties': ['version', 'enabled']
+    }
+    result = JsonRpc('Addons.GetAddonDetails').execute(params)
+    log.debug("EmbyCon Skin Details: {0}", result)
+
+    installed = result.get("result") is not None
+    version = 'na'
+    if installed:
+        version = result.get("result").get("addon").get("version")
+
+    if not installed:
+        clone_default_skin()
+
+
 def clone_default_skin():
     xbmc.executebuiltin("Dialog.Close(all,true)")
     xbmc.executebuiltin("ActivateWindow(Home)")
 
-    message = "This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.\nDo you want to continue?"
-    response = xbmcgui.Dialog().yesno("EmbyCon Skin Cloner", message)
+    response = xbmcgui.Dialog().yesno("EmbyCon, Clone Estuary Skin?",
+                                      "This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.",
+                                      "Once cloned you can switch between skins in the Kodi interface settings.",
+                                      "Do you want to continue?")
     if not response:
         return
 

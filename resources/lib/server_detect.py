@@ -115,32 +115,6 @@ def check_connection_speed():
     return speed
 
 
-def check_safe_delete_available():
-    log.debug("check_safe_delete_available")
-
-    du = DownloadUtils()
-    json_data = du.download_url("{server}/emby/Plugins")
-    result = json.loads(json_data)
-    if result is not None:
-        log.debug("Server Plugin List: {0}", result)
-
-        safe_delete_found = False
-        for plugin in result:
-            if plugin["Name"] == "Safe Delete":
-                safe_delete_found = True
-                break
-
-        log.debug("Safe Delete Plugin Available: {0}", safe_delete_found)
-        home_window = HomeWindow()
-        if safe_delete_found:
-            home_window.set_property("safe_delete_plugin_available", "true")
-        else:
-            home_window.clear_property("safe_delete_plugin_available")
-
-    else:
-        log.debug("Error getting server plugin list")
-
-
 def get_server_details():
     log.debug("Getting Server Details from Network")
     servers = []

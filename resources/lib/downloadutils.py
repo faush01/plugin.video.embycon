@@ -109,6 +109,7 @@ class DownloadUtils:
         self.verify_cert = settings.getSetting('verify_cert') == 'true'
         log.debug("verify_cert: {0}", self.verify_cert)
 
+    @timer
     def post_capabilities(self):
 
         url = "{server}/emby/Sessions/Capabilities/Full?format=json"
@@ -153,6 +154,7 @@ class DownloadUtils:
         self.download_url(url, post_body=data, method="POST")
         log.debug("Posted Capabilities: {0}", data)
 
+    @timer
     def get_item_playback_info(self, item_id, force_transcode):
 
         addon_settings = xbmcaddon.Addon()
@@ -586,6 +588,7 @@ class DownloadUtils:
 
         return userid
 
+    @timer
     def authenticate(self):
 
         window = HomeWindow()
