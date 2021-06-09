@@ -35,10 +35,12 @@ def clone_default_skin():
     xbmc.executebuiltin("Dialog.Close(all,true)")
     xbmc.executebuiltin("ActivateWindow(Home)")
 
-    response = xbmcgui.Dialog().yesno("EmbyCon, Clone Estuary Skin?",
-                                      "This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.",
-                                      "Once cloned you can switch between skins in the Kodi interface settings.",
-                                      "Do you want to continue?")
+    message = []
+    message.append("This will clone the default Estuary Kodi skin and add EmbyCon functionality to it.")
+    message.append("Once cloned you can switch between skins in the Kodi interface settings.")
+    message.append("Do you want to continue?")
+    response = xbmcgui.Dialog().yesno("EmbyCon, Clone Estuary Skin?", "\n".join(message))
+
     if not response:
         return
 
