@@ -514,6 +514,8 @@ def play_file(play_info, monitor):
                 log.info("PlaybackResumrAction : Playback resumed")
 
     next_episode = get_next_episode(result)
+    next_epp_art = get_art(next_episode, server)
+    next_episode["art"] = next_epp_art
     data["next_episode"] = next_episode
     send_next_episode_details(result, next_episode)
 
@@ -567,7 +569,7 @@ def get_next_episode(item):
            '&IsMissing=False' +
            '&IncludeItemTypes=Episode' +
            '&ImageTypeLimit=1' +
-           '&format=json')
+           '&fields=CriticRating,OfficialRating,CommunityRating,Overview')
 
     data_manager = DataManager()
     items_result = data_manager.get_content(url)

@@ -103,15 +103,44 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         log.debug("PlayNextDialog: onInit")
         self.action_exitkeys_id = [10, 13]
 
-        index = self.episode_info.get("IndexNumber", -1)
         series_name = self.episode_info.get("SeriesName")
-        next_epp_name = "Episode %02d - (%s)" % (index, self.episode_info.get("Name", "n/a"))
+        season_name = self.episode_info.get("SeasonName", "n/a")
+        next_epp_name = self.episode_info.get("Name", "n/a")
+
+        epp_index = self.episode_info.get("IndexNumber", -1)
+        season_index = self.episode_info.get("ParentIndexNumber", -1)
+        epp_season_number = "s%02d-e%02d" % (season_index, epp_index)
+
+        rating = self.episode_info.get("CommunityRating")
+        if rating:
+            next_epp_name += " (%s)" % (rating,)
+
+        overview = self.episode_info.get("Overview")
+
+        overview_label = self.getControl(3018)
+        overview_label.setText(overview)
 
         series_label = self.getControl(3011)
         series_label.setLabel(series_name)
 
+        season_label = self.getControl(3016)
+        season_label.setLabel(season_name)
+
+        epp_season_num = self.getControl(3017)
+        epp_season_num.setLabel(epp_season_number)
+
         series_label = self.getControl(3012)
         series_label.setLabel(next_epp_name)
+
+        epp_image = self.getControl(3015)
+        epp_image.setImage(self.episode_info["art"]["thumb"])
+
+        runtime_ticks = self.episode_info.get("RunTimeTicks", 0)
+        duration = (runtime_ticks / 10000000.0) / 60.0 # convert ticks to minutes
+        duration = int(round(duration, 0))
+        duration_string = "%s m" % (duration,)
+        duration_label = self.getControl(3019)
+        duration_label.setLabel(duration_string)
 
     def onFocus(self, control_id):
         pass
@@ -147,9 +176,8 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
             play_info["auto_resume"] = "-1"
             play_info["force_transcode"] = False
             send_event_notification("embycon_play_action", play_info)
-        elif control_id == 3014:
-            self.auto_close_thread.stop()
-            self.close()
+
+        self.auto_close_thread.set_last()
 
     def set_episode_info(self, info):
         self.episode_info = info
