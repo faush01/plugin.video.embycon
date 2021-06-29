@@ -21,7 +21,7 @@ from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
 from .server_detect import check_server, check_connection_speed
 from .simple_logging import SimpleLogging
-from .menu_functions import display_main_menu, display_menu, show_movie_alpha_list, show_tvshow_alpha_list, show_genre_list, show_search, show_movie_pages
+from .menu_functions import display_main_menu, display_menu, show_movie_alpha_list, show_tvshow_alpha_list, show_genre_list, show_search, show_movie_pages, get_node_url
 from .translation import string_load
 from .server_sessions import show_server_sessions
 from .action_menu import ActionMenu
@@ -34,6 +34,7 @@ from .dir_functions import get_content, process_directory
 from .tracking import timer
 from .skin_cloner import clone_default_skin
 from .item_functions import extract_media_info
+from .custom_nodes import load_custom_nodes
 
 __addon__ = xbmcaddon.Addon()
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
@@ -109,6 +110,8 @@ def main_entry_point():
         toggle_watched(params)
     elif mode == "SHOW_MENU":
         show_menu(params)
+    elif mode == "SHOW_NODE_CONTENT":
+        show_node_content(params)
     elif mode == "CLONE_SKIN":
         clone_default_skin()
     elif mode == "SHOW_SETTINGS":
@@ -351,6 +354,33 @@ def get_params():
 
     log.debug("EmbyCon -> Detected parameters: {0}", param)
     return param
+
+
+def show_node_content(params):
+    log.debug("show_node_content : {0}", params)
+    node_name = params["node_name"]
+    node_name = urllib.unquote(node_name)
+    custom_nodes = load_custom_nodes()
+    if node_name in custom_nodes:
+        node_info = custom_nodes[node_name]
+        url = get_node_url(node_info)
+
+        log.debug("show_node_content url : {0}", url)
+
+        content_params = {}
+        if "kodi_media_type" in  node_info and node_info["kodi_media_type"]:
+            content_params["media_type"] = node_info["kodi_media_type"]
+
+        if "kodi_sort" in node_info and node_info["kodi_sort"] == "False":
+            content_params["sort"] = "none"
+
+        if "use_cache" in node_info:
+            if node_info["use_cache"] == "False":
+                content_params["use_cache"] = "false"
+            else:
+                content_params["use_cache"] = "true"
+
+        get_content(url, content_params)
 
 
 def show_menu(params):

@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window id="33050" type="dialog">
+	<defaultcontrol always="true">3153</defaultcontrol>
+	<!--<zorder>0</zorder>-->
+	<coordinates>
+		<system>1</system>
+		<left>0</left>
+		<top>0</top>
+	</coordinates>
+    <controls>
+		<control type="image" id="3010">
+			<left>0</left>
+			<top>0</top>
+			<width>1280</width>
+			<height>720</height>
+			<texture>bg.png</texture>
+		</control>
+
+		<control type="grouplist">
+			<orientation>verticle</orientation>
+			<itemgap>5</itemgap>
+			<align>center</align>
+			<left>100</left>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>40</height>
+					<label>Select Node</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3153">
+					<width>400</width>
+					<height>35</height>
+					<label>New Node</label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<ondown>3154</ondown>
+				</control>
+			</control>
+
+			<control type="image">
+				<texture colordiffuse="ff525252">white.png</texture>
+					<width>1000</width>
+					<height>4</height>
+			</control>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Node Name</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3154">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3153</onup>
+					<ondown>3155</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Item Type</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3155">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3154</onup>
+					<ondown>3156</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Limit</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3156">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3155</onup>
+					<ondown>3157</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Parent</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3157">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3156</onup>
+					<ondown>3158</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Recursive</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3158">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3157</onup>
+					<ondown>3159</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Group Collections</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3159">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3158</onup>
+					<ondown>3160</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Watched</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3160">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3159</onup>
+					<ondown>3161</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>In Progress</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3161">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3160</onup>
+					<ondown>3162</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Sort By</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3162">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3161</onup>
+					<ondown>3163</ondown>
+				</control>
+			</control>
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Sort Order</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3163">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3162</onup>
+					<ondown>3164</ondown>
+				</control>
+			</control>
+
+
+			<control type="image">
+				<texture colordiffuse="ff525252">white.png</texture>
+					<width>1000</width>
+					<height>4</height>
+			</control>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Kodi Media Type</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3164">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3163</onup>
+					<ondown>3165</ondown>
+				</control>
+			</control>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Kodi Sort</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3165">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3164</onup>
+					<ondown>3166</ondown>
+				</control>
+			</control>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label>Use Cache</label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3166">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>left</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3165</onup>
+					<ondown>3180</ondown>
+				</control>
+			</control>
+
+			<control type="image">
+				<texture colordiffuse="ff525252">white.png</texture>
+					<width>1000</width>
+					<height>4</height>
+			</control>
+
+			<control type="grouplist">
+				<orientation>horizontal</orientation>
+				<width>1000</width>
+				<height>40</height>
+				<itemgap>10</itemgap>
+				<control type="label">
+					<width>400</width>
+					<height>35</height>
+					<label></label>
+					<aligny>center</aligny>
+					<align>right</align>
+					<font>font14</font>
+				</control>
+				<control type="button" id="3180">
+					<width>80</width>
+					<height>35</height>
+					<label>Save</label>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3166</onup>
+				</control>
+				<control type="button" id="3181">
+					<width>80</width>
+					<height>35</height>
+					<label>Delete</label>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus colordiffuse="ff525252">white.png</texturefocus>
+					<texturenofocus colordiffuse="ff333333">white.png</texturenofocus>
+					<onup>3156</onup>
+				</control>
+			</control>
+
+		</control>
+
+	</controls>
+</window>
