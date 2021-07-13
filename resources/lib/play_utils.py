@@ -51,7 +51,8 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
                                           icon="special://home/addons/plugin.video.embycon/icon.png")
             return
 
-        play_session_id = playback_info.get("PlaySessionId")
+        play_session_id = playback_info.get("PlaySessionId", "")
+        live_stream_id = playback_info.get("LiveStreamId", "")
 
         # select the media source to use
         sources = playback_info.get('MediaSources')
@@ -87,6 +88,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         data["source_id"] = source_id
         data["playback_type"] = playback_type_string
         data["play_session_id"] = play_session_id
+        data["live_stream_id"] = live_stream_id
         data["play_action_type"] = "play_all"
         monitor.played_information[playurl] = data
         log.debug("Add to played_information: {0}", monitor.played_information)
@@ -206,7 +208,8 @@ def add_to_playlist(play_info, monitor):
         return
 
     # play_session_id = id_generator()
-    play_session_id = playback_info.get("PlaySessionId")
+    play_session_id = playback_info.get("PlaySessionId", "")
+    live_stream_id = playback_info.get("LiveStreamId", "")
 
     # select the media source to use
     # sources = item.get("MediaSources")
@@ -243,6 +246,7 @@ def add_to_playlist(play_info, monitor):
     data["source_id"] = source_id
     data["playback_type"] = playback_type_string
     data["play_session_id"] = play_session_id
+    data["live_stream_id"] = live_stream_id
     data["play_action_type"] = "play_all"
     monitor.played_information[playurl] = data
     log.debug("Add to played_information: {0}", monitor.played_information)
@@ -360,7 +364,8 @@ def play_file(play_info, monitor):
                                       icon="special://home/addons/plugin.video.embycon/icon.png")
         return
 
-    play_session_id = playback_info.get("PlaySessionId")
+    play_session_id = playback_info.get("PlaySessionId", "")
+    live_stream_id = playback_info.get("LiveStreamId", "")
 
     # select the media source to use
     media_sources = playback_info.get('MediaSources')
@@ -499,6 +504,7 @@ def play_file(play_info, monitor):
     data["source_id"] = source_id
     data["playback_type"] = playback_type_string
     data["play_session_id"] = play_session_id
+    data["live_stream_id"] = live_stream_id
     data["play_action_type"] = "play"
     data["item_type"] = result.get("Type", None)
     data["can_delete"] = result.get("CanDelete", False)
@@ -972,7 +978,8 @@ def send_progress(monitor):
     duration = int(total_play_time * 10000000)
     paused = play_data.get("paused", False)
     playback_type = play_data.get("playback_type")
-    play_session_id = play_data.get("play_session_id")
+    play_session_id = play_data.get("play_session_id", "")
+    live_stream_id = play_data.get("LiveStreamId", "")
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist_position = playlist.getposition()
@@ -1126,7 +1133,8 @@ def stop_all_playback(played_information):
             duration = data.get("duration", 0)
             emby_item_id = data.get("item_id")
             emby_source_id = data.get("source_id")
-            play_session_id = data.get("play_session_id")
+            play_session_id = data.get("play_session_id", "")
+            live_stream_id = data.get("LiveStreamId", "")
 
             if emby_item_id is not None and current_position >= 0:
                 log.debug("Playback Stopped at: {0}", current_position)
@@ -1137,7 +1145,8 @@ def stop_all_playback(played_information):
                     'MediaSourceId': emby_source_id,
                     'PositionTicks': int(current_position * 10000000),
                     'RunTimeTicks': int(duration * 10000000),
-                    'PlaySessionId': play_session_id
+                    'PlaySessionId': play_session_id,
+                    'LiveStreamId': live_stream_id
                 }
                 download_utils.download_url(url, post_body=postdata, method="POST")
                 data["currently_playing"] = False
@@ -1197,6 +1206,7 @@ class Service(xbmc.Player):
         emby_source_id = play_data["source_id"]
         playback_type = play_data["playback_type"]
         play_session_id = play_data["play_session_id"]
+        live_stream_id = play_data["LiveStreamId"]
 
         # if we could not find the ID of the current item then return
         if emby_item_id is None:
