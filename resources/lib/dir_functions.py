@@ -88,24 +88,35 @@ def get_content(url, params):
     url_prev = None
     url_next = None
     if page_limit > 0 and media_type.startswith("movie"):
-        m = re.search('StartIndex=([0-9]{1,4})', url)
-        if m and m.group(1):
-            log.debug("UPDATING NEXT URL: {0}", url)
-            start_index = int(m.group(1))
-            log.debug("current_start : {0}", start_index)
-            if start_index > 0:
-                prev_index = start_index - page_limit
-                if prev_index < 0:
-                    prev_index = 0
-                url_prev = re.sub('StartIndex=([0-9]{1,4})', 'StartIndex=' + str(prev_index), url)
-            url_next = re.sub('StartIndex=([0-9]{1,4})', 'StartIndex=' + str(start_index + page_limit), url)
-            log.debug("UPDATING NEXT URL: {0}", url_next)
+        log.debug("Creating Paging URLS: {0}", url)
+        start_index_rex = "startindex=([0-9]{1,5})"
+        limit_rex = "&limit=([0-9]{1,5})"
+        limit_rex_p = "&Limit={ItemLimit}"
 
+        # add StartIndex and Limit to the url if they are not there already
+        # update limit to page limit if it is alreayd there
+        if not re.search(start_index_rex, url, flags=re.IGNORECASE):
+            url += "&StartIndex=0"
+
+        if not re.search(limit_rex, url, flags=re.IGNORECASE) and not re.search(limit_rex_p, url, flags=re.IGNORECASE):
+            url += "&Limit=" + str(page_limit)
         else:
-            log.debug("ADDING NEXT URL: {0}", url)
-            url_next = url + "&StartIndex=" + str(start_index + page_limit) + "&Limit=" + str(page_limit)
-            url = url + "&StartIndex=" + str(start_index) + "&Limit=" + str(page_limit)
-            log.debug("ADDING NEXT URL: {0}", url_next)
+            url = re.sub(limit_rex, '&Limit=' + str(page_limit), url, flags=re.IGNORECASE)
+            url = re.sub(limit_rex_p, '&Limit=' + str(page_limit), url, flags=re.IGNORECASE)
+
+        # create NEXT and PREV urls
+        start_index_match = re.search(start_index_rex, url, flags=re.IGNORECASE)
+        start_index = int(start_index_match.group(1))
+        if start_index > 0:
+            prev_index = start_index - page_limit
+            if prev_index < 0:
+                prev_index = 0
+            url_prev = re.sub(start_index_rex, 'StartIndex=' + str(prev_index), url, flags=re.IGNORECASE)
+        url_next = re.sub(start_index_rex, 'StartIndex=' + str(start_index + page_limit), url, flags=re.IGNORECASE)
+
+        log.debug("Paged URLS - url_current: {0}", url)
+        log.debug("Paged URLS - url_prev: {0}", url_prev)
+        log.debug("Paged URLS - url_next: {0}", url_next)
 
     # use the data manager to get the data
     # result = dataManager.get_content(url)

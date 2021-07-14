@@ -29,7 +29,7 @@ log = SimpleLogging(__name__)
 download_utils = DownloadUtils()
 
 
-def play_all_files(items, monitor, play_items=True):
+def play_all_files(items, auto_resume, monitor, play_items=True):
     log.debug("playAllFiles called with items: {0}", items)
     server = download_utils.get_server()
 
@@ -52,7 +52,8 @@ def play_all_files(items, monitor, play_items=True):
                                           icon="special://home/addons/plugin.video.embycon/icon.png")
             return
 
-        play_session_id = playback_info.get("PlaySessionId")
+        play_session_id = playback_info.get("PlaySessionId", "")
+        live_stream_id = playback_info.get("LiveStreamId", "")
 
         # select the media source to use
         sources = playback_info.get('MediaSources')
@@ -88,6 +89,7 @@ def play_all_files(items, monitor, play_items=True):
         data["source_id"] = source_id
         data["playback_type"] = playback_type_string
         data["play_session_id"] = play_session_id
+        data["live_stream_id"] = live_stream_id
         data["play_action_type"] = "play_all"
         monitor.played_information[playurl] = data
         log.debug("Add to played_information: {0}", monitor.played_information)
@@ -98,13 +100,70 @@ def play_all_files(items, monitor, play_items=True):
         playlist.add(playurl, list_item)
 
     if play_items:
-        xbmc.Player().play(playlist)
+        # auto_resume = "9000000000" # 15 min
+        auto_resume = int(auto_resume)
+        seek_time = 0
+        # process user data for resume points
+        if auto_resume != -1:
+            seek_time = (auto_resume / 1000) / 10000
+
+        log.debug("play_all_files auto_resume : {0} seekto : {1}", auto_resume, seek_time)
+
+        player = xbmc.Player()
+        player.play(playlist)
+
+        if seek_time != 0:
+            player.pause()
+            monitor = xbmc.Monitor()
+            count = 0
+            while not player.isPlaying() and not monitor.abortRequested() and count != 100:
+                count = count + 1
+                xbmc.sleep(100)
+
+            if count == 100 or not player.isPlaying() or monitor.abortRequested():
+                log.info("PlaybackResumrAction : Playback item did not get to a play state in 10 seconds so exiting")
+                player.stop()
+                return
+
+            log.info("PlaybackResumrAction : Playback is Running")
+
+            seek_to_time = seek_time
+            target_seek = (seek_to_time - 10)
+
+            count = 0
+            max_loops = 2 * 120
+            while not monitor.abortRequested() and player.isPlaying() and count < max_loops:
+                log.info("PlaybackResumrAction : Seeking to : {0}", seek_to_time)
+                player.seekTime(seek_to_time)
+                current_position = player.getTime()
+                if current_position >= target_seek:
+                    break
+                log.info("PlaybackResumrAction : target:{0} current:{1}", target_seek, current_position)
+                count = count + 1
+                xbmc.sleep(500)
+
+            if count == max_loops:
+                log.info("PlaybackResumrAction : Playback could not seek to required position")
+                player.stop()
+            else:
+                count = 0
+                while bool(xbmc.getCondVisibility("Player.Paused")) and count < 10:
+                    log.info("PlaybackResumrAction : Unpausing playback")
+                    player.pause()
+                    xbmc.sleep(1000)
+                    count = count + 1
+
+                if count == 10:
+                    log.info("PlaybackResumrAction : Could not unpause")
+                else:
+                    log.info("PlaybackResumrAction : Playback resumed")
+
         return None
     else:
         return playlist
 
 
-def play_list_of_items(id_list, monitor):
+def play_list_of_items(id_list, auto_resume, monitor):
     log.debug("Loading  all items in the list")
     data_manager = DataManager()
     items = []
@@ -118,7 +177,7 @@ def play_list_of_items(id_list, monitor):
             return
         items.append(result)
 
-    return play_all_files(items, monitor)
+    return play_all_files(items, auto_resume, monitor)
 
 
 def add_to_playlist(play_info, monitor):
@@ -150,7 +209,8 @@ def add_to_playlist(play_info, monitor):
         return
 
     # play_session_id = id_generator()
-    play_session_id = playback_info.get("PlaySessionId")
+    play_session_id = playback_info.get("PlaySessionId", "")
+    live_stream_id = playback_info.get("LiveStreamId", "")
 
     # select the media source to use
     # sources = item.get("MediaSources")
@@ -187,6 +247,7 @@ def add_to_playlist(play_info, monitor):
     data["source_id"] = source_id
     data["playback_type"] = playback_type_string
     data["play_session_id"] = play_session_id
+    data["live_stream_id"] = live_stream_id
     data["play_action_type"] = "play_all"
     monitor.played_information[playurl] = data
     log.debug("Add to played_information: {0}", monitor.played_information)
@@ -224,6 +285,7 @@ def play_file(play_info, monitor):
     if last_url:
         home_window.set_property("skip_cache_for_" + last_url, "true")
 
+    auto_resume = play_info.get("auto_resume", "-1")
     action = play_info.get("action", "play")
     if action == "add_to_playlist":
         add_to_playlist(play_info, monitor)
@@ -231,9 +293,8 @@ def play_file(play_info, monitor):
 
     # if this is a list of items them add them all to the play list
     if isinstance(item_id, list):
-        return play_list_of_items(item_id, monitor)
+        return play_list_of_items(item_id, auto_resume, monitor)
 
-    auto_resume = play_info.get("auto_resume", "-1")
     force_transcode = play_info.get("force_transcode", False)
     media_source_id = play_info.get("media_source_id", "")
     subtitle_stream_index = play_info.get("subtitle_stream_index", None)
@@ -273,7 +334,7 @@ def play_file(play_info, monitor):
         items = result["Items"]
         if items is None:
             items = []
-        return play_all_files(items, monitor)
+        return play_all_files(items, "-1", monitor)
 
     # if this is a program from live tv epg then play the actual channel
     if result.get("Type") == "Program":
@@ -304,7 +365,8 @@ def play_file(play_info, monitor):
                                       icon="special://home/addons/plugin.video.embycon/icon.png")
         return
 
-    play_session_id = playback_info.get("PlaySessionId")
+    play_session_id = playback_info.get("PlaySessionId", "")
+    live_stream_id = playback_info.get("LiveStreamId", "")
 
     # select the media source to use
     media_sources = playback_info.get('MediaSources')
@@ -443,6 +505,7 @@ def play_file(play_info, monitor):
     data["source_id"] = source_id
     data["playback_type"] = playback_type_string
     data["play_session_id"] = play_session_id
+    data["live_stream_id"] = live_stream_id
     data["play_action_type"] = "play"
     data["item_type"] = result.get("Type", None)
     data["can_delete"] = result.get("CanDelete", False)
@@ -515,6 +578,8 @@ def play_file(play_info, monitor):
                 log.info("PlaybackResumrAction : Playback resumed")
 
     next_episode = get_next_episode(result)
+    next_epp_art = get_art(next_episode, server)
+    next_episode["art"] = next_epp_art
     data["next_episode"] = next_episode
     send_next_episode_details(result, next_episode)
 
@@ -568,7 +633,7 @@ def get_next_episode(item):
            '&IsMissing=False' +
            '&IncludeItemTypes=Episode' +
            '&ImageTypeLimit=1' +
-           '&format=json')
+           '&fields=CriticRating,OfficialRating,CommunityRating,Overview')
 
     data_manager = DataManager()
     items_result = data_manager.get_content(url)
@@ -914,7 +979,8 @@ def send_progress(monitor):
     duration = int(total_play_time * 10000000)
     paused = play_data.get("paused", False)
     playback_type = play_data.get("playback_type")
-    play_session_id = play_data.get("play_session_id")
+    play_session_id = play_data.get("play_session_id", "")
+    live_stream_id = play_data.get("LiveStreamId", "")
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist_position = playlist.getposition()
@@ -1053,7 +1119,8 @@ def stop_all_playback(played_information):
             duration = data.get("duration", 0)
             emby_item_id = data.get("item_id")
             emby_source_id = data.get("source_id")
-            play_session_id = data.get("play_session_id")
+            play_session_id = data.get("play_session_id", "")
+            live_stream_id = data.get("LiveStreamId", "")
 
             if emby_item_id is not None and current_position >= 0:
                 log.debug("Playback Stopped at: {0}", current_position)
@@ -1064,7 +1131,8 @@ def stop_all_playback(played_information):
                     'MediaSourceId': emby_source_id,
                     'PositionTicks': int(current_position * 10000000),
                     'RunTimeTicks': int(duration * 10000000),
-                    'PlaySessionId': play_session_id
+                    'PlaySessionId': play_session_id,
+                    'LiveStreamId': live_stream_id
                 }
                 download_utils.download_url(url, post_body=postdata, method="POST")
                 data["currently_playing"] = False
@@ -1122,6 +1190,7 @@ class Service(xbmc.Player):
         emby_source_id = play_data["source_id"]
         playback_type = play_data["playback_type"]
         play_session_id = play_data["play_session_id"]
+        live_stream_id = play_data["LiveStreamId"]
 
         # if we could not find the ID of the current item then return
         if emby_item_id is None:

@@ -9,25 +9,59 @@
 	</coordinates>
     <controls>
 
+		<!-- Background -->
 		<control type="image" id="3010">
 			<left>0</left>
 			<top>0</top>
 			<width>1280</width>
-			<height>65</height>
+			<height>320</height>
 			<texture border="0" colordiffuse="FFFFFFFF">bg.png</texture>
 		</control>
 
+		<!-- bottom bar -->
 		<control type="image" id="3009">
 			<left>0</left>
-			<top>64</top>
+			<top>315</top>
 			<width>1280</width>
 			<height>2</height>
 			<texture border="0" colordiffuse="FFFFFFFF">white.png</texture>
 		</control>
 
-		<control type="label" id="3011">
+		<!-- episode thumb -->
+		<control type="image" id="3015">
 			<left>20</left>
+			<top>45</top>
+			<width>300</width>
+			<height>200</height>
+			<texture border="0"></texture>
+		</control>
+
+		<!-- time -->
+		<control type="label">
+			<left>1100</left>
 			<top>10</top>
+			<width>150</width>
+			<height>35</height>
+			<label>$INFO[System.Time(hh:mm xx)]</label>
+			<font>font45_title</font>
+			<align>right</align>
+		</control>
+
+		<!-- duration -->
+		<control type="label" id="3019">
+			<left>1100</left>
+			<top>45</top>
+			<width>150</width>
+			<height>35</height>
+			<label>55 min</label>
+			<font>font14</font>
+			<align>right</align>
+		</control>
+
+		<!-- series name -->
+		<control type="label" id="3011">
+			<left>360</left>
+			<top>25</top>
 			<width>390</width>
 			<height>45</height>
 			<label></label>
@@ -35,40 +69,63 @@
 			<align>left</align>
 		</control>
 
+		<!-- Season Name -->
+		<control type="label" id="3016">
+			<left>360</left>
+			<top>55</top>
+			<width>500</width>
+			<height>35</height>
+			<label></label>
+			<font>font12</font>
+			<align>left</align>
+		</control>
+
+		<!-- Episode Name -->
 		<control type="label" id="3012">
-			<left>390</left>
-			<top>15</top>
+			<left>360</left>
+			<top>85</top>
 			<width>500</width>
 			<height>35</height>
 			<label></label>
 			<font>font14</font>
-			<align>center</align>
+			<align>left</align>
 		</control>
 
+		<!-- Episode and season number -->
+		<control type="label" id="3017">
+			<left>20</left>
+			<top>10</top>
+			<width>500</width>
+			<height>35</height>
+			<label></label>
+			<font>font12</font>
+			<align>left</align>
+		</control>
+
+		<!-- Overview -->
+		<control type="textbox" id="3018">
+			<left>360</left>
+			<top>115</top>
+			<width>700</width>
+			<height>145</height>
+			<label></label>
+			<font>font12</font>
+			<align>left</align>
+			<autoscroll delay="3000" time="1000" repeat="5000"></autoscroll>
+		</control>
+
+		<!-- Play NOw Button -->
 		<control type="button" id="3013">
-			<left>1020</left>
-			<top>0</top>
+			<left>95</left>
+			<top>245</top>
 			<width>150</width>
-			<height>65</height>
+			<height>70</height>
 			<visible>true</visible>
-			<label>Play Next</label>
+			<label>Play Now</label>
 			<align>center</align>
 			<texture border="1" colordiffuse="ff161616">white.png</texture>
 			<font>font12</font>
-			<onright>3014</onright>
-		</control>
-
-		<control type="button" id="3014">
-			<left>1140</left>
-			<top>0</top>
-			<width>150</width>
-			<height>65</height>
-			<visible>true</visible>
-			<label>Close</label>
-			<align>center</align>
-			<texture border="1" colordiffuse="ff161616">white.png</texture>
-			<font>font12</font>
-			<onleft>3013</onleft>
+			<onright>-</onright>
 		</control>
 
 	</controls>

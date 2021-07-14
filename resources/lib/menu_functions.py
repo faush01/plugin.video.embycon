@@ -1,6 +1,7 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
 
+import os
 import sys
 import urllib.request
 import urllib.parse
@@ -9,6 +10,7 @@ import base64
 
 import xbmcplugin
 import xbmcaddon
+import xbmc
 
 from .downloadutils import DownloadUtils
 from .kodi_utils import add_menu_directory_item, HomeWindow
@@ -16,6 +18,7 @@ from .simple_logging import SimpleLogging
 from .translation import string_load
 from .datamanager import DataManager
 from .utils import get_art, get_emby_url
+from .custom_nodes import CustomNode, load_custom_nodes
 
 log = SimpleLogging(__name__)
 downloadUtils = DownloadUtils()
@@ -496,6 +499,8 @@ def display_main_menu():
                             "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=show_custom_widgets")
     add_menu_directory_item(string_load(30409),
                             "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=addon_items")
+    add_menu_directory_item("Custom Nodes",
+                            "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=custom_nodes")
 
     xbmcplugin.endOfDirectory(handle)
 
@@ -520,6 +525,76 @@ def display_menu(params):
         show_movie_years(params)
     elif menu_type == "show_movie_tags":
         show_movie_tags(params)
+    elif menu_type == "custom_nodes":
+        show_custom_nodes(params)
+    elif menu_type == "create_new_node":
+        create_new_node(params)
+
+
+def create_new_node(params):
+    log.debug("Create New Custom Node")
+
+    addon = xbmcaddon.Addon()
+    addon_path = addon.getAddonInfo('path')
+    skin_path = xbmc.translatePath(os.path.join(addon_path))
+
+    custom_node = CustomNode("CustomNode.xml", skin_path, "default", "720p")
+    #custom_node.setActionItems(action_items)
+    custom_node.doModal()
+
+
+def get_node_url(node_info):
+    log.debug("get_node_url : {0}", node_info)
+
+    base_params = {}
+    base_params["Fields"] = "{field_filters}"
+    base_params["ImageTypeLimit"] = 1
+    base_params["IsMissing"] = False
+
+    if "item_parent" in node_info and node_info["item_parent"]:
+        base_params["ParentId"] = node_info["item_parent"]
+    if "recursive" in node_info and node_info["recursive"]:
+        base_params["Recursive"] = node_info["recursive"]
+    if "item_type" in node_info and node_info["item_type"]:
+        base_params["IncludeItemTypes"] = node_info["item_type"]
+    if "item_limit" in node_info and node_info["item_limit"]:
+        base_params["Limit"] = node_info["item_limit"]
+    if "group" in node_info and node_info["group"]:
+        base_params["GroupItemsIntoCollections"] = node_info["group"]
+        base_params["CollapseBoxSetItems"] = node_info["group"]
+    if "watched" in node_info and node_info["watched"]:
+        base_params["IsPlayed"] = node_info["watched"]
+    if "inprogress" in node_info and node_info["inprogress"] == "True":
+        base_params["Filters"] = "IsResumable"
+    if "sortby" in node_info and node_info["sortby"]:
+        base_params["SortBy"] = node_info["sortby"]
+    if "sortorder" in node_info and node_info["sortorder"]:
+        base_params["SortOrder"] = node_info["sortorder"]
+
+    path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
+    return path
+
+
+def show_custom_nodes(params):
+    log.debug("Show Custom Nodes")
+    add_menu_directory_item("[Edit Nodes]",
+                            "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=create_new_node")
+
+    # show custom nodes
+    custom_nodes = load_custom_nodes()
+
+    node_names = []
+    for node_name in custom_nodes:
+        node_names.append(node_name)
+    node_names.sort()
+
+    for node_name in node_names:
+        encoded_name =  urllib.parse.quote(node_name)
+        add_menu_directory_item(node_name,
+                                "plugin://plugin.video.embycon/?mode=SHOW_NODE_CONTENT&node_name=" + encoded_name)
+
+    handle = int(sys.argv[1])
+    xbmcplugin.endOfDirectory(handle)
 
 
 def show_global_types(params):
@@ -909,6 +984,7 @@ def display_movies_type(menu_params, view):
     params["SortBy"] = "DateCreated"
     params["SortOrder"] = "Descending"
     params["Filters"] = "IsNotFolder"
+    params["Limit"] = "{ItemLimit}"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies&sort=none"
     add_menu_directory_item(view_name + string_load(30268) + " (" + show_x_filtered_items + ")", url)
