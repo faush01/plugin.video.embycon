@@ -120,11 +120,11 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
                 xbmc.sleep(100)
 
             if count == 100 or not player.isPlaying() or monitor.abortRequested():
-                log.info("PlaybackResumrAction : Playback item did not get to a play state in 10 seconds so exiting")
+                log.info("PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting")
                 player.stop()
                 return
 
-            log.info("PlaybackResumrAction : Playback is Running")
+            log.info("PlaybackResumeAction : Playback is Running")
 
             seek_to_time = seek_time
             target_seek = (seek_to_time - 10)
@@ -132,30 +132,30 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
             count = 0
             max_loops = 2 * 120
             while not monitor.abortRequested() and player.isPlaying() and count < max_loops:
-                log.info("PlaybackResumrAction : Seeking to : {0}", seek_to_time)
+                log.info("PlaybackResumeAction : Seeking to : {0}", seek_to_time)
                 player.seekTime(seek_to_time)
                 current_position = player.getTime()
                 if current_position >= target_seek:
                     break
-                log.info("PlaybackResumrAction : target:{0} current:{1}", target_seek, current_position)
+                log.info("PlaybackResumeAction : target:{0} current:{1}", target_seek, current_position)
                 count = count + 1
                 xbmc.sleep(500)
 
             if count == max_loops:
-                log.info("PlaybackResumrAction : Playback could not seek to required position")
+                log.info("PlaybackResumeAction : Playback could not seek to required position")
                 player.stop()
             else:
                 count = 0
                 while bool(xbmc.getCondVisibility("Player.Paused")) and count < 10:
-                    log.info("PlaybackResumrAction : Unpausing playback")
+                    log.info("PlaybackResumeAction : Unpausing playback")
                     player.pause()
                     xbmc.sleep(1000)
                     count = count + 1
 
                 if count == 10:
-                    log.info("PlaybackResumrAction : Could not unpause")
+                    log.info("PlaybackResumeAction : Could not unpause")
                 else:
-                    log.info("PlaybackResumrAction : Playback resumed")
+                    log.info("PlaybackResumeAction : Playback resumed")
 
         return None
     else:
@@ -365,7 +365,6 @@ def play_file(play_info, monitor):
         return
 
     play_session_id = playback_info.get("PlaySessionId", "")
-    live_stream_id = playback_info.get("LiveStreamId", "")
 
     # select the media source to use
     media_sources = playback_info.get('MediaSources')
@@ -403,6 +402,7 @@ def play_file(play_info, monitor):
         return
 
     source_id = selected_media_source.get("Id")
+    live_stream_id = selected_media_source.get("LiveStreamId", "")
     seek_time = 0
     auto_resume = int(auto_resume)
 
@@ -452,6 +452,7 @@ def play_file(play_info, monitor):
                 return
 
     log.debug("play_session_id: {0}", play_session_id)
+    log.debug("live_stream_id: {0}", live_stream_id)
     playurl, playback_type, listitem_props = PlayUtils().get_play_url(selected_media_source)
     log.info("Play URL: {0} Playback Type: {1} ListItem Properties: {2}", playurl, playback_type, listitem_props)
 
@@ -539,11 +540,11 @@ def play_file(play_info, monitor):
             xbmc.sleep(100)
 
         if count == 100 or not player.isPlaying() or monitor.abortRequested():
-            log.info("PlaybackResumrAction : Playback item did not get to a play state in 10 seconds so exiting")
+            log.info("PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting")
             player.stop()
             return
 
-        log.info("PlaybackResumrAction : Playback is Running")
+        log.info("PlaybackResumeAction : Playback is Running")
 
         seek_to_time = seek_time - jump_back_amount
         target_seek = (seek_to_time - 10)
@@ -551,30 +552,30 @@ def play_file(play_info, monitor):
         count = 0
         max_loops = 2 * 120
         while not monitor.abortRequested() and player.isPlaying() and count < max_loops:
-            log.info("PlaybackResumrAction : Seeking to : {0}", seek_to_time)
+            log.info("PlaybackResumeAction : Seeking to : {0}", seek_to_time)
             player.seekTime(seek_to_time)
             current_position = player.getTime()
             if current_position >= target_seek:
                 break
-            log.info("PlaybackResumrAction : target:{0} current:{1}", target_seek, current_position)
+            log.info("PlaybackResumeAction : target:{0} current:{1}", target_seek, current_position)
             count = count + 1
             xbmc.sleep(500)
 
         if count == max_loops:
-            log.info("PlaybackResumrAction : Playback could not seek to required position")
+            log.info("PlaybackResumeAction : Playback could not seek to required position")
             player.stop()
         else:
             count = 0
             while bool(xbmc.getCondVisibility("Player.Paused")) and count < 10:
-                log.info("PlaybackResumrAction : Unpausing playback")
+                log.info("PlaybackResumeAction : Unpausing playback")
                 player.pause()
                 xbmc.sleep(1000)
                 count = count + 1
 
             if count == 10:
-                log.info("PlaybackResumrAction : Could not unpause")
+                log.info("PlaybackResumeAction : Could not unpause")
             else:
-                log.info("PlaybackResumrAction : Playback resumed")
+                log.info("PlaybackResumeAction : Playback resumed")
 
     next_episode = get_next_episode(result)
     next_epp_art = get_art(next_episode, server)
@@ -979,7 +980,7 @@ def send_progress(monitor):
     paused = play_data.get("paused", False)
     playback_type = play_data.get("playback_type")
     play_session_id = play_data.get("play_session_id", "")
-    live_stream_id = play_data.get("LiveStreamId", "")
+    live_stream_id = play_data.get("live_stream_id", "")
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist_position = playlist.getposition()
@@ -998,6 +999,7 @@ def send_progress(monitor):
         'IsMuted': muted,
         'PlayMethod': playback_type,
         'PlaySessionId': play_session_id,
+        'LiveStreamId': live_stream_id,
         'PlaylistIndex': playlist_position,
         'PlaylistLength': playlist_size,
         'VolumeLevel': volume
@@ -1134,7 +1136,7 @@ def stop_all_playback(played_information):
             emby_item_id = data.get("item_id")
             emby_source_id = data.get("source_id")
             play_session_id = data.get("play_session_id", "")
-            live_stream_id = data.get("LiveStreamId", "")
+            live_stream_id = data.get("live_stream_id", "")
 
             if emby_item_id is not None and current_position >= 0:
                 log.debug("Playback Stopped at: {0}", current_position)
@@ -1188,7 +1190,12 @@ class Service(xbmc.Player):
 
     def onPlayBackStarted(self):
         # Will be called when xbmc starts playing a file
-        stop_all_playback(self.played_information)
+        '''
+        Why are we stopping here the item that has just started to play?
+        It would only make sense to stop a previous item that was still running when the new playback start happens.
+        But all previous items where already stopped by either onPlayBackEnded or onPlayBackStopped
+        '''
+        # stop_all_playback(self.played_information)
 
         if not xbmc.Player().isPlaying():
             log.debug("onPlayBackStarted: not playing file!")
@@ -1206,7 +1213,7 @@ class Service(xbmc.Player):
         emby_source_id = play_data["source_id"]
         playback_type = play_data["playback_type"]
         play_session_id = play_data["play_session_id"]
-        live_stream_id = play_data["LiveStreamId"]
+        live_stream_id = play_data["live_stream_id"]
 
         # if we could not find the ID of the current item then return
         if emby_item_id is None:
@@ -1219,7 +1226,8 @@ class Service(xbmc.Player):
             'ItemId': emby_item_id,
             'MediaSourceId': emby_source_id,
             'PlayMethod': playback_type,
-            'PlaySessionId': play_session_id
+            'PlaySessionId': play_session_id,
+            'LiveStreamId': live_stream_id
         }
 
         log.debug("Sending POST play started: {0}", postdata)
