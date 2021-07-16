@@ -578,8 +578,11 @@ def play_file(play_info, monitor):
                 log.info("PlaybackResumeAction : Playback resumed")
 
     next_episode = get_next_episode(result)
-    next_epp_art = get_art(next_episode, server)
-    next_episode["art"] = next_epp_art
+
+    if next_episode is not None:
+        next_epp_art = get_art(next_episode, server)
+        next_episode["art"] = next_epp_art
+
     data["next_episode"] = next_episode
     send_next_episode_details(result, next_episode)
 
@@ -1190,7 +1193,7 @@ class Service(xbmc.Player):
 
     def onPlayBackStarted(self):
         # Will be called when xbmc starts playing a file
-        stop_all_playback(self.played_information)
+        #stop_all_playback(self.played_information)
 
         if not xbmc.Player().isPlaying():
             log.debug("onPlayBackStarted: not playing file!")
