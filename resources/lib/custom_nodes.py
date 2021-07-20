@@ -245,7 +245,9 @@ class CustomNode(xbmcgui.WindowXMLDialog):
                 control.setLabel("True")
 
         elif control_id == 3162:
-            option_list = ["None", "DatePlayed", "DateCreated", "PlayCount"]
+            # Album, AlbumArtist, Artist, Budget, CommunityRating, CriticRating, DateCreated, DatePlayed,
+            # PlayCount, PremiereDate, ProductionYear, SortName, Random, Revenue, Runtime
+            option_list = ["None", "DatePlayed", "DateCreated", "PlayCount", "ProductionYear", "PremiereDate"]
             self.show_setting_for_select(3162, option_list)
 
         elif control_id == 3163:
