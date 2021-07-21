@@ -23,6 +23,7 @@
 		<setting label="30437" type="lsep"/>
 		<setting type="sep" />
 		<setting id="play_cinema_intros" type="bool" label="30438" default="false" visible="true" enable="true" />
+		<setting id="force_fullscreenvideo" type="bool" label="30441" default="false" visible="true" enable="true" />
 
 		<!--<setting id="playback_type" type="select" label="30206" lvalues="30209|30210|30211" default="1" />-->
 

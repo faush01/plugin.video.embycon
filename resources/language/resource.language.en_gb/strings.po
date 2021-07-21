@@ -1073,3 +1073,7 @@ msgstr ""
 msgctxt "#30440"
 msgid "Play next"
 msgstr ""
+
+msgctxt "#30441"
+msgid "Force fullscreen video"
+msgstr ""

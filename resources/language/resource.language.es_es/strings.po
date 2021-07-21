@@ -1074,3 +1074,7 @@ msgstr "Mostrar reproducir el próximo episodio en un momento concreto"
 msgctxt "#30440"
 msgid "Play next"
 msgstr "Reproducir siguiente"
+
+msgctxt "#30441"
+msgid "Force fullscreen video"
+msgstr "Forzar video en pantalla completa"
