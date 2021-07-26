@@ -1236,6 +1236,15 @@ class Service(xbmc.Player):
         home_screen = HomeWindow()
         home_screen.set_property("currently_playing_id", str(emby_item_id))
 
+    def onAVStarted(self):
+        if not xbmc.Player().isPlayingVideo():
+            return
+        play_data = get_playing_data(self.played_information)
+        if play_data is None:
+            return
+        log.debug("onAVStarted: ActivateWindow(fullscreenvideo)")
+        xbmc.executebuiltin("ActivateWindow(fullscreenvideo)")
+
     def onPlayBackEnded(self):
         # Will be called when kodi stops playing a file
         log.debug("onPlayBackEnded")
