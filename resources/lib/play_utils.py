@@ -522,7 +522,7 @@ def play_file(play_info, monitor):
         intro_items = get_playback_intros(item_id)
 
     if len(intro_items) > 0:
-        playlist = play_all_files(intro_items, monitor, play_items=False)
+        playlist = play_all_files(intro_items, "-1", monitor, play_items=False)
         playlist.add(playurl, list_item)
     else:
         playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)

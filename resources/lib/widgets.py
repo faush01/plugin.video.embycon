@@ -311,7 +311,7 @@ def get_widget_content(handle, params):
         xbmcplugin.setContent(handle, 'episodes')
         url_verb = '{server}/emby/Users/{userid}/Items/Latest'
         url_params["GroupItems"] = True
-        url_params["Limit"] = 45
+        url_params["Limit"] = 200
         url_params["Recursive"] = True
         url_params["SortBy"] = "DateCreated"
         url_params["SortOrder"] = "Descending"
