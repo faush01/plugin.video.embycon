@@ -16,12 +16,15 @@ class ActionAutoClose(threading.Thread):
     last_interaction = time.time()
     parent_dialog = None
     stop_thread = False
+    progress_call_back = None
+    time_out = 20
 
     def __init__(self, parent):
         self.parent_dialog = parent
         self.stop_thread = False
         self.last_interaction = time.time()
         threading.Thread.__init__(self)
+        self.time_out = 20
 
     def run(self):
         log.debug("ActionAutoClose Running")
@@ -30,14 +33,24 @@ class ActionAutoClose(threading.Thread):
             time_since_last = time.time() - self.last_interaction
             log.debug("ActionAutoClose time_since_last : {0}", time_since_last)
 
-            if time_since_last > 20:
+            if time_since_last > self.time_out:
                 log.debug("ActionAutoClose Closing Parent")
                 self.parent_dialog.close()
                 break
 
-            monitor.waitForAbort(0.5)
+            if self.progress_call_back is not None:
+                percentage = (float(time_since_last) / float(self.time_out)) * 100
+                self.progress_call_back.update_progress(percentage)
+
+            monitor.waitForAbort(0.1)
 
         log.debug("ActionAutoClose Exited")
+
+    def set_timeout(self, t):
+        self.time_out = t
+
+    def set_callback(self, call_back):
+        self.progress_call_back = call_back
 
     def set_last(self):
         self.last_interaction = time.time()
