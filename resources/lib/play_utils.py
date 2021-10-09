@@ -1008,10 +1008,13 @@ def send_progress(monitor):
         'VolumeLevel': volume
     }
 
-    log.debug("Sending POST progress started: {0}", postdata)
+    if duration is not None and duration > 0:
+        log.debug("Sending POST progress started: {0}", postdata)
 
-    url = "{server}/emby/Sessions/Playing/Progress"
-    download_utils.download_url(url, post_body=postdata, method="POST")
+        url = "{server}/emby/Sessions/Playing/Progress"
+        download_utils.download_url(url, post_body=postdata, method="POST")
+    else:
+        log.debug("Sending POST progress started: No duration, not sending!")
 
 
 def get_volume():
