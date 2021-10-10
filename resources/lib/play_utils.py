@@ -996,8 +996,6 @@ def send_progress(monitor):
         'CanSeek': True,
         'ItemId': item_id,
         'MediaSourceId': source_id,
-        'PositionTicks': ticks,
-        'RunTimeTicks': duration,
         'IsPaused': paused,
         'IsMuted': muted,
         'PlayMethod': playback_type,
@@ -1009,12 +1007,12 @@ def send_progress(monitor):
     }
 
     if duration is not None and duration > 0:
-        log.debug("Sending POST progress started: {0}", postdata)
+        postdata["RunTimeTicks"] = duration
+        postdata["PositionTicks"] = ticks
 
-        url = "{server}/emby/Sessions/Playing/Progress"
-        download_utils.download_url(url, post_body=postdata, method="POST")
-    else:
-        log.debug("Sending POST progress started: No duration, not sending!")
+    log.debug("Sending POST progress started: {0}", postdata)
+    url = "{server}/emby/Sessions/Playing/Progress"
+    download_utils.download_url(url, post_body=postdata, method="POST")
 
 
 def get_volume():
