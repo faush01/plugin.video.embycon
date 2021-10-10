@@ -7,17 +7,20 @@ import sys
 package_path = "package"
 
 def ignore_files(path, item_list):
-	return [".idea", ".git", ".gitignore", "scripts", "venv", package_path]
+	return [".idea", ".git", ".gitignore", "scripts", "venv", "package"]
 
 zip_path = "c:\\Program Files\\7-Zip\\7z.exe"
 addon_path = sys.argv[1]
 
 tree = ET.parse(addon_path + "\\addon.xml")
 root = tree.getroot()
-
-
 id = root.attrib["id"]
 version = root.attrib["version"]
+
+if version.find("1.10") > -1:
+	package_path = package_path + "\\matrix"
+else:
+	package_path = package_path + "\\krypton"
 
 print (package_path + " - " + version)
 
@@ -34,7 +37,7 @@ os.chdir(package_path)
 cmd_7zip = [zip_path, "a", zip_name, id]
 sp = subprocess.Popen(cmd_7zip, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 sp.wait()
-os.chdir("..")
+os.chdir("..\\..")
 
 copy2(package_path + "\\" + id + "\\addon.xml", package_path + "\\addon.xml")
 

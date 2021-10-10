@@ -151,6 +151,24 @@ class CustomNode(xbmcgui.WindowXMLDialog):
             control.setLabel(new_setting)
         return return_index
 
+    def show_setting_for_select_multi(self, control_id, option_list):
+        control = self.getControl(control_id)
+        current_value = control.getLabel()
+        types = current_value.split(",")
+        selected = []
+        for index in range(0, len(option_list)):
+            if option_list[index] in types:
+                selected.append(index)
+        return_indexes = xbmcgui.Dialog().multiselect("Select Value", option_list, preselect=selected)
+        if return_indexes is not None:
+            type_list = []
+            for selected_index in return_indexes:
+                type_list.append(option_list[selected_index])
+            control.setLabel(",".join(type_list))
+            return len(return_indexes)
+        else:
+            return 0
+
     def onClick(self, control_id):
         log.debug("CustomNode: control_id: {0}", control_id)
         if control_id == 3000:
@@ -195,7 +213,7 @@ class CustomNode(xbmcgui.WindowXMLDialog):
 
         elif control_id == 3155:
             option_list = ["Movie", "Boxset", "Series", "Episode", "MusicAlbum", "Audio"]
-            self.show_setting_for_select(3155, option_list)
+            self.show_setting_for_select_multi(3155, option_list)
 
         elif control_id == 3156:
             control = self.getControl(3156)
