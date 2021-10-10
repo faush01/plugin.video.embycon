@@ -7,7 +7,7 @@ import sys
 package_path = "package"
 
 def ignore_files(path, item_list):
-	return [".idea", ".git", ".gitignore", "scripts", package_path]
+	return [".idea", ".git", ".gitignore", "scripts", "venv", package_path]
 
 zip_path = "c:\\Program Files\\7-Zip\\7z.exe"
 addon_path = sys.argv[1]
