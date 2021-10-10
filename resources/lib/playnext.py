@@ -98,6 +98,7 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         log.debug("PlayNextDialog: __init__")
         xbmcgui.WindowXML.__init__(self, *args, **kwargs)
         self.auto_close_thread = ActionAutoClose(self)
+        self.auto_close_thread.set_timeout(30)
         self.auto_close_thread.start()
 
     def onInit(self):
@@ -142,6 +143,12 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         duration_string = "%s m" % (duration,)
         duration_label = self.getControl(3019)
         duration_label.setLabel(duration_string)
+
+        self.auto_close_thread.set_callback(self)
+
+    def update_progress(self, percentage):
+        count_down = self.getControl(3030)
+        count_down.setPercent(percentage)
 
     def onFocus(self, control_id):
         pass

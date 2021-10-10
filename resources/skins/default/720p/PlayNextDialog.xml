@@ -27,6 +27,15 @@
 			<texture border="0" colordiffuse="FFFFFFFF">white.png</texture>
 		</control>
 
+		<control type="progress" id="3030">
+			<left>0</left>
+			<top>310</top>
+			<width>1280</width>
+			<height>4</height>
+			<texturebg border="3" colordiffuse="60FFFFFF">colors/white50.png</texturebg>
+			<midtexture colordiffuse="button_focus">colors/white.png</midtexture>
+		</control>
+
 		<!-- episode thumb -->
 		<control type="image" id="3015">
 			<left>20</left>
