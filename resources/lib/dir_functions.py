@@ -84,10 +84,10 @@ def get_content(url, params):
 
     # update url for paging
     start_index = 0
-    page_limit = int(settings.getSetting('moviePageSize'))
+    page_limit = int(settings.getSetting('itemsPerPage'))
     url_prev = None
     url_next = None
-    if page_limit > 0 and media_type.startswith("movie"):
+    if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         log.debug("Creating Paging URLS: {0}", url)
         start_index_rex = "startindex=([0-9]{1,5})"
         limit_rex = "&limit=([0-9]{1,5})"
@@ -134,7 +134,7 @@ def get_content(url, params):
     log.debug("total_records: {0}", total_records)
 
     # add paging items
-    if page_limit > 0 and media_type.startswith("movie"):
+    if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         if url_prev:
             list_item = xbmcgui.ListItem("Prev Page (" + str(start_index - page_limit + 1) + "-" + str(start_index) +
                                          " of " + str(total_records) + ")")
@@ -167,7 +167,7 @@ def get_content(url, params):
         xbmcplugin.setContent(pluginhandle, content_type)
 
     # set the sort items
-    if page_limit > 0 and media_type.startswith("movie"):
+    if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_UNSORTED)
     else:
         set_sort(pluginhandle, view_type, default_sort)

@@ -208,7 +208,7 @@ def show_movie_pages(menu_params):
     if result == 0:
         return
 
-    page_limit = int(settings.getSetting('moviePageSize'))
+    page_limit = int(settings.getSetting('itemsPerPage'))
     if page_limit == 0:
         page_limit = 20
 
@@ -482,6 +482,83 @@ def show_tvshow_alpha_list(menu_params):
         url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
                "&mode=GET_CONTENT&media_type=" + collection["media_type"])
         log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
+        add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+
+def show_tvshow_pages(menu_params):
+    log.debug("showTvShowPages: {0}", menu_params)
+
+    parent_id = menu_params.get("parent_id")
+    settings = xbmcaddon.Addon()
+
+    params = {}
+    params["IncludeItemTypes"] = "Series"
+    params["IsMissing"] = False
+    params["ImageTypeLimit"] = 0
+
+    if parent_id:
+        params["ParentId"] = parent_id
+
+    url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+
+    data_manager = DataManager()
+    result = data_manager.get_content(url)
+
+    if result is None:
+        return
+
+    total_results = result.get("TotalRecordCount", 0)
+    log.debug("showMoviePages TotalRecordCount {0}", total_results)
+
+    if result == 0:
+        return
+
+    page_limit = int(settings.getSetting('itemsPerPage'))
+    if page_limit == 0:
+        page_limit = 20
+
+    start_index = 0
+    collections = []
+
+    while start_index < total_results:
+
+        params = {}
+        params["IncludeItemTypes"] = "Series"
+        params["IsMissing"] = False
+        params["ImageTypeLimit"] = 1
+        params["SortBy"] = "Name"
+        params["SortOrder"] = "Ascending"
+        params["Fields"] = "{field_filters}"
+        params["StartIndex"] = start_index
+        params["Limit"] = page_limit
+
+        if parent_id:
+            params["ParentId"] = parent_id
+
+        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+
+        page_upper = start_index + page_limit
+        if page_upper > total_results:
+            page_upper = total_results
+
+        item_data = {}
+        item_data['title'] = "Page (" + str(start_index + 1) + " - " + str(page_upper) + ")"
+        item_data['path'] = item_url
+        item_data['media_type'] = 'tvshows'
+
+        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url)}
+
+        collections.append(item_data)
+        start_index = start_index + page_limit
+
+    for collection in collections:
+        content_url = urllib.quote(collection['path'])
+        url = sys.argv[0] + ("?url=" + content_url +
+                             "&mode=GET_CONTENT" +
+                             "&media_type=" + collection["media_type"])
+        log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), url, collection.get("art"))
         add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -771,6 +848,12 @@ def display_tvshow_type(menu_params, view):
     if view is not None:
         path += "&parent_id=" + view.get("Id")
     add_menu_directory_item(view_name + string_load(30404), path)
+
+    # Tv Show Pages
+    path = "plugin://plugin.video.embycon/?mode=TVSHOW_PAGES"
+    if view is not None:
+        path += "&parent_id=" + view.get("Id")
+    add_menu_directory_item(view_name + string_load(30397), path)
 
     xbmcplugin.endOfDirectory(handle)
 

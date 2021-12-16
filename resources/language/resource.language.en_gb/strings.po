@@ -639,7 +639,7 @@ msgid "Show change user dialog"
 msgstr ""
 
 msgctxt "#30331"
-msgid "Movies per page"
+msgid "Items per page"
 msgstr ""
 
 msgctxt "#30332"
