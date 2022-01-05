@@ -567,8 +567,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
 
     info_labels["duration"] = item_details.duration
     info_labels["playcount"] = item_details.play_count
-    if item_details.favorite == 'true':
-        info_labels["top250"] = "1"
+    # if item_details.favorite == 'true':
+    #    info_labels["top250"] = "1"
 
     info_labels["rating"] = item_details.rating
     info_labels["year"] = item_details.year
