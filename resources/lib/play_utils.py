@@ -1178,7 +1178,7 @@ class Service(xbmc.Player):
 
     def onPlayBackStarted(self):
         # Will be called when xbmc starts playing a file
-        #stop_all_playback(self.played_information)
+        log.debug("onPlayBackStarted")
 
         if not xbmc.Player().isPlaying():
             log.debug("onPlayBackStarted: not playing file!")
@@ -1187,6 +1187,7 @@ class Service(xbmc.Player):
         play_data = get_playing_data(self.played_information)
 
         if play_data is None:
+            stop_all_playback(self.played_information)
             return
 
         play_data["paused"] = False
