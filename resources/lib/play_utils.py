@@ -81,7 +81,23 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
 
         # add title decoration is needed
         item_title = item.get("Name", string_load(30280))
-        list_item = xbmcgui.ListItem(label=item_title)
+
+        gui_options = {}
+        gui_options["server"] = server
+        gui_options["name_format"] = None
+        gui_options["name_format_type"] = ""
+        item_details = extract_item_info(item, gui_options)
+
+        # create ListItem
+        display_options = {}
+        display_options["addCounts"] = False
+        display_options["addResumePercent"] = False
+        display_options["addSubtitleAvailable"] = False
+        display_options["addUserRatings"] = False
+
+        gui_item = add_gui_item("", item_details, display_options, False)
+        list_item = gui_item[1]
+        #list_item = xbmcgui.ListItem(label=item_title)
 
         # add playurl and data to the monitor
         data = {}
@@ -291,7 +307,7 @@ def play_file(play_info, monitor):
         add_to_playlist(play_info, monitor)
         return
 
-    # if this is a list of items them add them all to the play list
+    # if this is a list of items add them all to the play list
     if isinstance(item_id, list):
         return play_list_of_items(item_id, auto_resume, monitor)
 
@@ -313,7 +329,7 @@ def play_file(play_info, monitor):
     url = "{server}/emby/Users/{userid}/Items/%s?format=json" % (item_id,)
     data_manager = DataManager()
     result = data_manager.get_content(url)
-    log.debug("Playfile item: {0}", result)
+    log.debug("Playfile item: {0}", dict(result))
 
     if result is None:
         log.debug("Playfile item was None, so can not play!")
@@ -324,7 +340,7 @@ def play_file(play_info, monitor):
         log.debug("PlayAllFiles for parent item id: {0}", item_id)
         url = ('{server}/emby/Users/{userid}/items' +
                '?ParentId=%s' +
-               '&Fields=MediaSources' +
+               '&Fields={field_filters}' +
                '&format=json')
         url = url % (item_id,)
         result = data_manager.get_content(url)
