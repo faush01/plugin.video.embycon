@@ -797,7 +797,7 @@ def set_list_item_props(item_id, list_item, result, server, extra_props, title):
             season_number = result.get("IndexNumber", -1)
             details["season"] = str(season_number)
 
-        details["plotoutline"] = "emby_id:%s" % (item_id,)
+        #details["plotoutline"] = "emby_id:%s" % (item_id,)
 
         list_item.setInfo("Video", infoLabels=details)
 
