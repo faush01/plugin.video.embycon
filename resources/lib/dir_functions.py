@@ -372,7 +372,7 @@ def process_directory(url, progress, params, use_cache_data=False):
 
         elif item_details.item_type == "MusicArtist":
             u = ('{server}/emby/Users/{userid}/items' +
-                 '?ArtistIds=' + item_details.id +
+                 '?AlbumArtistIds=' + item_details.id +
                  '&IncludeItemTypes=MusicAlbum' +
                  '&CollapseBoxSetItems=false' +
                  '&Recursive=true' +
