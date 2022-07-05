@@ -16,6 +16,8 @@ class SkipIntroMonitor(threading.Thread):
 
     intro_start_ticks = 0
     intro_end_ticks = 0
+    auto_skip = False
+    original_play_path = None
 
     def __init__(self):
         threading.Thread.__init__(self)
@@ -35,11 +37,21 @@ class SkipIntroMonitor(threading.Thread):
         while not monitor.abortRequested():
 
             play_time = player.getTime()
+            play_path = player.getPlayingFile()
+
+            if play_path != self.original_play_path:
+                log.debug("SkipIntroMonitor original file no longer playing: {0} {1}", play_path, self.original_play_path)
+                break
 
             if skip_intro_dialog is None and (intro_start_sec < play_time < intro_end_sec):
-                log.debug("SkipIntroMonitor showing skip intro dialog: {0} {1} {2}", intro_start_sec, play_time, intro_end_sec)
-                skip_intro_dialog = SkipIntroDialog("SkipIntroDialog.xml", addon_path, "default", "720p")
-                skip_intro_dialog.show()
+                log.debug("SkipIntroMonitor doing skip intro action: {0} {1} {2}", intro_start_sec, play_time, intro_end_sec)
+                if self.auto_skip:
+                    log.debug("SkipIntroMonitor auto skip")
+                    player.seekTime(intro_end_sec)
+                else:
+                    log.debug("SkipIntroMonitor show dialog")
+                    skip_intro_dialog = SkipIntroDialog("SkipIntroDialog.xml", addon_path, "default", "720p")
+                    skip_intro_dialog.show()
 
             # player skipped past intro end so exit the monitor
             if play_time > intro_end_sec:
@@ -62,6 +74,12 @@ class SkipIntroMonitor(threading.Thread):
     def set_times(self, start, end):
         self.intro_start_ticks = start
         self.intro_end_ticks = end
+
+    def set_auto_skip(self, auto_skip):
+        self.auto_skip = auto_skip
+
+    def set_play_path(self, path):
+        self.original_play_path = path
 
 
 class SkipIntroDialog(xbmcgui.WindowXMLDialog):

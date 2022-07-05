@@ -1272,9 +1272,14 @@ class Service(xbmc.Player):
         intro_start = play_data.get("intro_start", 0)
         intro_end = play_data.get("intro_end", 0)
         if intro_start > 0 and intro_end > 0:
-            skip_monitor = SkipIntroMonitor()
-            skip_monitor.set_times(intro_start, intro_end)
-            skip_monitor.start()
+            settings = xbmcaddon.Addon()
+            skip_intros = settings.getSetting("skip_intros")
+            if skip_intros != "0":
+                skip_monitor = SkipIntroMonitor()
+                skip_monitor.set_times(intro_start, intro_end)
+                skip_monitor.set_auto_skip(skip_intros == "2")
+                skip_monitor.set_play_path(xbmc.Player().getPlayingFile())
+                skip_monitor.start()
 
     def onAVStarted(self):
         if not xbmc.Player().isPlayingVideo():

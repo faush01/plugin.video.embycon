@@ -1073,3 +1073,19 @@ msgstr ""
 msgctxt "#30440"
 msgid "Play next"
 msgstr ""
+
+msgctxt "#30441"
+msgid "Intro Skipping"
+msgstr ""
+
+msgctxt "#30442"
+msgid "Off"
+msgstr ""
+
+msgctxt "#30443"
+msgid "Show skip button"
+msgstr ""
+
+msgctxt "#30444"
+msgid "Auto skip intro"
+msgstr ""
