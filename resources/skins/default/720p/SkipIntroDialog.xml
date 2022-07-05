@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window id="3301" type="dialog">
+	<defaultcontrol always="true">1</defaultcontrol>
+    <zorder>200</zorder>
+	<coordinates>
+		<system>1</system>
+		<top>135</top>
+		<left>240</left>
+	</coordinates>
+    <controls>
+		<!--
+		<control type="image" id="3010">
+			<left>800</left>
+			<top>450</top>
+			<width>200</width>
+			<height>105</height>
+			<texture border="40">bg.png</texture>
+		</control>
+		-->
+		<control type="button" id="1">
+			<left>820</left>
+			<top>450</top>
+			<width>180</width>
+			<height>70</height>
+			<visible>true</visible>
+			<label>Skip Intro</label>
+			<align>center</align>
+			<onleft>1</onleft>
+      		<onright>1</onright>
+			<texture border="1" colordiffuse="ff161616">white.png</texture>
+			<font>font14</font>
+		</control>
+
+	</controls>
+</window>

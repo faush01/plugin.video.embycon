@@ -24,6 +24,7 @@ from .cache_images import CacheArtwork
 from .picture_viewer import PictureViewer
 from .tracking import timer
 from .playnext import PlayNextDialog
+from .skip_intro_dialog import SkipIntroMonitor
 
 log = SimpleLogging(__name__)
 download_utils = DownloadUtils()
@@ -326,7 +327,7 @@ def play_file(play_info, monitor):
 
     server = download_utils.get_server()
 
-    url = "{server}/emby/Users/{userid}/Items/%s?format=json" % (item_id,)
+    url = "{server}/emby/Users/{userid}/Items/%s?fields=Chapters&format=json" % (item_id,)
     data_manager = DataManager()
     result = data_manager.get_content(url)
     log.debug("Playfile item: {0}", dict(result))
@@ -516,6 +517,17 @@ def play_file(play_info, monitor):
     elif playback_type == "1":  # for direct stream add any streamable subtitles
         external_subs(selected_media_source, list_item, item_id)
 
+    # get chapters for skip intro action
+    chapters = result.get("Chapters", [])
+    intro_start = 0
+    intro_end = 0
+    for chapter in chapters:
+        log.debug("Play Item Chapter : {0} - {1} - {2}", chapter["MarkerType"], chapter["Name"], chapter["StartPositionTicks"])
+        if intro_start == 0 and chapter["MarkerType"] == "IntroStart":
+            intro_start = chapter["StartPositionTicks"]
+        elif intro_end == 0 and chapter["MarkerType"] == "IntroEnd":
+            intro_end = chapter["StartPositionTicks"]
+
     # add playurl and data to the monitor
     data = {}
     data["item_id"] = item_id
@@ -526,6 +538,8 @@ def play_file(play_info, monitor):
     data["play_action_type"] = "play"
     data["item_type"] = result.get("Type", None)
     data["can_delete"] = result.get("CanDelete", False)
+    data["intro_start"] = intro_start
+    data["intro_end"] = intro_end
     monitor.played_information[playurl] = data
     log.debug("Add to played_information: {0}", monitor.played_information)
 
@@ -1237,6 +1251,19 @@ class Service(xbmc.Player):
 
         home_screen = HomeWindow()
         home_screen.set_property("currently_playing_id", str(emby_item_id))
+
+        # start the skip intro monitor
+        intro_start = play_data.get("intro_start", 0)
+        intro_end = play_data.get("intro_end", 0)
+        if intro_start > 0 and intro_end > 0:
+            settings = xbmcaddon.Addon()
+            skip_intros = settings.getSetting("skip_intros")
+            if skip_intros != "0":
+                skip_monitor = SkipIntroMonitor()
+                skip_monitor.set_times(intro_start, intro_end)
+                skip_monitor.set_auto_skip(skip_intros == "2")
+                skip_monitor.set_play_path(xbmc.Player().getPlayingFile())
+                skip_monitor.start()
 
     def onAVStarted(self):
         if not xbmc.Player().isPlayingVideo():
