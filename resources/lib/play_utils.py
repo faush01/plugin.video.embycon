@@ -1255,7 +1255,7 @@ class Service(xbmc.Player):
         # start the skip intro monitor
         intro_start = play_data.get("intro_start", 0)
         intro_end = play_data.get("intro_end", 0)
-        if intro_start > 0 and intro_end > 0:
+        if intro_end > 0 and intro_end > intro_start:
             settings = xbmcaddon.Addon()
             skip_intros = settings.getSetting("skip_intros")
             if skip_intros != "0":
