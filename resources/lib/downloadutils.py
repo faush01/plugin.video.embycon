@@ -284,6 +284,10 @@ class DownloadUtils:
                 {
                     "Format": "pgs",
                     "Method": "External"
+                },
+                {
+                    "Format": "subrip",
+                    "Method": "Embed"
                 }
             ]
         }
