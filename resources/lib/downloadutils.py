@@ -594,6 +594,9 @@ class DownloadUtils:
 
     @timer
     def authenticate(self):
+        log.debug("authenticate called")
+        # import traceback
+        # log.debug("StackTrace : \n{0}", ''.join(traceback.format_stack()))
 
         window = HomeWindow()
 
@@ -611,7 +614,12 @@ class DownloadUtils:
         url = "{server}/emby/Users/AuthenticateByName?format=json"
 
         user_details = load_user_details(settings)
-        user_name = urllib.parse.quote(user_details.get("username", ""))
+        user_name = user_details.get("username", "")
+        user_name = user_name.strip()
+        if user_name == "":
+            return ""
+
+        user_name = urllib.parse.quote(user_name)
         pwd_text = urllib.parse.quote(user_details.get("password", ""))
 
         message_data = "username=" + user_name + "&pw=" + pwd_text
@@ -685,7 +693,7 @@ class DownloadUtils:
 
     @timer
     def download_url(self, url, suppress=False, post_body=None, method="GET", authenticate=True, headers=None):
-        log.debug("downloadUrl")
+        log.debug("DownloadUrl : {0}", url)
 
         return_data = "null"
         settings = xbmcaddon.Addon()
