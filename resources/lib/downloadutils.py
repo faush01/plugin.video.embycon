@@ -611,7 +611,12 @@ class DownloadUtils:
         url = "{server}/emby/Users/AuthenticateByName?format=json"
 
         user_details = load_user_details(settings)
-        user_name = urllib.quote(user_details.get("username", ""))
+        user_name = user_details.get("username", "")
+        user_name = user_name.strip()
+        if user_name == "":
+            return ""
+
+        user_name = urllib.quote(user_name)
         pwd_text = urllib.quote(user_details.get("password", ""))
 
         message_data = "username=" + user_name + "&pw=" + pwd_text
