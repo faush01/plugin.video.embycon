@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-	<onunload>ClearProperty(first_load_done, 10000)</onunload>
 	<defaultcontrol>9000</defaultcontrol>
 	<backgroundcolor>background</backgroundcolor>
 	<controls>
@@ -21,7 +20,6 @@
 <!--
 		<include>DefaultBackground</include>
 -->
-		
 <!-- Start of EmbyCon Backgrounds -->
 		<control type="group">
 			<animation effect="fade" start="0" end="100" time="300" condition="Window.Previous(fullscreenvideo) | Window.Previous(startup)">WindowOpen</animation>
@@ -44,8 +42,6 @@
 			<visible>!String.IsEmpty(ListItem.Art(fanart))</visible>
 		</control>		
 <!-- End of EmbyCon Backgrounds -->		
-		
-		
 		<control type="multiimage">
 			<depth>DepthBackground</depth>
 			<include>FullScreenDimensions</include>
@@ -71,7 +67,6 @@
 					<effect type="slide" end="0,20" time="180" tween="sine" delay="80" />
 				</animation>
 				<include>OpenClose_Right</include>
-				
 <!-- Start of Emby Widget Items -->
 				<control type="group" id="3000">
 					<visible>String.IsEqual(Container(9000).ListItem.Property(id),emby_movies)</visible>
@@ -128,7 +123,6 @@
 					</control>
 				</control>            
 <!-- End of Emby Widget Items -->				
-				
 				<control type="group" id="5000">
 					<visible>String.IsEqual(Container(9000).ListItem.Property(id),movies)</visible>
 					<include content="Visible_Right_Delayed">
@@ -490,16 +484,13 @@
 						<include content="WidgetListCategories" condition="System.HasPVRAddon">
 							<param name="content_path" value="pvr://tv/"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
-							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="12900"/>
 						</include>
-
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
 							<param name="content_path" value="pvr://channels/tv/*?view=lastplayed"/>
 							<param name="sortby" value="lastplayed"/>
 							<param name="sortorder" value="descending"/>
 							<param name="widget_header" value="$LOCALIZE[31016]"/>
-							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="12200"/>
 						</include>
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
@@ -507,7 +498,6 @@
 							<param name="sortby" value="date"/>
 							<param name="sortorder" value="descending"/>
 							<param name="widget_header" value="$LOCALIZE[31015]"/>
-							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="12300"/>
 							<param name="label" value="$INFO[ListItem.ChannelName]"/>
 							<param name="label2" value="$INFO[ListItem.Title]$INFO[ListItem.EpisodeName, (,)]"/>
@@ -571,7 +561,6 @@
 						<include content="WidgetListCategories" condition="System.HasPVRAddon">
 							<param name="content_path" value="pvr://radio/"/>
 							<param name="widget_header" value="$LOCALIZE[31148]"/>
-							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="13900"/>
 						</include>
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
@@ -579,7 +568,6 @@
 							<param name="sortby" value="lastplayed"/>
 							<param name="sortorder" value="descending"/>
 							<param name="widget_header" value="$LOCALIZE[31018]"/>
-							<param name="widget_target" value="files"/>
 							<param name="list_id" value="13200"/>
 						</include>
 						<include content="WidgetListChannels" condition="System.HasPVRAddon">
@@ -587,7 +575,6 @@
 							<param name="sortby" value="date"/>
 							<param name="sortorder" value="descending"/>
 							<param name="widget_header" value="$LOCALIZE[31015]"/>
-							<param name="widget_target" value="pvr"/>
 							<param name="list_id" value="13300"/>
 							<param name="label" value="$INFO[ListItem.ChannelName]"/>
 							<param name="label2" value="$INFO[ListItem.Title]$INFO[ListItem.EpisodeName, (,)]"/>
@@ -704,7 +691,17 @@
 								<right>60</right>
 								<align>right</align>
 								<font>font14</font>
-								<label>$INFO[Weather.Conditions,, ∙ ]$INFO[Weather.Temperature]</label>
+								<label>$INFO[Weather.Conditions]</label>
+							</control>
+							<control type="label">
+								<left>840</left>
+								<top>180</top>
+								<aligny>center</aligny>
+								<height>24</height>
+								<right>60</right>
+								<align>right</align>
+								<font>font14</font>
+								<label>$INFO[Weather.Temperature]</label>
 							</control>
 							<control type="grouplist">
 								<top>50</top>
@@ -713,27 +710,27 @@
 								<orientation>horizontal</orientation>
 								<align>left</align>
 								<itemgap>-110</itemgap>
-								<include content="WeatherIcon" condition="!String.IsEmpty(Weather.Plugin)">
+								<include content="WeatherIconHome" condition="!String.IsEmpty(Weather.Plugin)">
 									<param name="label" value="Window(weather).Property(Current.Wind)" />
 									<param name="texture" value="icons/weather/wind.png" />
 									<param name="header" value="404" />
 								</include>
-								<include content="WeatherIcon" condition="!String.IsEmpty(Weather.Plugin)">
+								<include content="WeatherIconHome" condition="!String.IsEmpty(Weather.Plugin)">
 									<param name="label" value="Window(weather).Property(Current.Humidity)" />
 									<param name="texture" value="icons/weather/humidity.png" />
 									<param name="header" value="406" />
 								</include>
-								<include content="WeatherIcon" condition="!String.IsEmpty(Weather.Plugin)">
+								<include content="WeatherIconHome" condition="!String.IsEmpty(Weather.Plugin)">
 									<param name="label" value="Window(weather).Property(Current.Precipitation)" />
 									<param name="texture" value="icons/weather/rain.png" />
 									<param name="header" value="33021" />
 								</include>
-								<include content="WeatherIcon" condition="!String.IsEmpty(Weather.Plugin)">
+								<include content="WeatherIconHome" condition="!String.IsEmpty(Weather.Plugin)">
 									<param name="label" value="Window(weather).Property(Today.Sunrise)" />
 									<param name="texture" value="icons/weather/sunrise.png" />
 									<param name="header" value="405" />
 								</include>
-								<include content="WeatherIcon" condition="!String.IsEmpty(Weather.Plugin)">
+								<include content="WeatherIconHome" condition="!String.IsEmpty(Weather.Plugin)">
 									<param name="label" value="Window(weather).Property(Today.Sunset)" />
 									<param name="texture" value="icons/weather/sunset.png" />
 									<param name="header" value="403" />
