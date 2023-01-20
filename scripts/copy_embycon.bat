@@ -1,4 +1,4 @@
-set KODIPATH=c:\tools\Kodi19
+set KODIPATH=c:\tools\Kodi20
 
 del /F /Q /S %KODIPATH%\addons\plugin.video.embycon
 rmdir /Q /S %KODIPATH%\addons\plugin.video.embycon
