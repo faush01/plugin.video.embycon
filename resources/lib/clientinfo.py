@@ -2,7 +2,6 @@
 
 from uuid import uuid4 as uuid4
 import xbmcaddon
-import xbmc
 import xbmcvfs
 
 from .kodi_utils import HomeWindow
@@ -22,14 +21,14 @@ class ClientInformation:
         if client_id:
             return client_id
 
-        emby_guid_path = xbmc.translatePath("special://temp/embycon_guid").decode('utf-8')
+        emby_guid_path = xbmcvfs.translatePath("special://temp/embycon_guid")
         log.debug("emby_guid_path: {0}", emby_guid_path)
         guid = xbmcvfs.File(emby_guid_path)
         client_id = guid.read()
         guid.close()
 
         if not client_id:
-            client_id = str("%012X" % uuid4())
+            client_id = uuid4().hex
             log.debug("Generating a new guid: {0}", client_id)
             guid = xbmcvfs.File(emby_guid_path, 'w')
             guid.write(client_id)

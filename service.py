@@ -119,9 +119,6 @@ if enable_logging:
                                   time=3000,
                                   icon=xbmcgui.NOTIFICATION_WARNING)
 
-# monitor.abortRequested() is causes issues, it currently triggers for all addon cancelations which causes
-# the service to exit when a user cancels an addon load action. This is a bug in Kodi.
-# I am switching back to xbmc.abortRequested approach until kodi is fixed or I find a work arround
 prev_user_id = home_window.get_property("userid")
 
 while not kodi_monitor.abortRequested():

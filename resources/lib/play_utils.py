@@ -3,6 +3,7 @@
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcvfs
 
 from datetime import timedelta
 import json
@@ -363,7 +364,7 @@ def play_file(play_info, monitor):
         play_url = "%s/emby/Items/%s/Images/Primary"
         play_url = play_url % (server, item_id)
 
-        plugin_path = xbmc.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
+        plugin_path = xbmcvfs.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
         action_menu = PictureViewer("PictureViewer.xml", plugin_path, "default", "720p")
         action_menu.setPicture(play_url)
         action_menu.doModal()
@@ -756,7 +757,7 @@ def set_list_item_props(item_id, list_item, result, server, extra_props, title):
     # set up item and item info
 
     art = get_art(result, server=server)
-    list_item.setIconImage(art['thumb'])  # back compat
+    list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
     list_item.setProperty('fanart_image', art['fanart'])  # back compat
     list_item.setProperty('discart', art['discart'])  # not avail to setArt
     list_item.setArt(art)
@@ -1112,14 +1113,9 @@ def prompt_for_stop_actions(item_id, data):
             item_type == "Episode" and
             percenatge_complete > prompt_next_percentage):
 
-        # resp = True
-        index = next_episode.get("IndexNumber", -1)
         if play_prompt:
-            # series_name = next_episode.get("SeriesName")
-            # next_epp_name = "Episode %02d - (%s)" % (index, next_episode.get("Name", "n/a"))
-
             plugin_path = settings.getAddonInfo('path')
-            plugin_path_real = xbmc.translatePath(os.path.join(plugin_path))
+            plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
             play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
             play_next_dialog.set_episode_info(next_episode)
@@ -1128,24 +1124,14 @@ def prompt_for_stop_actions(item_id, data):
             if not play_next_dialog.get_play_called():
                 xbmc.executebuiltin("Container.Refresh")
 
-            # resp = xbmcgui.Dialog().yesno(string_load(30283),
-            #                              series_name,
-            #                              next_epp_name,
-            #                              autoclose=20000)
-        """
-        if resp:
+        else:
             next_item_id = next_episode.get("Id")
             log.debug("Playing Next Episode: {0}", next_item_id)
-
             play_info = {}
             play_info["item_id"] = next_item_id
             play_info["auto_resume"] = "-1"
             play_info["force_transcode"] = False
             send_event_notification("embycon_play_action", play_info)
-        
-        else:
-            xbmc.executebuiltin("Container.Refresh")
-        """
 
 
 def stop_all_playback(played_information):
@@ -1198,14 +1184,12 @@ def stop_all_playback(played_information):
 def get_playing_data(play_data_map):
     try:
         playing_file = xbmc.Player().getPlayingFile()
-        playing_file = playing_file.decode('utf-8')
     except Exception as e:
         log.error("get_playing_data : getPlayingFile() : {0}", e)
         return None
     log.debug("get_playing_data : getPlayingFile() : {0}", playing_file)
     if playing_file not in play_data_map:
         infolabel_path_and_file = xbmc.getInfoLabel("Player.Filenameandpath")
-        infolabel_path_and_file = infolabel_path_and_file.decode('utf-8')
         log.debug("get_playing_data : Filenameandpath : {0}", infolabel_path_and_file)
         if infolabel_path_and_file not in play_data_map:
             log.debug("get_playing_data : play data not found")
@@ -1354,7 +1338,7 @@ class PlaybackService(xbmc.Monitor):
         message_data = data_json[0]
         log.debug("PlaybackService:onNotification:{0}", message_data)
         decoded_data = base64.b64decode(message_data)
-        play_info = json.loads(decoded_data)
+        play_info = json.loads(decoded_data.decode("utf-8"))
 
         if signal == "embycon_play_action":
             log.info("Received embycon_play_action : {0}", play_info)

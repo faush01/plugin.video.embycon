@@ -5,7 +5,9 @@ import xbmcvfs
 
 import string
 import random
-import urllib
+import urllib.request
+import urllib.parse
+import urllib.error
 import json
 import base64
 import time
@@ -16,7 +18,6 @@ import re
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
-from .clientinfo import ClientInformation
 
 # hack to get datetime strptime loaded
 throwaway = time.strptime('20110101', '%Y%m%d')
@@ -32,11 +33,9 @@ def get_emby_url(base_url, params):
     for key in params:
         if params[key] is not None:
             value = params[key]
-            if isinstance(value, unicode):
-                value = value.encode("utf8")
-            else:
+            if not isinstance(value, str):
                 value = str(value)
-            param_list.append(key + "=" + urllib.quote_plus(value, safe="{}"))
+            param_list.append(key + "=" + urllib.parse.quote_plus(str(value), safe="{}"))
     param_string = "&".join(param_list)
     return base_url + "?" + param_string
 
@@ -147,7 +146,7 @@ class PlayUtils:
         playurl = None
         listitem_props = []
 
-        contents = media_source.get('Path').encode('utf-8')  # contains contents of strm file with linebreaks
+        contents = media_source.get('Path')  # contains contents of strm file with linebreaks
 
         line_break = '\r'
         if '\r\n' in contents:
@@ -289,18 +288,18 @@ def double_urlencode(text):
 
 
 def single_urlencode(text):
-    # urlencode needs a utf- string
-    text = urllib.urlencode({'blahblahblah': text.encode('utf-8')})
-    text = text[13:]
-    return text.decode('utf-8')  # return the result again as unicode
+    text = urllib.parse.urlencode({"1": text})
+    text = text[2:]
+    return text
 
 
 def send_event_notification(method, data):
     message_data = json.dumps(data)
     source_id = "embycon"
-    base64_data = base64.b64encode(message_data)
+    base64_data = base64.b64encode(message_data.encode("utf-8"))
+    base64_data = base64_data.decode("utf-8")
     escaped_data = '\\"[\\"{0}\\"]\\"'.format(base64_data)
-    command = 'XBMC.NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
+    command = 'NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
     log.debug("Sending notification event data: {0}", command)
     xbmc.executebuiltin(command)
 

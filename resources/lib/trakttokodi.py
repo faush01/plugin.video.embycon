@@ -1,10 +1,12 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib
-import encodings
+import urllib.request
+import urllib.parse
+import urllib.error
 
 import xbmc
 import xbmcgui
+import xbmcvfs
 
 from .simple_logging import SimpleLogging
 from .datamanager import DataManager
@@ -15,7 +17,7 @@ log = SimpleLogging(__name__)
 dataManager = DataManager()
 
 details_string = 'EpisodeCount,SeasonCount,Path,Etag,MediaStreams'
-icon = xbmc.translatePath('special://home/addons/plugin.video.embycon/icon.png')
+icon = xbmcvfs.translatePath('special://home/addons/plugin.video.embycon/icon.png')
 
 
 def not_found(content_string):
@@ -105,7 +107,7 @@ def get_episode_id(parent_id, episode):
 
 
 def get_match(item_type, title, year, imdb_id):
-    query = urllib.quote(title)
+    query = urllib.parse.quote(title)
 
     results = search(item_type, query=query)
     results = results.get('SearchHints')
@@ -137,7 +139,7 @@ def entry_point(parameters):
     action = parameters.get('action', None)
     video_type = parameters.get('video_type', None)
 
-    title = urllib.unquote(parameters.get('title', ''))
+    title = urllib.parse.unquote(parameters.get('title', ''))
 
     year = parameters.get('year', '')
     episode = parameters.get('episode', '')
@@ -245,4 +247,4 @@ def entry_point(parameters):
                 not_found('{title} ({year}) - S{season}'.format(title=title, year=year, season=str_season))
 
         if url and media_type:
-            xbmc.executebuiltin('ActivateWindow(Videos, plugin://plugin.video.embycon/?mode=GET_CONTENT&url={url}&media_type={media_type})'.format(url=urllib.quote(url), media_type=media_type))
+            xbmc.executebuiltin('ActivateWindow(Videos, plugin://plugin.video.embycon/?mode=GET_CONTENT&url={url}&media_type={media_type})'.format(url=urllib.parse.quote(url), media_type=media_type))

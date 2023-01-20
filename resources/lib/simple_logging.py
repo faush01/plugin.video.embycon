@@ -2,7 +2,6 @@
 
 import xbmc
 import xbmcaddon
-from .jsonrpc import JsonRpc
 
 
 class SimpleLogging:
@@ -27,7 +26,7 @@ class SimpleLogging:
 
     def info(self, fmt, *args, **kwargs):
         log_line = self.name + "|INFO|" + self.log_line(fmt, *args)
-        xbmc.log(log_line, level=xbmc.LOGNOTICE)
+        xbmc.log(log_line, level=xbmc.LOGINFO)
 
     def error(self, fmt, *args, **kwargs):
         log_line = self.name + "|ERROR|" + self.log_line(fmt, *args)
@@ -36,16 +35,17 @@ class SimpleLogging:
     def debug(self, fmt, *args, **kwargs):
         if self.enable_logging:
             log_line = self.name + "|DEBUG|" + self.log_line(fmt, *args)
-            xbmc.log(log_line, level=xbmc.LOGNOTICE)
+            xbmc.log(log_line, level=xbmc.LOGINFO)
 
     @staticmethod
     def log_line(fmt, *args):
         new_args = []
         # convert any unicode to utf-8 strings
         for arg in args:
-            if isinstance(arg, unicode):
-                new_args.append(arg.encode("utf-8"))
-            else:
-                new_args.append(arg)
+            new_args.append(arg)
+            #if isinstance(arg, unicode):
+            #    new_args.append(arg.encode("utf-8"))
+            #else:
+            #    new_args.append(arg)
         log_line = fmt.format(*new_args)
         return log_line

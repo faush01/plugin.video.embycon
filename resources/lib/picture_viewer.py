@@ -1,10 +1,9 @@
-import xbmc
-import xbmcaddon
 import xbmcgui
 
 from .simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
+
 
 class PictureViewer(xbmcgui.WindowXMLDialog):
     picture_url = None

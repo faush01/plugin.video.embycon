@@ -3,14 +3,14 @@
 import xbmcgui
 import xbmcaddon
 
-import httplib
+import http.client
 import hashlib
 import ssl
-import StringIO
+from io import BytesIO
 import gzip
 import json
-from urlparse import urlparse
-import urllib
+from urllib.parse import urlparse
+import urllib.request, urllib.parse, urllib.error
 from base64 import b64encode
 from collections import defaultdict
 
@@ -558,7 +558,7 @@ class DownloadUtils:
 
         secure = False
         for user in result:
-            if user.get("Name") == unicode(user_name, "utf-8"):
+            if user.get("Name") == user_name:
                 userid = user.get("Id")
                 user_image = self.get_user_artwork(user, 'Primary')
                 log.debug("Username Found: {0}", user.get("Name"))
@@ -594,6 +594,9 @@ class DownloadUtils:
 
     @timer
     def authenticate(self):
+        log.debug("authenticate called")
+        # import traceback
+        # log.debug("StackTrace : \n{0}", ''.join(traceback.format_stack()))
 
         window = HomeWindow()
 
@@ -616,8 +619,8 @@ class DownloadUtils:
         if user_name == "":
             return ""
 
-        user_name = urllib.quote(user_name)
-        pwd_text = urllib.quote(user_details.get("password", ""))
+        user_name = urllib.parse.quote(user_name)
+        pwd_text = urllib.parse.quote(user_details.get("password", ""))
 
         message_data = "username=" + user_name + "&pw=" + pwd_text
 
@@ -660,7 +663,7 @@ class DownloadUtils:
         settings = xbmcaddon.Addon()
         device_name = settings.getSetting('deviceName')
         # remove none ascii chars
-        device_name = device_name.decode("ascii", errors='ignore')
+        # deviceName = deviceName.decode("ascii", errors='ignore')
         # remove some chars not valid for names
         device_name = device_name.replace("\"", "_")
         if len(device_name) == 0:
@@ -690,7 +693,7 @@ class DownloadUtils:
 
     @timer
     def download_url(self, url, suppress=False, post_body=None, method="GET", authenticate=True, headers=None):
-        log.debug("downloadUrl")
+        log.debug("DownloadUrl : {0}", url)
 
         return_data = "null"
         settings = xbmcaddon.Addon()
@@ -762,13 +765,13 @@ class DownloadUtils:
 
             if local_use_https and self.verify_cert:
                 log.debug("Connection: HTTPS, Cert checked")
-                conn = httplib.HTTPSConnection(server, timeout=http_timeout)
+                conn = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
-                conn = httplib.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
+                conn = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
             else:
                 log.debug("Connection: HTTP")
-                conn = httplib.HTTPConnection(server, timeout=http_timeout)
+                conn = http.client.HTTPConnection(server, timeout=http_timeout)
 
             head = self.get_auth_header(authenticate)
 
@@ -804,7 +807,7 @@ class DownloadUtils:
                 content_type = data.getheader('content-encoding')
                 log.debug("Data Len Before: {0}", len(ret_data))
                 if content_type == "gzip":
-                    ret_data = StringIO.StringIO(ret_data)
+                    ret_data = BytesIO(ret_data)
                     gzipper = gzip.GzipFile(fileobj=ret_data)
                     return_data = gzipper.read()
                 else:

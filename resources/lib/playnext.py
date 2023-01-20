@@ -6,6 +6,7 @@ import threading
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcvfs
 
 from .simple_logging import SimpleLogging
 from .play_utils import send_event_notification
@@ -61,7 +62,7 @@ class PlayNextService(threading.Thread):
 
                         settings = xbmcaddon.Addon()
                         plugin_path = settings.getAddonInfo('path')
-                        plugin_path_real = xbmc.translatePath(os.path.join(plugin_path))
+                        plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
                         play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
                         play_next_dialog.set_episode_info(next_episode)

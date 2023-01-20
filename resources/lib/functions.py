@@ -1,18 +1,21 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib
+import urllib.request
+import urllib.parse
+import urllib.error
 import sys
 import os
 import time
 import cProfile
 import pstats
 import json
-import StringIO
+import io
 
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
 import xbmc
+import xbmcvfs
 
 from .downloadutils import DownloadUtils, load_user_details
 from .utils import get_art, send_event_notification, convert_size
@@ -37,9 +40,9 @@ from .item_functions import extract_media_info
 from .custom_nodes import load_custom_nodes
 
 __addon__ = xbmcaddon.Addon()
-__addondir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
+__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
 __cwd__ = __addon__.getAddonInfo('path')
-PLUGINPATH = xbmc.translatePath(os.path.join(__cwd__))
+PLUGINPATH = xbmcvfs.translatePath(os.path.join(__cwd__))
 
 log = SimpleLogging(__name__)
 
@@ -54,13 +57,15 @@ def main_entry_point():
     log.debug("===== EmbyCon START =====")
 
     settings = xbmcaddon.Addon()
-    profile_count = int(settings.getSetting('profile_count'))
+    profiling_enabled = settings.getSetting('profiling_enabled') == "true"
     pr = None
-    if profile_count > 0:
-        profile_count = profile_count - 1
-        settings.setSetting('profile_count', str(profile_count))
-        pr = cProfile.Profile()
-        pr.enable()
+    if profiling_enabled:
+
+        message = "Enable performance profiling for this request?"
+        response = xbmcgui.Dialog().yesno("Record Performance Data", message)
+        if response:
+            pr = cProfile.Profile()
+            pr.enable()
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().get_version())
@@ -75,7 +80,7 @@ def main_entry_point():
     param_url = params.get('url', None)
 
     if param_url:
-        param_url = urllib.unquote(param_url)
+        param_url = urllib.parse.unquote(param_url)
 
     mode = params.get("mode", None)
 
@@ -169,8 +174,9 @@ def main_entry_point():
         pr.disable()
 
         file_time_stamp = time.strftime("%Y%m%d-%H%M%S")
-        tab_file_name = __addondir__ + "profile(" + file_time_stamp + ").txt"
-        s = StringIO.StringIO()
+        profile_file_name = "profile(" + file_time_stamp + ").txt"
+        tab_file_name = __addondir__ + profile_file_name
+        s = io.StringIO()
         ps = pstats.Stats(pr, stream=s)
         ps = ps.sort_stats('cumulative')
         ps.print_stats()
@@ -178,7 +184,9 @@ def main_entry_point():
         ps = ps.sort_stats('tottime')
         ps.print_stats()
         with open(tab_file_name, 'wb') as f:
-            f.write(s.getvalue())
+            if param_url:
+                f.write((param_url + "\r\n").encode("utf-8"))
+            f.write(s.getvalue().encode("utf-8"))
 
     log.debug("===== EmbyCon FINISHED =====")
 
@@ -305,10 +313,12 @@ def delete(item_id):
     final_name += item_name
 
     if not item.get("CanDelete", False):
-        xbmcgui.Dialog().ok(string_load(30135), string_load(30417), final_name)
+        message = string_load(30417) + "\n" + final_name
+        xbmcgui.Dialog().ok(string_load(30135), message)
         return
 
-    return_value = xbmcgui.Dialog().yesno(string_load(30091), final_name, string_load(30092))
+    message = final_name + "\n" + string_load(30092)
+    return_value = xbmcgui.Dialog().yesno(string_load(30091), message)
     if return_value:
         log.debug('Deleting Item: {0}', item_id)
         url = '{server}/emby/Items/' + item_id
@@ -361,7 +371,7 @@ def get_params():
 def show_node_content(params):
     log.debug("show_node_content : {0}", params)
     node_name = params["node_name"]
-    node_name = urllib.unquote(node_name)
+    node_name = urllib.parse.unquote(node_name)
     custom_nodes = load_custom_nodes()
     if node_name in custom_nodes:
         node_info = custom_nodes[node_name]
@@ -620,7 +630,7 @@ def show_menu(params):
     elif selected_action == "show_extras":
         # "http://localhost:8096/emby/Users/3138bed521e5465b9be26d2c63be94af/Items/78/SpecialFeatures"
         u = "{server}/emby/Users/{userid}/Items/" + item_id + "/SpecialFeatures"
-        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Videos")
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Videos")
         built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
         xbmc.executebuiltin(built_in_command)
 
@@ -636,7 +646,7 @@ def show_menu(params):
              '&IsMissing=false' +
              '&Fields=SpecialEpisodeNumbers,{field_filters}' +
              '&format=json')
-        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Season")
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Season")
         built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
         xbmc.executebuiltin(built_in_command)
 
@@ -653,7 +663,7 @@ def show_menu(params):
              '&Fields={field_filters}' +
              '&format=json')
 
-        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.quote(u) + "&mode=GET_CONTENT&media_type=Series")
+        action_url = ("plugin://plugin.video.embycon/?url=" + urllib.parse.quote(u) + "&mode=GET_CONTENT&media_type=Series")
 
         if xbmc.getCondVisibility("Window.IsActive(home)"):
             built_in_command = 'ActivateWindow(Videos, ' + action_url + ', return)'
@@ -680,7 +690,7 @@ def populate_listitem(item_id):
     log.debug("populate_listitem item info: {0}", result)
 
     '''
-    server = downloadUtils.getServer()
+    server = downloadUtils.get_server()
     gui_options = {}
     gui_options["server"] = server
 
@@ -703,7 +713,7 @@ def populate_listitem(item_id):
     server = downloadUtils.get_server()
 
     art = get_art(result, server=server)
-    list_item.setIconImage(art['thumb'])  # back compat
+    list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
     list_item.setProperty('fanart_image', art['fanart'])  # back compat
     list_item.setProperty('discart', art['discart'])  # not avail to setArt
     list_item.setArt(art)
@@ -763,7 +773,7 @@ def search_results_person(params):
                    '&format=json')
 
     '''
-    details_result = dataManager.GetContent(details_url)
+    details_result = dataManager.get_content(details_url)
     log.debug("Search Results Details: {0}", details_result)
 
     if details_result:
@@ -812,7 +822,7 @@ def search_results(params):
     query_string = params.get('query')
     if query_string:
         log.debug("query_string : {0}", query_string)
-        query_string = urllib.unquote(query_string)
+        query_string = urllib.parse.unquote(query_string)
         log.debug("query_string : {0}", query_string)
 
     item_type = item_type.lower()
@@ -859,7 +869,7 @@ def search_results(params):
     else:
         query = query_string
 
-    query = urllib.quote(query)
+    query = urllib.parse.quote(query)
     log.debug("query : {0}", query)
 
     if (not item_type) or (not query):

@@ -1,15 +1,14 @@
 
 import xbmcvfs
-import xbmc
 import base64
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 from random import shuffle
 
 import threading
-import httplib
+import http.client
 import io
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from .simple_logging import SimpleLogging
 from .datamanager import DataManager
@@ -85,7 +84,7 @@ def build_image(path):
     if request_path == "favicon.ico":
         return []
 
-    decoded_url = base64.b64decode(request_path)
+    decoded_url = base64.b64decode(request_path).decode("utf-8")
     log.debug("decoded_url : {0}", decoded_url)
 
     image_urls = get_image_links(decoded_url)
@@ -119,7 +118,7 @@ def build_image(path):
             log.debug("Loading image from : {0} {1} {2}", image_count, server, url_full_path)
 
             try:
-                conn = httplib.HTTPConnection(server)
+                conn = http.client.HTTPConnection(server)
                 conn.request("GET", url_full_path)
                 image_responce = conn.getresponse()
                 image_data = image_responce.read()
@@ -189,7 +188,7 @@ class HttpImageHandler(BaseHTTPRequestHandler):
 
         else:
 
-            image_path = xbmc.translatePath("special://home/addons/plugin.video.embycon/icon.png").decode('utf-8')
+            image_path = xbmcvfs.translatePath("special://home/addons/plugin.video.embycon/icon.png").decode('utf-8')
             self.send_response(200)
             self.send_header('Content-type', 'image/png')
             modified = xbmcvfs.Stat(image_path).st_mtime()
@@ -214,7 +213,7 @@ class HttpImageServerThread(threading.Thread):
         self.keep_running = False
         log.debug("HttpImageServerThread:stop called")
         try:
-            conn = httplib.HTTPConnection("localhost:%d" % PORT_NUMBER)
+            conn = http.client.HTTPConnection("localhost:%d" % PORT_NUMBER)
             conn.request("QUIT", "/")
             conn.getresponse()
         except:

@@ -5,7 +5,7 @@ from collections import defaultdict
 import threading
 import hashlib
 import os
-import cPickle
+import pickle
 import time
 
 from .downloadutils import DownloadUtils
@@ -40,7 +40,7 @@ class CacheItem:
 
 class DataManager:
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
 
     def __init__(self, *args):
         # log.debug("DataManager __init__")
@@ -68,12 +68,13 @@ class DataManager:
         server = download_utils.get_server()
 
         m = hashlib.md5()
-        m.update(user_id + "|" + str(server) + "|" + url)
+        line = user_id + "|" + str(server) + "|" + url
+        m.update(line.encode("utf-8"))
         url_hash = m.hexdigest()
         cache_file = os.path.join(self.addon_dir, "cache_" + url_hash + ".pickle")
 
         # changed_url = url + "&MinDateLastSavedForUser=" + urllib.unquote("2019-09-16T13:45:30")
-        # results = self.GetContent(changed_url)
+        # results = self.get_content(changed_url)
         # log.debug("DataManager Changes Since Date : {0}", results)
 
         item_list = None
@@ -98,7 +99,7 @@ class DataManager:
             with FileLock(cache_file, timeout=5):
                 with open(cache_file, 'rb') as handle:
                     try:
-                        cache_item = cPickle.load(handle)
+                        cache_item = pickle.load(handle)
                         cache_thread.cached_item = cache_item
                         item_list = cache_item.item_list
                         total_records = cache_item.total_records
@@ -200,7 +201,7 @@ class CacheManagerThread(threading.Thread):
 
             with FileLock(self.cached_item.file_path, timeout=5):
                 with open(self.cached_item.file_path, 'wb') as handle:
-                    cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                    pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         else:
             log.debug("CacheManagerThread : Reloading to recheck data hashes")
@@ -246,7 +247,7 @@ class CacheManagerThread(threading.Thread):
 
                 with FileLock(self.cached_item.file_path, timeout=5):
                     with open(self.cached_item.file_path, 'wb') as handle:
-                        cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                        pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 log.debug("CacheManagerThread : Sending container refresh")
                 xbmc.executebuiltin("Container.Refresh")
@@ -255,7 +256,7 @@ class CacheManagerThread(threading.Thread):
                 self.cached_item.date_last_used = time.time()
                 with FileLock(self.cached_item.file_path, timeout=5):
                     with open(self.cached_item.file_path, 'wb') as handle:
-                        cPickle.dump(self.cached_item, handle, protocol=cPickle.HIGHEST_PROTOCOL)
+                        pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 log.debug("CacheManagerThread : Updating last used date for cache data")
 
         log.debug("CacheManagerThread : Exited")
@@ -264,7 +265,7 @@ class CacheManagerThread(threading.Thread):
 def clear_cached_server_data():
     log.debug("clear_cached_server_data() called")
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     dirs, files = xbmcvfs.listdir(addon_dir)
 
     del_count = 0
@@ -286,7 +287,7 @@ def clear_cached_server_data():
 def clear_old_cache_data():
     log.debug("clear_old_cache_data() : called")
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     dirs, files = xbmcvfs.listdir(addon_dir)
 
     del_count = 0
@@ -300,7 +301,7 @@ def clear_old_cache_data():
                     data_file = os.path.join(addon_dir, filename)
                     with FileLock(data_file, timeout=5):
                         with open(data_file, 'rb') as handle:
-                            cache_item = cPickle.load(handle)
+                            cache_item = pickle.load(handle)
                     break
                 except Exception as error:
                     log.debug("clear_old_cache_data() : Pickle load error : {0}", error)

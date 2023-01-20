@@ -2,8 +2,8 @@
 
 import socket
 import json
-from urlparse import urlparse
-import httplib
+from urllib.parse import urlparse
+import http.client
 import ssl
 import time
 import hashlib
@@ -59,13 +59,13 @@ def check_connection_speed():
 
     if local_use_https and verify_cert:
         log.debug("Connection: HTTPS, Cert checked")
-        conn = httplib.HTTPSConnection(server, timeout=http_timeout)
+        conn = http.client.HTTPSConnection(server, timeout=http_timeout)
     elif local_use_https and not verify_cert:
         log.debug("Connection: HTTPS, Cert NOT checked")
-        conn = httplib.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
+        conn = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
     else:
         log.debug("Connection: HTTP")
-        conn = httplib.HTTPConnection(server, timeout=http_timeout)
+        conn = http.client.HTTPConnection(server, timeout=http_timeout)
 
     head = du.get_auth_header(True)
     head["User-Agent"] = "EmbyCon-" + ClientInformation().get_version()
@@ -128,7 +128,7 @@ def get_server_details():
 
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 3)  # timeout
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
+    #sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
     sock.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
 
     log.debug("MutliGroup: {0}", multi_group)
@@ -142,14 +142,16 @@ def get_server_details():
 
     # while True:
     try:
-        sock.sendto(message, multi_group)
+        sock.sendto(message.encode("utf-8"), multi_group)
         while True:
             try:
                 server_count += 1
                 progress.update(server_count * 10, string_load(30375) % server_count)
                 xbmc.sleep(1000)
                 data, addr = sock.recvfrom(1024)
-                servers.append(json.loads(data))
+                responce_data = json.loads(data)
+                servers.append(responce_data)
+                log.debug("UDP Responce Data : {0}", responce_data)
             except:
                 break
     except Exception as e:
@@ -202,7 +204,7 @@ def check_server(force=False, change_user=False, notify=False):
                 server_url = server_info[return_index]["Address"]
 
         if not server_url:
-            return_index = xbmcgui.Dialog().yesno(__addon_name__, string_load(30282), string_load(30370))
+            return_index = xbmcgui.Dialog().yesno(__addon_name__, string_load(30282))
             if not return_index:
                 xbmc.executebuiltin("ActivateWindow(Home)")
                 return
@@ -246,9 +248,8 @@ def check_server(force=False, change_user=False, notify=False):
                                         "%s://%s:%s/" % (server_protocol, server_address, server_port))
                     break
                 else:
-                    return_index = xbmcgui.Dialog().yesno(__addon_name__ + " : " + string_load(30135),
-                                                          server_url,
-                                                          string_load(30371))
+                    message = server_url + "\n" + string_load(30371)
+                    return_index = xbmcgui.Dialog().yesno(__addon_name__ + " : " + string_load(30135), message)
                     if not return_index:
                         xbmc.executebuiltin("ActivateWindow(Home)")
                         return
@@ -282,7 +283,6 @@ def check_server(force=False, change_user=False, notify=False):
     # do we need to change the user
     user_details = load_user_details(settings)
     current_username = user_details.get("username", "")
-    current_username = unicode(current_username, "utf-8")
 
     # if asked or we have no current user then show user selection screen
     if something_changed or change_user or len(current_username) == 0:
@@ -302,9 +302,8 @@ def check_server(force=False, change_user=False, notify=False):
             result = None
 
         if result is None:
-            xbmcgui.Dialog().ok(string_load(30135),
-                                string_load(30201),
-                                string_load(30169) + server_url)
+            message = string_load(30201) + "\n" + string_load(30169) + server_url
+            xbmcgui.Dialog().ok(string_load(30135), message)
 
         else:
             selected_id = -1
@@ -355,7 +354,7 @@ def check_server(force=False, change_user=False, notify=False):
                             user_item.setProperty("secure", "true")
 
                             m = hashlib.md5()
-                            m.update(name)
+                            m.update(name.encode("utf-8"))
                             hashed_username = m.hexdigest()
                             saved_password = settings.getSetting("saved_user_password_" + hashed_username)
                             if saved_password:
@@ -421,7 +420,7 @@ def check_server(force=False, change_user=False, notify=False):
                 if secured:
                     # we need a password, check the settings first
                     m = hashlib.md5()
-                    m.update(selected_user_name)
+                    m.update(selected_user_name.encode("utf-8"))
                     hashed_username = m.hexdigest()
                     saved_password = settings.getSetting("saved_user_password_" + hashed_username)
                     allow_password_saving = settings.getSetting("allow_password_saving") == "true"

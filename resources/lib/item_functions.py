@@ -1,7 +1,9 @@
 
 import sys
 import os
-import urllib
+import urllib.request
+import urllib.parse
+import urllib.error
 
 from datetime import datetime
 
@@ -10,6 +12,7 @@ from collections import defaultdict
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 
 from .utils import get_art, datetime_from_string
 from .simple_logging import SimpleLogging
@@ -21,7 +24,7 @@ kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
 addon_instance = xbmcaddon.Addon()
 addon_path = addon_instance.getAddonInfo('path')
-PLUGINPATH = xbmc.translatePath(os.path.join(addon_path))
+PLUGINPATH = xbmcvfs.translatePath(os.path.join(addon_path))
 
 download_utils = DownloadUtils()
 home_window = HomeWindow()
@@ -247,10 +250,10 @@ def extract_item_info(item, gui_options):
             name_info["SeriesName"] = season_name
         else:
             name_info["SeriesName"] = ""
-        name_info["SeasonIndex"] = u"%02d" % item_details.season_number
-        name_info["EpisodeIndex"] = u"%02d" % item_details.episode_number
+        name_info["SeasonIndex"] = "%02d" % item_details.season_number
+        name_info["EpisodeIndex"] = "%02d" % item_details.episode_number
         log.debug("FormatName: {0} | {1}", name_format, name_info)
-        item_details.name = unicode(name_format).format(**name_info).strip()
+        item_details.name = str(name_format).format(**name_info).strip()
 
     year = item["ProductionYear"]
     prem_date = item["PremiereDate"]
@@ -392,7 +395,7 @@ def extract_item_info(item, gui_options):
 
     runtime = item["RunTimeTicks"]
     if item_details.is_folder is False and runtime is not None:
-        item_details.duration = long(runtime) / 10000000
+        item_details.duration = int(runtime) / 10000000
 
     child_count = item["ChildCount"]
     if child_count is not None:
@@ -444,9 +447,9 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
 
     # Create the URL to pass to the item
     if folder:
-        u = sys.argv[0] + "?url=" + urllib.quote(url) + mode + "&media_type=" + item_details.item_type
+        u = sys.argv[0] + "?url=" + urllib.parse.quote(url) + mode + "&media_type=" + item_details.item_type
         if item_details.name_format:
-            u += '&name_format=' + urllib.quote(item_details.name_format)
+            u += '&name_format=' + urllib.parse.quote(item_details.name_format)
         if default_sort:
             u += '&sort=none'
     else:
@@ -573,8 +576,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     if item_details.genres is not None and len(item_details.genres) > 0:
         genres_list = []
         for genre in item_details.genres:
-            genres_list.append(urllib.quote(genre.encode('utf8')))
-        item_properties["genres"] = urllib.quote("|".join(genres_list))
+            genres_list.append(urllib.parse.quote(genre.encode('utf8')))
+        item_properties["genres"] = urllib.parse.quote("|".join(genres_list))
 
         info_labels["genre"] = " / ".join(item_details.genres)
 
@@ -694,7 +697,7 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     if kodi_version > 17:
         list_item.setProperties(item_properties)
     else:
-        for key, value in item_properties.iteritems():
+        for key, value in list(item_properties.items()):
             list_item.setProperty(key, value)
 
     return u, list_item, folder

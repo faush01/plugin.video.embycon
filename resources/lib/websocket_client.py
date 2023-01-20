@@ -4,7 +4,6 @@
 
 import json
 import threading
-import websocket
 
 import xbmc
 import xbmcgui
@@ -15,6 +14,8 @@ from . import clientinfo
 from . import downloadutils
 from .jsonrpc import JsonRpc
 from .kodi_utils import HomeWindow
+from .websocket import WebSocketApp, enableTrace
+
 
 log = SimpleLogging(__name__)
 
@@ -39,30 +40,30 @@ class WebSocketClient(threading.Thread):
 
         threading.Thread.__init__(self)
 
-    def on_message(self, ws, message):
+    def on_message(ws, message):
 
         result = json.loads(message)
         message_type = result['MessageType']
 
         if message_type == 'Play':
             data = result['Data']
-            self._play(data)
+            ws._play(data)
 
         elif message_type == 'Playstate':
             data = result['Data']
-            self._playstate(data)
+            ws._playstate(data)
 
         elif message_type == "UserDataChanged":
             data = result['Data']
-            self._library_changed(data)
+            ws._library_changed(data)
 
         elif message_type == "LibraryChanged":
             data = result['Data']
-            self._library_changed(data)
+            ws._library_changed(data)
 
         elif message_type == "GeneralCommand":
             data = result['Data']
-            self._general_commands(data)
+            ws._general_commands(data)
 
         else:
             log.debug("WebSocket Message Type: {0}", message)
@@ -102,7 +103,6 @@ class WebSocketClient(threading.Thread):
             params["subtitle_stream_index"] = subtitle_stream_index
             params["audio_stream_index"] = audio_stream_index
             play_action(params)
-
 
     def _playstate(self, data):
 
@@ -168,7 +168,7 @@ class WebSocketClient(threading.Thread):
 
             elif command == 'SetRepeatMode':
                 mode = arguments['RepeatMode']
-                xbmc.executebuiltin('xbmc.PlayerControl(%s)' % mode)
+                xbmc.executebuiltin('PlayerControl(%s)' % mode)
 
         elif command == 'DisplayMessage':
 
@@ -226,14 +226,14 @@ class WebSocketClient(threading.Thread):
             if command in builtin:
                 xbmc.executebuiltin(builtin[command])
 
-    def on_close(self, ws):
+    def on_close(ws):
         log.debug("Closed")
 
-    def on_open(self, ws):
+    def on_open(ws):
         log.debug("Connected")
-        self.post_capabilities()
+        ws.post_capabilities()
 
-    def on_error(self, ws, error):
+    def on_error(ws, error):
         log.debug("Error: {0}", error)
 
     def run(self):
@@ -257,7 +257,13 @@ class WebSocketClient(threading.Thread):
         websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (server, token, self.device_id)
         log.debug("websocket url: {0}", websocket_url)
 
-        self._client = websocket.WebSocketApp(websocket_url,
+        params = {"setting": "debug.showloginfo"}
+        setting_result = JsonRpc('Settings.getSettingValue').execute(params)
+        current_value = setting_result.get("result", None)
+        if current_value is not None and current_value.get("value", False):
+            enableTrace(True)
+
+        self._client = WebSocketApp(websocket_url,
                                               on_open=self.on_open,
                                               on_message=self.on_message,
                                               on_error=self.on_error,
