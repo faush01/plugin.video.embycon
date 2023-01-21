@@ -534,9 +534,6 @@ def show_menu(params):
 
     if selected_action == "play":
         log.debug("Play Item")
-        # list_item = populate_listitem(params["item_id"])
-        # result = xbmcgui.Dialog().info(list_item)
-        # log.debug("xbmcgui.Dialog().info: {0}", result)
         play_action(params)
 
     elif selected_action == "media_info":
@@ -679,58 +676,6 @@ def show_menu(params):
     elif selected_action == "info":
         xbmc.executebuiltin("Dialog.Close(all,true)")
         xbmc.executebuiltin("Action(info)")
-
-
-def populate_listitem(item_id):
-    log.debug("populate_listitem: {0}", item_id)
-
-    url = "{server}/emby/Users/{userid}/Items/" + item_id + "?format=json"
-    json_data = downloadUtils.download_url(url)
-    result = json.loads(json_data)
-    log.debug("populate_listitem item info: {0}", result)
-
-    '''
-    server = downloadUtils.get_server()
-    gui_options = {}
-    gui_options["server"] = server
-
-    gui_options["name_format"] = None
-    gui_options["name_format_type"] = None
-
-    details, extraData = extract_item_info(result,gui_options )
-    u, list_item, folder = add_gui_item(result["Id"], details, extraData, {}, folder=False)
-
-    log.debug("list_item path: {0}", u)
-
-    #list_item.setProperty('IsPlayable', 'false')
-    #list_item.setPath(u)
-    '''
-
-    item_title = result.get("Name", string_load(30280))
-
-    list_item = xbmcgui.ListItem(label=item_title)
-
-    server = downloadUtils.get_server()
-
-    art = get_art(result, server=server)
-    list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
-    list_item.setProperty('fanart_image', art['fanart'])  # back compat
-    list_item.setProperty('discart', art['discart'])  # not avail to setArt
-    list_item.setArt(art)
-
-    list_item.setProperty('IsPlayable', 'false')
-    list_item.setProperty('IsFolder', 'false')
-    list_item.setProperty('id', result.get("Id"))
-
-    # play info
-    details = {
-        'title': item_title,
-        'plot': result.get("Overview")
-    }
-
-    list_item.setInfo("Video", infoLabels=details)
-
-    return list_item
 
 
 def show_content(params):

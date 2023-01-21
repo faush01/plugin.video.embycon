@@ -234,11 +234,7 @@ def get_widget_content_cast(handle, params):
             if person_tag:
                 person_thumbnail = downloadUtils.image_url(person_id, "Primary", 0, 400, 400, person_tag, server=server)
 
-            if kodi_version > 17:
-                list_item = xbmcgui.ListItem(label=person_name, offscreen=True)
-            else:
-                list_item = xbmcgui.ListItem(label=person_name)
-
+            list_item = xbmcgui.ListItem(label=person_name, offscreen=True)
             list_item.setProperty("id", person_id)
 
             if person_thumbnail:
@@ -247,9 +243,9 @@ def get_widget_content_cast(handle, params):
                 art_links["poster"] = person_thumbnail
                 list_item.setArt(art_links)
 
-            labels = {}
-            labels["mediatype"] = "artist"
-            list_item.setInfo(type="music", infoLabels=labels)
+            #labels = {}
+            #labels["mediatype"] = "artist"
+            #list_item.setInfo(type="music", infoLabels=labels)
 
             if person_role:
                 list_item.setLabel2(person_role)
@@ -397,15 +393,16 @@ def get_widget_content(handle, params):
     list_items, detected_type, total_records = process_directory(items_url, None, params, False)
 
     # remove resumable items from next up
+    '''
     if widget_type == "nextup_episodes":
         filtered_list = []
         for item in list_items:
-            resume_time = item[1].getProperty("ResumeTime")
+            vit = item[1].getVideoInfoTag()
+            resume_time = vit.getResumeTime()
             if resume_time is None or float(resume_time) == 0.0:
                 filtered_list.append(item)
         list_items = filtered_list
-
-    # list_items = populateWidgetItems(items_url, widget_type)
+    '''
 
     if detected_type is not None:
         # if the media type is not set then try to use the detected type

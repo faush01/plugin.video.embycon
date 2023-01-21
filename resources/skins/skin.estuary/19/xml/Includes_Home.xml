@@ -122,7 +122,7 @@
 					<left>29</left>
 					<top>240</top>
 					<width>260</width>
-					<label>$INFO[ListItem.Property(UnWatchedEpisodes)] Episodes</label>
+					<label>$INFO[ListItem.Property(SeriesUnwatched)] Episodes</label>
 					<font>font10</font>
 					<shadowcolor>text_shadow</shadowcolor>
 					<scroll>$PARAM[focused]</scroll>

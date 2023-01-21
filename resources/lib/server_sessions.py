@@ -95,15 +95,15 @@ def show_server_sessions():
         user_session_details += play_method + "\n"
         user_session_details += transcoding_details + "\n"
 
-        info_labels = {}
-        info_labels["duration"] = str(runtime / 10000000)
-        info_labels["mediatype"] = "movie"
-        info_labels["plot"] = user_session_details
-        list_item.setInfo('video', info_labels)
+        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video.setMediaType("movie")
+        #info_tag_video.setDuration(int(runtime / 10000000))
+        info_tag_video.setResumePoint(int(position_ticks / 10000000), int(runtime / 10000000))
+        info_tag_video.setPlot(user_session_details)
 
-        list_item.setProperty('TotalTime', str(runtime / 10000000))
-        list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
-        list_item.setProperty("complete_percentage", str(percenatge_played))
+        #list_item.setProperty('TotalTime', str(runtime / 10000000))
+        #list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
+        #list_item.setProperty("complete_percentage", str(percenatge_played))
 
         item_tuple = ("", list_item, False)
         list_items.append(item_tuple)

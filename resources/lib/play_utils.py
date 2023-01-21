@@ -784,37 +784,28 @@ def set_list_item_props(item_id, list_item, result, server, extra_props, title):
         mediatype = 'song'
 
     if item_type == "audio":
-
-        details = {
-            'title': title,
-            'mediatype': mediatype
-        }
-        list_item.setInfo("Music", infoLabels=details)
+        info_tag_music = list_item.getMusicInfoTag()
+        info_tag_music.setMediaType(mediatype)
+        info_tag_music.setTitle(title)
 
     else:
-
-        details = {
-            'title': title,
-            'plot': result.get("Overview"),
-            'mediatype': mediatype
-        }
+        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video.setMediaType(mediatype)
+        info_tag_video.setTitle(title)
+        info_tag_video.setPlot(result.get("Overview"))
 
         tv_show_name = result.get("SeriesName")
         if tv_show_name is not None:
-            details['tvshowtitle'] = tv_show_name
+            info_tag_video.setTvShowTitle(tv_show_name)
 
         if item_type == "episode":
             episode_number = result.get("IndexNumber", -1)
-            details["episode"] = str(episode_number)
+            info_tag_video.setEpisode(episode_number)
             season_number = result.get("ParentIndexNumber", -1)
-            details["season"] = str(season_number)
+            info_tag_video.setSeason(season_number)
         elif item_type == "season":
             season_number = result.get("IndexNumber", -1)
-            details["season"] = str(season_number)
-
-        #details["plotoutline"] = "emby_id:%s" % (item_id,)
-
-        list_item.setInfo("Video", infoLabels=details)
+            info_tag_video.setSeason(season_number)
 
     return list_item
 
