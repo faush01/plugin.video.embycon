@@ -17,7 +17,9 @@ root = tree.getroot()
 id = root.attrib["id"]
 version = root.attrib["version"]
 
-if version.find("1.10") > -1:
+if version.find("1.11") > -1:
+	package_path = package_path + "\\nexus"
+elif version.find("1.10") > -1:
 	package_path = package_path + "\\matrix"
 else:
 	package_path = package_path + "\\krypton"
