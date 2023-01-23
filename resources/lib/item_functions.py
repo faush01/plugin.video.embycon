@@ -628,8 +628,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
             # info_labels["sortseason"] = item_details.season_sort_number
             # info_labels["sortepisode"] = item_details.episode_sort_number
             # info_labels["tvshowtitle"] = item_details.series_name
-            # if item_details.season_number == 0:
-            #     item_properties["IsSpecial"] = "true"
+            if item_details.season_number == 0:
+                item_properties["IsSpecial"] = "true"
 
         elif item_type == 'season':
             info_tag_video.setSeason(item_details.season_number)
@@ -638,8 +638,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
             # info_labels["season"] = item_details.season_number
             # info_labels["episode"] = item_details.total_episodes
             # info_labels["tvshowtitle"] = item_details.series_name
-            # if item_details.season_number == 0:
-            #     item_properties["IsSpecial"] = "true"
+            if item_details.season_number == 0:
+                item_properties["IsSpecial"] = "true"
 
         elif item_type == "series":
             info_tag_video.setEpisode(item_details.total_episodes)
@@ -745,20 +745,30 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         info_tag_music.setMediaType(mediatype)
 
         info_tag_music.setTitle(list_item_name)
-        if item_details.sort_name:
-            info_tag_music.setSortTitle(item_details.sort_name)
+        info_tag_music.setDuration(int(item_details.duration))
 
-        info_labels = {}
+        if item_details.year is not None:
+            info_tag_music.setYear(item_details.year)
 
-        info_labels["tracknumber"] = item_details.track_number
+        if item_details.genres is not None and len(item_details.genres) > 0:
+            info_tag_music.setGenres(item_details.genres)
+
+        info_tag_music.setTrack(item_details.track_number)
+        info_tag_music.setAlbum(item_details.album_name)
         if item_details.album_artist:
-            info_labels["artist"] = item_details.album_artist
-        elif item_details.song_artist:
-            info_labels["artist"] = item_details.song_artist
-        info_labels["album"] = item_details.album_name
+            info_tag_music.setAlbumArtist(item_details.album_artist)
+        if item_details.song_artist:
+            info_tag_music.setArtist(item_details.song_artist)
 
+        # info_labels = {}
+        # info_labels["tracknumber"] = item_details.track_number
+        # if item_details.album_artist:
+        #    info_labels["artist"] = item_details.album_artist
+        # elif item_details.song_artist:
+        #    info_labels["artist"] = item_details.song_artist
+        # info_labels["album"] = item_details.album_name
         # log.debug("info_labels: {0}", info_labels)
-        list_item.setInfo('music', info_labels)
+        # list_item.setInfo('music', info_labels)
 
     list_item.setContentLookup(False)
     item_properties["ItemType"] = item_details.item_type
