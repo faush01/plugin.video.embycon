@@ -11,6 +11,7 @@ import base64
 import xbmcplugin
 import xbmcaddon
 import xbmc
+import xbmcvfs
 
 from .downloadutils import DownloadUtils
 from .kodi_utils import add_menu_directory_item, HomeWindow
@@ -613,7 +614,7 @@ def create_new_node(params):
 
     addon = xbmcaddon.Addon()
     addon_path = addon.getAddonInfo('path')
-    skin_path = xbmc.translatePath(os.path.join(addon_path))
+    skin_path = xbmcvfs.translatePath(os.path.join(addon_path))
 
     custom_node = CustomNode("CustomNode.xml", skin_path, "default", "720p")
     #custom_node.setActionItems(action_items)

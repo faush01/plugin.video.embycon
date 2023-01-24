@@ -79,7 +79,7 @@ def get_view_list():
 
 def load_custom_nodes():
     log.debug("load_custom_nodes")
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     node_info_path = os.path.join(addon_dir, "custom_nodes.json")
     if xbmcvfs.exists(node_info_path):
         log.debug("custom_nodes.json : Exists")
@@ -102,7 +102,7 @@ def add_custom_node(existing_name, new_name, node_info):
     if new_name is not None and node_info is not None:
         custom_nodes[new_name] = node_info
 
-    addon_dir = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
     node_info_path = os.path.join(addon_dir, "custom_nodes.json")
     with open(node_info_path, 'w') as outfile:
         json.dump(custom_nodes, outfile)

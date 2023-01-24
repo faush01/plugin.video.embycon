@@ -107,6 +107,8 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         log.debug("PlayNextDialog: onInit")
         self.action_exitkeys_id = [10, 13]
 
+        log.debug("PlayNextDialog: episode_info : {0}", self.episode_info)
+
         series_name = self.episode_info.get("SeriesName")
         season_name = self.episode_info.get("SeasonName", "n/a")
         next_epp_name = self.episode_info.get("Name", "n/a")
