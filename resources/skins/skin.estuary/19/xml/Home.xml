@@ -31,7 +31,7 @@
 			<fadetime>400</fadetime>
 			<animation effect="fade" time="400">VisibleChange</animation>
 			<texture background="true" colordiffuse="37FFFFFF">$INFO[Window(Home).Property(plugin.video.embycon-random-gb)]</texture>
-			<visible>String.IsEmpty(ListItem.Art(fanart))</visible>
+			<visible>!Skin.HasSetting(no_fanart) + String.IsEmpty(ListItem.Art(fanart))</visible>
 		</control>			
 		<control type="image">
 			<include>FullScreenDimensions</include>
@@ -39,7 +39,7 @@
 			<fadetime>400</fadetime>
 			<animation effect="fade" time="400">VisibleChange</animation>
 			<texture background="true" colordiffuse="37FFFFFF">$INFO[ListItem.Art(fanart)]</texture>
-			<visible>!String.IsEmpty(ListItem.Art(fanart))</visible>
+			<visible>!Skin.HasSetting(no_fanart) + !String.IsEmpty(ListItem.Art(fanart))</visible>
 		</control>		
 <!-- End of EmbyCon Backgrounds -->		
 		<control type="multiimage">
