@@ -49,10 +49,27 @@ while not monitor.abortRequested():
     i += 1
     xbmc.sleep(100)
 
-server = DownloadUtils().get_server()
-if server is None:
-    # wait for 10 sec if server is not set
-    kodi_monitor.waitForAbort(20)
+# notify of debug logging
+enable_logging = settings.getSetting('log_debug') == "true"
+if enable_logging:
+    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
+                                  "Debug logging enabled!",
+                                  time=3000,
+                                  icon=xbmcgui.NOTIFICATION_WARNING)
+
+# make sure we have a server before starting the service
+du = DownloadUtils()
+while not monitor.abortRequested():
+    server = du.get_server()
+    if server is not None:
+        break
+    kodi_monitor.waitForAbort(5)
+
+if monitor.abortRequested():
+    log.debug("Abort requested before service started")
+    exit(0)
+
+log.debug("Service starting up")
 
 check_server()
 
@@ -111,13 +128,6 @@ background_interval = int(settings.getSetting('background_interval'))
 newcontent_interval = int(settings.getSetting('new_content_check_interval'))
 random_movie_list_interval = int(settings.getSetting('random_movie_refresh_interval'))
 random_movie_list_interval = random_movie_list_interval * 60
-
-enable_logging = settings.getSetting('log_debug') == "true"
-if enable_logging:
-    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
-                                  "Debug logging enabled!",
-                                  time=3000,
-                                  icon=xbmcgui.NOTIFICATION_WARNING)
 
 prev_user_id = home_window.get_property("userid")
 

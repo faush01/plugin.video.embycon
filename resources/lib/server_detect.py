@@ -455,6 +455,7 @@ def check_server(force=False, change_user=False, notify=False):
                     log.debug("Saving username with no password: {0}", selected_user_name)
                     save_user_details(settings, selected_user_name, "")
 
+        log.debug("Changed user - checking change : {0}", something_changed)
         if something_changed:
             home_window = HomeWindow()
             home_window.clear_property("userid")
@@ -464,6 +465,8 @@ def check_server(force=False, change_user=False, notify=False):
             du = DownloadUtils()
             du.authenticate()
             du.get_user_id()
+            log.debug("Changed user - reloading skin")
+            xbmc.executebuiltin("Dialog.Close(all,true)")
             xbmc.executebuiltin("ActivateWindow(Home)")
             if "estuary_embycon" in xbmc.getSkinDir():
                 xbmc.executebuiltin("SetFocus(9000, 0, absolute)")
