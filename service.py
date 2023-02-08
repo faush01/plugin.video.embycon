@@ -24,6 +24,7 @@ from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
 from resources.lib.skin_cloner import check_skin_installed
 from resources.lib.version_check import VersionCheck
+from resources.lib.chapter_dialog import ChapterDialogMonitor
 
 settings = xbmcaddon.Addon()
 
@@ -124,6 +125,9 @@ if context_menu:
     context_monitor = ContextMonitor()
     context_monitor.start()
 
+chapter_dialog_monitor = ChapterDialogMonitor()
+chapter_dialog_monitor.start()
+
 background_interval = int(settings.getSetting('background_interval'))
 newcontent_interval = int(settings.getSetting('new_content_check_interval'))
 random_movie_list_interval = int(settings.getSetting('random_movie_refresh_interval'))
@@ -198,6 +202,9 @@ if play_next_service:
 # call stop on the context menu monitor
 if context_monitor:
     context_monitor.stop_monitor()
+
+if chapter_dialog_monitor:
+    chapter_dialog_monitor.stop_monitor()
 
 # stop the WebSocket Client
 websocket_client.stop_client()
