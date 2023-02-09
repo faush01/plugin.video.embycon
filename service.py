@@ -125,8 +125,12 @@ if context_menu:
     context_monitor = ContextMonitor()
     context_monitor.start()
 
-chapter_dialog_monitor = ChapterDialogMonitor()
-chapter_dialog_monitor.start()
+# Start the bookmark/chapter monitor
+chapter_dialog_monitor = None
+emby_bookmarks = settings.getSetting('override_bookmarks') == "true"
+if emby_bookmarks:
+    chapter_dialog_monitor = ChapterDialogMonitor()
+    chapter_dialog_monitor.start()
 
 background_interval = int(settings.getSetting('background_interval'))
 newcontent_interval = int(settings.getSetting('new_content_check_interval'))

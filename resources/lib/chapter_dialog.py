@@ -97,9 +97,9 @@ class ChapterDialogMonitor(threading.Thread):
         kodi_monitor = xbmc.Monitor()
         while not kodi_monitor.abortRequested() and not self.stop_thread:
 
-            if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo)"):
-                item_id = home_screen.get_property("currently_playing_id")
+            if xbmc.getCondVisibility("Window.IsActive(videoosd)"):  # videoosd | fullscreenvideo
 
+                item_id = home_screen.get_property("currently_playing_id")
                 if xbmc.getCondVisibility("Window.IsVisible(VideoBookmarks)") and item_id:
                     xbmc.executebuiltin("Dialog.Close(VideoBookmarks,true)")
 
@@ -112,7 +112,7 @@ class ChapterDialogMonitor(threading.Thread):
 
                 kodi_monitor.waitForAbort(0.1)
             else:
-                kodi_monitor.waitForAbort(2)
+                kodi_monitor.waitForAbort(3)
 
         log.debug("ChapterDialogMonitor Thread Exited")
 

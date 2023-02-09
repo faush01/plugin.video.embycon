@@ -654,6 +654,10 @@ msgctxt "#30334"
 msgid "Use EmbyCon context menu"
 msgstr ""
 
+msgctxt "#30335"
+msgid "Use EmbyCon bookmarks dialog"
+msgstr ""
+
 msgctxt "#30337"
 msgid "Song"
 msgstr ""

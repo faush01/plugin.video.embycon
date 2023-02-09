@@ -10,90 +10,84 @@
     <controls>
 
 		<control type="group">
-			<bottom>0</bottom>
-			<height>550</height>
+			<bottom>80</bottom>
+			<height>190</height>
+
 			<control type="image">
 				<left>0</left>
+				<top>0</top>
 				<width>100%</width>
-				<height>410</height>
-				<!--
-				<animation effect="fade" start="0" end="100" time="300">WindowOpen</animation>
-				<animation effect="fade" start="100" end="0" time="300">WindowClose</animation>
-				<texture colordiffuse="E6FFFFFF">dialogs/dialog-bg-nobo.png</texture>
-				-->
-				<texture>bg.png</texture>
+				<height>190</height>
+				<texture colordiffuse="E6FFFFFF">bg.png</texture>
 			</control>
 
 			<control type="panel" id="1234">
 				<left>0</left>
-				<top>81</top>
+				<top>0</top>
 				<width>100%</width>
-				<height>350</height>
-				<onup></onup>
-				<ondown></ondown>
+				<height>190</height>
 				<preloaditems>2</preloaditems>
 				<scrolltime tween="sine">200</scrolltime>
 				<orientation>horizontal</orientation>
-				<itemlayout width="360" height="340">
+
+				<itemlayout width="280" height="240">
 					<control type="group">
 						<left>70</left>
 						<control type="image">
-							<left>0</left>
+							<left>20</left>
 							<top>5</top>
-							<width>330</width>
-							<height>250</height>
+							<width>240</width>
+							<height>135</height>
 							<aspectratio>scale</aspectratio>
 							<texture border="4" fallback="DefaultVideo.png">$INFO[ListItem.Art(thumb)]</texture>
-							<bordertexture colordiffuse="border_alpha">colors/black.png</bordertexture>
 							<bordersize>4</bordersize>
 						</control>
 						<control type="label">
-							<left>20</left>
-							<top>255</top>
-							<width>290</width>
+							<left>5</left>
+							<top>140</top>
+							<width>270</width>
 							<height>40</height>
 							<label>$INFO[ListItem.Label][CR][COLOR grey]$INFO[ListItem.Label2][/COLOR]</label>
 							<font>font12</font>
-							<shadowcolor>text_shadow</shadowcolor>
 							<align>center</align>
 						</control>
 					</control>
 				</itemlayout>
-				<focusedlayout width="360" height="340">
+
+				<focusedlayout width="250" height="250">
 					<control type="group">
 						<left>70</left>
 						<control type="image">
-							<left>0</left>
+							<left>20</left>
 							<top>5</top>
-							<width>330</width>
-							<height>250</height>
+							<width>240</width>
+							<height>135</height>
+							<texture border="8">white.png</texture>
+						</control>
+						<control type="image">
+							<left>20</left>
+							<top>5</top>
+							<width>240</width>
+							<height>135</height>
 							<aspectratio>scale</aspectratio>
 							<texture border="4" fallback="DefaultVideo.png">$INFO[ListItem.Art(thumb)]</texture>
-							<bordertexture colordiffuse="border_alpha">colors/black.png</bordertexture>
 							<bordersize>4</bordersize>
 						</control>
 						<control type="label">
-							<left>20</left>
-							<top>255</top>
-							<width>290</width>
+							<left>5</left>
+							<top>140</top>
+							<width>270</width>
 							<height>40</height>
 							<label>$INFO[ListItem.Label][CR][COLOR grey]$INFO[ListItem.Label2][/COLOR]</label>
 							<font>font12</font>
-							<shadowcolor>text_shadow</shadowcolor>
 							<align>center</align>
-						</control>
-						<control type="image">
-							<left>0</left>
-							<top>5</top>
-							<width>330</width>
-							<height>250</height>
-							<texture border="8" colordiffuse="button_focus">buttons/thumbnail_focused.png</texture>
-							<!--<visible>Control.HasFocus(1234)</visible>-->
 						</control>
 					</control>
 				</focusedlayout>
+
 			</control>
 
 		</control>
+
 	</controls>
 </window>
