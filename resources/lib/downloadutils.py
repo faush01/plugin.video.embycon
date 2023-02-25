@@ -346,7 +346,7 @@ class DownloadUtils:
 
         return play_info_result
 
-    def get_server(self):
+    def get_server(self, add_user_id=False):
         settings = xbmcaddon.Addon()
         host = settings.getSetting('ipaddress')
 
@@ -377,14 +377,20 @@ class DownloadUtils:
             if url_bits.hostname is not None and len(url_bits.hostname) > 0:
                 host = url_bits.hostname
 
-                if url_bits.username and url_bits.password:
-                    host = "%s:%s@" % (url_bits.username, url_bits.password) + host
+                #if url_bits.username and url_bits.password:
+                #    host = "%s:%s@" % (url_bits.username, url_bits.password) + host
 
                 settings.setSetting("ipaddress", host)
 
             if url_bits.port is not None and url_bits.port > 0:
                 port = str(url_bits.port)
                 settings.setSetting("port", port)
+
+        if add_user_id:
+            window = HomeWindow()
+            user_id = window.get_property("userid")
+            if user_id:
+                host = ("%s@" % user_id) + host
 
         if self.use_https:
             server = "https://" + host + ":" + port
