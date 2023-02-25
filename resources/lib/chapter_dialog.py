@@ -112,7 +112,7 @@ class ChapterDialogMonitor(threading.Thread):
 
                 kodi_monitor.waitForAbort(0.1)
             else:
-                kodi_monitor.waitForAbort(3)
+                kodi_monitor.waitForAbort(2)
 
         log.debug("ChapterDialogMonitor Thread Exited")
 
