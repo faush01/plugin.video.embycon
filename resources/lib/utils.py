@@ -59,7 +59,7 @@ class PlayUtils:
 
         # get all the options
         addon_settings = xbmcaddon.Addon()
-        server = downloadUtils.get_server()
+        server = downloadUtils.get_server(add_user_id=True)
         use_https = addon_settings.getSetting('protocol') == "1"
         verify_cert = addon_settings.getSetting('verify_cert') == 'true'
         allow_direct_file_play = addon_settings.getSetting('allow_direct_file_play') == 'true'
