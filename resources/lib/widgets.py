@@ -133,7 +133,7 @@ def check_for_new_content():
     url_params["Fields"] = "DateCreated,Etag"
     url_params["SortBy"] = "DateCreated"
     url_params["SortOrder"] = "Descending"
-    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["IncludeItemTypes"] = "Movie,Episode,Audio"
     url_params["ImageTypeLimit"] = 0
     url_params["format"] = "json"
 
@@ -157,7 +157,7 @@ def check_for_new_content():
     url_params["Fields"] = "DateCreated,Etag"
     url_params["SortBy"] = "DatePlayed"
     url_params["SortOrder"] = "Descending"
-    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["IncludeItemTypes"] = "Movie,Episode,Audio"
     url_params["ImageTypeLimit"] = 0
     url_params["format"] = "json"
 
