@@ -23,7 +23,6 @@ from resources.lib.tracking import set_timing_enabled
 from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
 from resources.lib.skin_cloner import check_skin_installed
-from resources.lib.version_check import VersionCheck
 from resources.lib.chapter_dialog import ChapterDialogMonitor
 
 settings = xbmcaddon.Addon()
@@ -82,9 +81,6 @@ try:
     download_utils.get_user_id()
 except Exception as error:
     log.error("Error with initial service auth: {0}", error)
-
-# do a version check
-VersionCheck().start()
 
 image_server = HttpImageServerThread()
 image_server.start()
