@@ -582,6 +582,7 @@ class DownloadUtils:
                 return ""
             if not userid:
                 userid = window.get_property("userid")
+                user_image = window.get_property("userimage")
 
         if userid and not user_image:
             user_image = 'DefaultUser.png'
@@ -635,11 +636,13 @@ class DownloadUtils:
 
         access_token = None
         userid = None
+        user_image = None
         try:
             result = json.loads(resp)
             access_token = result.get("AccessToken")
             # userid = result["SessionInfo"].get("UserId")
             userid = result["User"].get("Id")
+            user_image = self.get_user_artwork(result["User"], 'Primary')
         except:
             pass
 
@@ -648,7 +651,7 @@ class DownloadUtils:
             log.debug("User Id: {0}", userid)
             window.set_property("AccessToken", access_token)
             window.set_property("userid", userid)
-            # WINDOW.setProperty("userimage", "")
+            window.set_property("userimage", user_image)
 
             self.post_capabilities()
 
