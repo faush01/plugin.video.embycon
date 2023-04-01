@@ -731,7 +731,7 @@ def search_results_person(params):
 
     params["name_format"] = "Episode|episode_name_format"
 
-    dir_items, detected_type, total_records = process_directory(details_url, None, params)
+    dir_items, detected_type, total_records = process_directory(details_url, None, params, False)
 
     log.debug('search_results_person results: {0}', dir_items)
     log.debug('search_results_person detect_type: {0}', detected_type)
@@ -896,7 +896,7 @@ def search_results(params):
 
         # set content type
         xbmcplugin.setContent(handle, content_type)
-        dir_items, detected_type, total_records = process_directory(search_url, progress, params)
+        dir_items, detected_type, total_records = process_directory(search_url, progress, params, False)
         xbmcplugin.addDirectoryItems(handle, dir_items)
         xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
 

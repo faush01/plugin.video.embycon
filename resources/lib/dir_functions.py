@@ -126,8 +126,15 @@ def get_content(url, params):
     #    total_records = result.get("TotalRecordCount", 0)
 
     use_cache = params.get("use_cache", "true") == "true"
+    dir_items = None
+    try:
+        dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
+    except Exception as e:
+        log.debug("There was an error processing the URL : {0}", e)
+        home_window = HomeWindow()
+        home_window.set_property("skip_cache_for_" + url, "true")
+        raise
 
-    dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
     if dir_items is None:
         return
 
