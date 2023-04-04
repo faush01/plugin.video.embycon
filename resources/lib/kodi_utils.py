@@ -9,7 +9,6 @@ import json
 from .simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
-addon = xbmcaddon.Addon()
 
 
 class HomeWindow:
@@ -42,6 +41,7 @@ def add_menu_directory_item(label, path, folder=True, art=None):
     li = xbmcgui.ListItem(label, path=path)
     if art is None:
         art = {}
+        addon = xbmcaddon.Addon()
         art["thumb"] = addon.getAddonInfo('icon')
     li.setArt(art)
 

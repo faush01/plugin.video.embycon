@@ -3,21 +3,23 @@
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
+import xbmcvfs
 
 import urllib.request
 import urllib.parse
 import urllib.error
 import sys
+import os
 import re
 
 from .datamanager import DataManager
-from .kodi_utils import HomeWindow
 from .downloadutils import DownloadUtils
 from .translation import string_load
 from .simple_logging import SimpleLogging
 from .item_functions import add_gui_item, ItemDetails
 from .utils import send_event_notification
 from .tracking import timer
+from .filelock import FileLock
 
 log = SimpleLogging(__name__)
 
@@ -131,8 +133,12 @@ def get_content(url, params):
         dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
     except Exception as e:
         log.debug("There was an error processing the URL : {0}", e)
-        home_window = HomeWindow()
-        home_window.set_property("skip_cache_for_" + url, "true")
+        data_manager = DataManager()
+        cache_file_path = data_manager.get_cache_filename(url)
+        if os.path.isfile(cache_file_path):
+            log.debug("Clearing cache data file of failed process_directory : {0}", url)
+            with FileLock(cache_file_path, timeout=5):
+                xbmcvfs.delete(cache_file_path)
         raise
 
     if dir_items is None:

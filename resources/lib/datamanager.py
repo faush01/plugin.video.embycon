@@ -56,6 +56,17 @@ class DataManager:
         result = self.load_json_data(json_data)
         return result
 
+    def get_cache_filename(self, url):
+        download_utils = DownloadUtils()
+        user_id = download_utils.get_user_id()
+        server = download_utils.get_server()
+        m = hashlib.md5()
+        line = user_id + "|" + str(server) + "|" + url
+        m.update(line.encode("utf-8"))
+        url_hash = m.hexdigest()
+        cache_file = os.path.join(self.addon_dir, "cache_" + url_hash + ".pickle")
+        return cache_file
+
     @timer
     def get_items(self, url, gui_options, use_cache=False):
 
@@ -65,17 +76,7 @@ class DataManager:
 
         download_utils = DownloadUtils()
         user_id = download_utils.get_user_id()
-        server = download_utils.get_server()
-
-        m = hashlib.md5()
-        line = user_id + "|" + str(server) + "|" + url
-        m.update(line.encode("utf-8"))
-        url_hash = m.hexdigest()
-        cache_file = os.path.join(self.addon_dir, "cache_" + url_hash + ".pickle")
-
-        # changed_url = url + "&MinDateLastSavedForUser=" + urllib.unquote("2019-09-16T13:45:30")
-        # results = self.get_content(changed_url)
-        # log.debug("DataManager Changes Since Date : {0}", results)
+        cache_file = self.get_cache_filename(url)
 
         item_list = None
         total_records = 0
