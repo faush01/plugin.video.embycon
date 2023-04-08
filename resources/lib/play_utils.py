@@ -800,12 +800,15 @@ def set_list_item_props(item_id, list_item, result, server, extra_props, title):
 
         if item_type == "episode":
             episode_number = result.get("IndexNumber", -1)
-            info_tag_video.setEpisode(episode_number)
+            if episode_number is not None:
+                info_tag_video.setEpisode(episode_number)
             season_number = result.get("ParentIndexNumber", -1)
-            info_tag_video.setSeason(season_number)
+            if season_number is not None:
+                info_tag_video.setSeason(season_number)
         elif item_type == "season":
             season_number = result.get("IndexNumber", -1)
-            info_tag_video.setSeason(season_number)
+            if season_number is not None:
+                info_tag_video.setSeason(season_number)
 
     return list_item
 

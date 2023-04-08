@@ -152,6 +152,22 @@ class ItemDetails:
 
     baseline_itemname = None
 
+    def set_episode_number(self, value):
+        if value is not None:
+            self.episode_number = value
+
+    def set_season_sort_number(self, value):
+        if value is not None:
+            self.season_sort_number = value
+
+    def set_season_number(self, value):
+        if value is not None:
+            self.season_number = value
+
+    def set_episode_sort_number(self, value):
+        if value is not None:
+            self.episode_sort_number = value
+
 
 def extract_media_info(item):
     media_info = []
@@ -240,28 +256,28 @@ def extract_item_info(item, gui_options):
     item_details.original_title = item_details.name
 
     if item_details.item_type == "Episode":
-        item_details.episode_number = item["IndexNumber"]
-        item_details.season_number = item["ParentIndexNumber"]
+        item_details.set_episode_number(item["IndexNumber"])
+        item_details.set_season_number(item["ParentIndexNumber"])
         item_details.series_id = item["SeriesId"]
 
         if item_details.season_number != 0:
-            item_details.season_sort_number = item_details.season_number
-            item_details.episode_sort_number = item_details.episode_number
+            item_details.set_season_sort_number(item_details.season_number)
+            item_details.set_episode_sort_number(item_details.episode_number)
         else:
             special_after_season = item["AirsAfterSeasonNumber"]
             special_before_season = item["AirsBeforeSeasonNumber"]
             special_before_episode = item["AirsBeforeEpisodeNumber"]
 
             if special_after_season:
-                item_details.season_sort_number = special_after_season + 1
+                item_details.set_season_sort_number(special_after_season + 1)
             elif special_before_season:
-                item_details.season_sort_number = special_before_season - 1
+                item_details.set_season_sort_number(special_before_season - 1)
 
             if special_before_episode:
-                item_details.episode_sort_number = special_before_episode - 1
+                item_details.set_episode_sort_number(special_before_episode - 1)
 
     elif item_details.item_type == "Season":
-        item_details.season_number = item["IndexNumber"]
+        item_details.set_season_number(item["IndexNumber"])
         item_details.series_id = item["SeriesId"]
 
     elif item_details.item_type == "Series":
@@ -277,11 +293,6 @@ def extract_item_info(item, gui_options):
     elif item_details.item_type == "MusicAlbum":
         item_details.album_artist = item["AlbumArtist"]
         item_details.album_name = item_details.name
-
-    if item_details.season_number is None:
-        item_details.season_number = 0
-    if item_details.episode_number is None:
-        item_details.episode_number = 0
 
     if item["Taglines"] is not None and len(item["Taglines"]) > 0:
         item_details.tagline = item["Taglines"][0]
