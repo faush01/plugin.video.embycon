@@ -5,11 +5,9 @@ import urllib.parse
 import urllib.error
 import sys
 import os
-import time
+from datetime import datetime
 import cProfile
-import pstats
 import json
-import io
 
 import xbmcplugin
 import xbmcgui
@@ -18,7 +16,7 @@ import xbmc
 import xbmcvfs
 
 from .downloadutils import DownloadUtils, load_user_details
-from .utils import get_art, send_event_notification, convert_size
+from .utils import send_event_notification, get_profile_data, remove_old_profiles
 from .kodi_utils import HomeWindow
 from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
@@ -29,7 +27,6 @@ from .translation import string_load
 from .server_sessions import show_server_sessions
 from .action_menu import ActionMenu
 from .bitrate_dialog import BitrateDialog
-from .safe_delete_dialog import SafeDeleteDialog
 from .widgets import get_widget_content, get_widget_content_cast, check_for_new_content
 from . import trakttokodi
 from .cache_images import CacheArtwork
@@ -56,14 +53,14 @@ dataManager = DataManager()
 def main_entry_point():
     log.debug("===== EmbyCon START =====")
 
+    params = get_params()
+    mode = params.get("mode", None)
+
     settings = xbmcaddon.Addon()
     profiling_enabled = settings.getSetting('profiling_enabled') == "true"
     pr = None
     if profiling_enabled:
-
-        message = "Enable performance profiling for this request?"
-        response = xbmcgui.Dialog().yesno("Record Performance Data", message)
-        if response:
+        if mode in ["MOVIE_ALPHA", "TVSHOW_ALPHA", "WIDGET_CONTENT", "GET_CONTENT_BY_TV_SHOW", "GET_CONTENT"]:
             pr = cProfile.Profile()
             pr.enable()
 
@@ -72,8 +69,6 @@ def main_entry_point():
     log.debug("Kodi BuildVersion: {0}", xbmc.getInfoLabel("System.BuildVersion"))
     log.debug("Kodi Version: {0}", kodi_version)
     log.debug("Script argument data: {0}", sys.argv)
-
-    params = get_params()
     log.debug("Script params: {0}", params)
 
     request_path = params.get("request_path", None)
@@ -81,8 +76,6 @@ def main_entry_point():
 
     if param_url:
         param_url = urllib.parse.unquote(param_url)
-
-    mode = params.get("mode", None)
 
     if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
         check_server()
@@ -172,21 +165,22 @@ def main_entry_point():
 
     if pr:
         pr.disable()
+        profile_file_path = os.path.join(__addondir__, "profile")
+        xbmcvfs.mkdirs(profile_file_path)
 
-        file_time_stamp = time.strftime("%Y%m%d-%H%M%S")
-        profile_file_name = "profile(" + file_time_stamp + ").txt"
-        tab_file_name = __addondir__ + profile_file_name
-        s = io.StringIO()
-        ps = pstats.Stats(pr, stream=s)
-        ps = ps.sort_stats('cumulative')
-        ps.print_stats()
-        ps.strip_dirs()
-        ps = ps.sort_stats('tottime')
-        ps.print_stats()
-        with open(tab_file_name, 'wb') as f:
-            if param_url:
-                f.write((param_url + "\r\n").encode("utf-8"))
-            f.write(s.getvalue().encode("utf-8"))
+        # del old profiles
+        remove_old_profiles(profile_file_path, 50)
+
+        pdata = get_profile_data(pr)
+        pdata["addon_action"] = sys.argv[2]
+        pstring = json.dumps(pdata)
+
+        file_time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        profile_file_name = "profile(" + file_time_stamp + ").json"
+        tab_file_name = os.path.join(profile_file_path, profile_file_name)
+
+        with open(tab_file_name, "w", encoding="utf-8") as f:
+            f.write(pstring)
 
     log.debug("===== EmbyCon FINISHED =====")
 
@@ -380,7 +374,7 @@ def show_node_content(params):
         log.debug("show_node_content url : {0}", url)
 
         content_params = {}
-        if "kodi_media_type" in  node_info and node_info["kodi_media_type"]:
+        if "kodi_media_type" in node_info and node_info["kodi_media_type"]:
             content_params["media_type"] = node_info["kodi_media_type"]
 
         if "kodi_sort" in node_info and node_info["kodi_sort"] == "False":
