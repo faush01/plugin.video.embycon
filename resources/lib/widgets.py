@@ -423,3 +423,5 @@ def get_widget_content(handle, params):
 
     xbmcplugin.addDirectoryItems(handle, list_items)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+
+    return len(list_items)

@@ -142,7 +142,7 @@ def get_content(url, params):
         raise
 
     if dir_items is None:
-        return
+        return 0
 
     log.debug("total_records: {0}", total_records)
 
@@ -207,7 +207,7 @@ def get_content(url, params):
         progress.update(100, string_load(30125))
         progress.close()
 
-    return
+    return len(dir_items)
 
 
 def set_sort(pluginhandle, view_type, default_sort):

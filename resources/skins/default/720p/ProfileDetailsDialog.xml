@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window id="3302" type="dialog">
+
+    <zorder>2</zorder>
+	<coordinates>
+		<system>1</system>
+		<left>0</left>
+		<top>0</top>
+	</coordinates>
+    <controls>
+
+		<control type="image" id="3000">
+			<left>0</left>
+			<top>0</top>
+			<width>1280</width>
+			<height>720</height>
+			<texture border="40">bg.png</texture>
+		</control>
+
+        <control type="textbox" id="3010">
+            <left>20</left>
+			<top>20</top>
+			<width>1240</width>
+			<height>680</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <font>Mono26</font>
+			<monofont>Mono26</monofont>
+            <textcolor>FFFFFFFF</textcolor>
+            <pulseonselect></pulseonselect>
+            <pagecontrol>13</pagecontrol>
+            <scrolltime>200</scrolltime>
+            <!--<autoscroll delay="3000" time="1000" repeat="10000">!Control.HasFocus(13)</autoscroll>-->
+            <label>Text to display goes here [CR] next line...</label>
+            <align>left</align>
+        </control>
+
+        <!--
+		<control type="image" id="3010">
+			<left>0</left>
+			<top>0</top>
+			<width>1280</width>
+			<height>720</height>
+			<texture border="40">bg.png</texture>
+            <aspectratio>keep</aspectratio>
+		</control>
+		-->
+
+	</controls>
+</window>

@@ -17,8 +17,6 @@ import math
 from datetime import datetime
 import calendar
 import re
-import io
-import pstats
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -42,81 +40,6 @@ def get_emby_url(base_url, params):
             param_list.append(key + "=" + urllib.parse.quote_plus(str(value), safe="{}"))
     param_string = "&".join(param_list)
     return base_url + "?" + param_string
-
-
-def remove_old_profiles(profile_path, keep=30):
-    dirs, files = xbmcvfs.listdir(profile_path)
-    file_count = len(files)
-    log.debug("Performance profile file count : {0} target : {1}", file_count, keep)
-    if file_count > keep:
-        files.sort()
-        to_remove = file_count - keep
-        log.debug("Performance files removing : {0}", to_remove)
-        for index in range(0, to_remove):
-            full_path = os.path.join(profile_path, files[index])
-            log.debug("Removing performance file : {0}", full_path)
-            xbmcvfs.delete(full_path)
-
-
-def get_profile_data(pr):
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s)
-
-    # ps = ps.sort_stats('cumulative')
-    # ps.print_stats()
-    # ps.strip_dirs()
-    # ps = ps.sort_stats('tottime')
-    # ps.print_stats()
-
-    ps.strip_dirs()
-    ps.print_stats()
-    pstring = s.getvalue()
-    # log.debug("profile data :\n{0}", pstring)
-
-    # pstring = 'ncalls' + pstring.split('ncalls')[-1]
-    # pstring = '\n'.join([','.join(line.rstrip().split(None, 5)) for line in pstring.split('\n')])
-
-    stats_data = {}
-    stats_data["source"] = pstring
-
-    # extract stats info
-    stats = []
-    total_tokens = []
-    data_started = False
-    lines = pstring.split("\n")
-    for index in range(0, len(lines)):
-        line = lines[index].strip()
-        if len(line) == 0:
-            continue
-        if index == 0:
-            total_tokens = line.split(" ")
-        elif line.startswith("ncalls"):
-            data_started = True
-        elif data_started:
-            stats_tokens = line.split(None, 5)
-            stats.append(stats_tokens)
-
-    total_calls = 0
-    if total_tokens.index("function") > -1:
-        total_calls = total_tokens[total_tokens.index("function") - 1]
-    total_time = 0.0
-    if total_tokens.index("in") > -1:
-        total_time = total_tokens[total_tokens.index("in") + 1]
-
-    stats_data["total_calls"] = int(total_calls)
-    stats_data["total_time"] = float(total_time)
-    stats_data["stats"] = []
-    for s in stats:
-        calls = s[0].split("/")
-        item = {
-            "calls": int(calls[0]),
-            "time_local": float(s[1]),
-            "time_stack": float(s[3]),
-            "func": s[5]
-        }
-        stats_data["stats"].append(item)
-
-    return stats_data
 
 
 ###########################################################################

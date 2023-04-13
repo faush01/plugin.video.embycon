@@ -16,7 +16,8 @@ import xbmc
 import xbmcvfs
 
 from .downloadutils import DownloadUtils, load_user_details
-from .utils import send_event_notification, get_profile_data, remove_old_profiles
+from .utils import send_event_notification
+from .profile_utils import get_profile_data, remove_old_profiles
 from .kodi_utils import HomeWindow
 from .clientinfo import ClientInformation
 from .datamanager import DataManager, clear_cached_server_data
@@ -35,6 +36,7 @@ from .tracking import timer
 from .skin_cloner import clone_default_skin
 from .item_functions import extract_media_info
 from .custom_nodes import load_custom_nodes
+from .profile_utils import list_available_profiles, view_profile_details
 
 __addon__ = xbmcaddon.Addon()
 __addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
@@ -76,6 +78,8 @@ def main_entry_point():
 
     if param_url:
         param_url = urllib.parse.unquote(param_url)
+
+    item_count = 0
 
     if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
         check_server()
@@ -123,7 +127,7 @@ def main_entry_point():
     elif mode == "CLEAR_CACHE":
         clear_cached_server_data()
     elif mode == "WIDGET_CONTENT":
-        get_widget_content(int(sys.argv[1]), params)
+        item_count = get_widget_content(int(sys.argv[1]), params)
     elif mode == "WIDGET_CONTENT_CAST":
         get_widget_content_cast(int(sys.argv[1]), params)
     elif mode == "SHOW_CONTENT":
@@ -144,11 +148,15 @@ def main_entry_point():
         trakttokodi.entry_point(params)
     elif mode == "SHOW_ADDON_MENU":
         display_menu(params)
+    elif mode == "LIST_AVAILABLE_PROFILES":
+        list_available_profiles(params)
+    elif mode == "VIEW_PROFILE_DETAILS":
+        view_profile_details(params)
     elif mode == "GET_CONTENT_BY_TV_SHOW":
         parent_id = __get_parent_id_from(params)
         if parent_id is not None:
             enriched_url = param_url + "&ParentId=" + parent_id
-            get_content(enriched_url, params)
+            item_count = get_content(enriched_url, params)
         else:
             log.info("Unable to find TV show parent ID.")
     else:
@@ -156,7 +164,7 @@ def main_entry_point():
         log.debug("EmbyCon -> URL: {0}", param_url)
 
         if mode == "GET_CONTENT":
-            get_content(param_url, params)
+            item_count = get_content(param_url, params)
         elif mode == "PLAY":
             play_action(params)
         else:
@@ -173,6 +181,7 @@ def main_entry_point():
 
         pdata = get_profile_data(pr)
         pdata["addon_action"] = sys.argv[2]
+        pdata["item_count"] = item_count
         pstring = json.dumps(pdata)
 
         file_time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
