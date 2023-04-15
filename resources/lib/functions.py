@@ -62,7 +62,7 @@ def main_entry_point():
     profiling_enabled = settings.getSetting('profiling_enabled') == "true"
     pr = None
     if profiling_enabled:
-        if mode in ["MOVIE_ALPHA", "TVSHOW_ALPHA", "WIDGET_CONTENT", "GET_CONTENT_BY_TV_SHOW", "GET_CONTENT"]:
+        if mode in ["MOVIE_ALPHA", "TVSHOW_ALPHA", "WIDGET_CONTENT", "GET_CONTENT_BY_TV_SHOW", "GET_CONTENT", "SHOW_CONTENT"]:
             pr = cProfile.Profile()
             pr.enable()
 
@@ -86,7 +86,7 @@ def main_entry_point():
         new_params = {}
         new_params["item_type"] = "Movie"
         new_params["media_type"] = "movies"
-        show_content(new_params)
+        item_count = show_content(new_params)
     elif mode == "CHANGE_USER":
         check_server(change_user=True, notify=False)
     elif mode == "CACHE_ARTWORK":
@@ -133,7 +133,7 @@ def main_entry_point():
     elif mode == "SHOW_CONTENT":
         # plugin://plugin.video.embycon?mode=SHOW_CONTENT&item_type=Movie|Series
         check_server()
-        show_content(params)
+        item_count = show_content(params)
     elif mode == "SEARCH":
         # plugin://plugin.video.embycon?mode=SEARCH
         xbmcplugin.setContent(int(sys.argv[1]), 'files')
@@ -705,7 +705,7 @@ def show_content(params):
                    "&IncludeItemTypes=" + item_type)
 
     log.debug("showContent Content Url: {0}", content_url)
-    get_content(content_url, params)
+    return get_content(content_url, params)
 
 
 def search_results_person(params):

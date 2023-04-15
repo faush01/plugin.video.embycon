@@ -4,6 +4,7 @@ import io
 import os
 import pstats
 from datetime import datetime
+import time
 
 import xbmcplugin
 import xbmcgui
@@ -89,8 +90,12 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
             # build profile details text
             profile_details_text = "Profile Data\n\n"
 
+            time_stamp = self.profile_details["time_stamp"]
+            time_date = datetime(*(time.strptime(time_stamp, "%Y%m%d-%H%M%S-%f")[0:6]))
+            time_stamp = time_date.strftime("%Y/%m/%d %H:%M:%S")
+
             profile_details_text += "Params      : " + self.profile_details["addon_action"] + "\n"
-            profile_details_text += "Time Stamp  : " + self.profile_details["time_stamp"] + "\n"
+            profile_details_text += "Time Stamp  : " + time_stamp + "\n"
             profile_details_text += "Total Calls : " + str(self.profile_details["total_calls"]) + "\n"
             profile_details_text += "Total Time  : " + str(self.profile_details["total_time"]) + "\n"
             profile_details_text += "Total Items : " + str(self.profile_details["item_count"]) + "\n"
@@ -173,7 +178,7 @@ def list_available_profiles(params):
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     profile_path = os.path.join(addon_dir, "profile")
     dirs, files = xbmcvfs.listdir(profile_path)
-    files.sort()
+    files.sort(reverse=True)
 
     for file in files:
         stats_data = None
@@ -181,12 +186,15 @@ def list_available_profiles(params):
         with open(profile_file_name) as json_file:
             stats_data = json.load(json_file)
 
+        time_stamp = stats_data["time_stamp"]
+        time_date = datetime(*(time.strptime(time_stamp, "%Y%m%d-%H%M%S-%f")[0:6]))
+        time_stamp = time_date.strftime("%Y/%m/%d %H:%M:%S")
+
         total_calls = stats_data["total_calls"]
         total_time = stats_data["total_time"]
         item_count = stats_data["item_count"]
-        time_stamp = stats_data["time_stamp"]
 
-        label = time_stamp + " : " + str(total_time) + " : " + str(total_calls) + " : " + str(item_count)
+        label = time_stamp + " | " + str(total_time) + " | " + str(total_calls) + " | " + str(item_count)
 
         list_item = xbmcgui.ListItem(label=label, offscreen=True)
         action_url = sys.argv[0] + "?mode=VIEW_PROFILE_DETAILS&file=" + file
