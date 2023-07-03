@@ -834,7 +834,7 @@ class DownloadUtils:
                 if int(data.status) == 401:
                     # remove any saved password
                     m = hashlib.md5()
-                    m.update(username)
+                    m.update(username.encode("utf-8"))
                     hashed_username = m.hexdigest()
                     log.error("HTTP response error 401 auth error, removing any saved passwords for user: {0}", hashed_username)
                     settings.setSetting("saved_user_password_" + hashed_username, "")
