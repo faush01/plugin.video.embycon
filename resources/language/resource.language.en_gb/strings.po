@@ -75,7 +75,7 @@ msgid "Filtered episode name format"
 msgstr ""
 
 msgctxt "#30020"
-msgid "Flatten single season"
+msgid "Flatten TV Show seasons"
 msgstr ""
 
 msgctxt "#30021"
@@ -1084,4 +1084,16 @@ msgstr ""
 
 msgctxt "#30444"
 msgid "Auto skip intro"
+msgstr ""
+
+msgctxt "#30445"
+msgid "No Flattening"
+msgstr ""
+
+msgctxt "#30446"
+msgid "Flatten Single"
+msgstr ""
+
+msgctxt "#30447"
+msgid "Flatten All"
 msgstr ""

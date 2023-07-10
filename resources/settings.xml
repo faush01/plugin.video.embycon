@@ -96,7 +96,7 @@
 		<setting label="30222" type="lsep"/>
 		<setting type="sep" />
 		<setting id="group_movies" type="bool" label="30340" default="true" visible="true" enable="true" />
-		<setting id="flatten_single_season" type="bool" label="30020" default="true" visible="true" enable="true" />
+		<setting id="flatten_tvshow_seasons" type="select" label="30020" default="0" visible="true" enable="true" lvalues="30445|30446|30447" />
 		<setting id="show_all_episodes" type="bool" label="30021" default="true" visible="true" enable="true" />
 		<setting id="show_empty_folders" type="bool" label="30328" default="false" visible="true" enable="true" />
 		<setting id="hide_watched" type="bool" label="30432" default="true" visible="true" enable="true" />

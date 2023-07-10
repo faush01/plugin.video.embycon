@@ -283,14 +283,30 @@ def process_directory(url, progress, params, use_cache_data=False):
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
     # build a new url, set the content media type and call get content again
-    flatten_single_season = settings.getSetting("flatten_single_season") == "true"
-    if flatten_single_season and len(item_list) == 1 and item_list[0].item_type == "Season":
+    flatten_tvshow_seasons = settings.getSetting("flatten_tvshow_seasons")
+    if flatten_tvshow_seasons == "1" and len(item_list) == 1 and item_list[0].item_type == "Season":
         season_id = item_list[0].id
         series_id = item_list[0].series_id
         season_url = ('{server}/emby/Shows/' + series_id +
                       '/Episodes'
                       '?userId={userid}' +
                       '&seasonId=' + season_id +
+                      '&IsVirtualUnAired=false' +
+                      '&IsMissing=false' +
+                      '&Fields=SpecialEpisodeNumbers,{field_filters}' +
+                      '&format=json')
+        if progress is not None:
+            progress.close()
+        params["media_type"] = "Episodes"
+        get_content(season_url, params)
+        return None, None, None
+    elif flatten_tvshow_seasons == "2" and len(item_list) > 0 and item_list[0].item_type == "Season":
+        season_id = item_list[0].id
+        series_id = item_list[0].series_id
+        season_url = ('{server}/emby/Shows/' + series_id +
+                      '/Episodes'
+                      '?userId={userid}' +
+                      #'&seasonId=' + season_id +
                       '&IsVirtualUnAired=false' +
                       '&IsMissing=false' +
                       '&Fields=SpecialEpisodeNumbers,{field_filters}' +
