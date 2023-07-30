@@ -310,7 +310,7 @@ def check_server(force=False, change_user=False, notify=False):
             selected_id = -1
             users = []
             for user in result:
-                config = user.get("Configuration")
+                config = user #.get("Configuration")
                 if config is not None:
                     if config.get("IsHidden", False) is False:
                         name = user.get("Name")
