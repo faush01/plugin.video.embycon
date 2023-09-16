@@ -1081,3 +1081,7 @@ msgstr ""
 msgctxt "#30444"
 msgid "Auto skip intro"
 msgstr ""
+
+msgctxt "#30448"
+msgid "Force transcode av1"
+msgstr ""

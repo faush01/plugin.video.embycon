@@ -1074,3 +1074,7 @@ msgstr "Mostrar reproducir el próximo episodio en un momento concreto"
 msgctxt "#30440"
 msgid "Play next"
 msgstr "Reproducir siguiente"
+
+msgctxt "#30448"
+msgid "Force transcode av1"
+msgstr "Forzar transcodificación av1"
