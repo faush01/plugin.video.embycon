@@ -622,7 +622,7 @@ def play_file(play_info, monitor):
     next_episode = get_next_episode(result)
 
     if next_episode is not None:
-        next_epp_art = get_art(next_episode, server, max_image_width=max_image_width)
+        next_epp_art = get_art(next_episode, server, maxwidth=max_image_width)
         next_episode["art"] = next_epp_art
 
     data["next_episode"] = next_episode
