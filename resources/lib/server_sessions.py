@@ -2,6 +2,7 @@
 import sys
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -33,6 +34,9 @@ def show_server_sessions():
     if results is None:
         return
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     list_items = []
     for session in results:
         device_name = session.get("DeviceName", "na")
@@ -59,7 +63,7 @@ def show_server_sessions():
         art = {}
         if now_playing:
             server = download_utils.get_server()
-            art = get_art(now_playing, server)
+            art = get_art(now_playing, server, maxwidth=max_image_width)
 
             runtime = now_playing.get("RunTimeTicks", 0)
             if position_ticks > 0 and runtime > 0:

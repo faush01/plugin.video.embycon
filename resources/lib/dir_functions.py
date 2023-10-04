@@ -272,10 +272,13 @@ def process_directory(url, progress, params, use_cache_data=False):
             name_format_type = None
             name_format = None
 
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     gui_options = {}
     gui_options["server"] = server
     gui_options["name_format"] = name_format
     gui_options["name_format_type"] = name_format_type
+    gui_options["max_image_width"] = max_image_width
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
     cache_file, item_list, total_records, cache_thread = data_manager.get_items(url, gui_options, use_cache)

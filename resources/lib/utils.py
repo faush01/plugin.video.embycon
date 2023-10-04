@@ -195,7 +195,7 @@ def get_checksum(item):
     return checksum
 
 
-def get_art(item, server):
+def get_art(item, server, maxwidth):
     art = {
         'thumb': '',
         'fanart': '',
@@ -216,65 +216,65 @@ def get_art(item, server):
     image_tags = item["ImageTags"]
     if image_tags is not None and image_tags["Primary"] is not None:
         # image_tag = image_tags["Primary"]
-        art['thumb'] = downloadUtils.get_artwork(item, "Primary", server=server)
+        art['thumb'] = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=maxwidth)
 
     item_type = item["Type"]
 
     if item_type == "Genre":
-        art['poster'] = downloadUtils.get_artwork(item, "Primary", server=server)
+        art['poster'] = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=maxwidth)
     elif item_type == "Episode":
-        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=True, server=server)
-        # art['poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server)
-        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server)
-        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server)
-        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server)
-        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server)
-        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server)
-        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server)
-        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server)
-        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server)
-        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server)
-        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server)
+        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=True, server=server, maxwidth=maxwidth)
+        # art['poster'] = downloadUtils.getArtwork(item, "Primary", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server, maxwidth=maxwidth)
+        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server, maxwidth=maxwidth)
+        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server, maxwidth=maxwidth)
+        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server, maxwidth=maxwidth)
+        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
+        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
     elif item_type == "Season":
-        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=True, server=server)
-        art['season.poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server)
-        art['poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server)
-        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server)
-        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server)
-        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server)
-        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server)
-        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server)
-        art['season.banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server)
-        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server)
-        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server)
-        art['season.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server)
-        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server)
-        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server)
-        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server)
+        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=True, server=server, maxwidth=maxwidth)
+        art['season.poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server, maxwidth=maxwidth)
+        art['poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server, maxwidth=maxwidth)
+        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server, maxwidth=maxwidth)
+        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=True, server=server, maxwidth=maxwidth)
+        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=True, server=server, maxwidth=maxwidth)
+        art['season.banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server, maxwidth=maxwidth)
+        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=True, server=server, maxwidth=maxwidth)
+        art['season.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server, maxwidth=maxwidth)
+        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
+        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
     elif item_type == "Series":
-        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server)
-        art['poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server)
-        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=False, server=server)
-        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=False, server=server)
-        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=False, server=server)
-        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=False, server=server)
-        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server)
-        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server)
-        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server)
-        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server)
-        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=False, server=server)
-        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=False, server=server)
+        art['tvshow.poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server, maxwidth=maxwidth)
+        art['poster'] = downloadUtils.get_artwork(item, "Primary", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.clearart'] = downloadUtils.get_artwork(item, "Art", parent=False, server=server, maxwidth=maxwidth)
+        art['clearart'] = downloadUtils.get_artwork(item, "Art", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=False, server=server, maxwidth=maxwidth)
+        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server, maxwidth=maxwidth)
+        art['banner'] = downloadUtils.get_artwork(item, "Banner", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server, maxwidth=maxwidth)
+        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", parent=False, server=server, maxwidth=maxwidth)
+        art['tvshow.fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=False, server=server, maxwidth=maxwidth)
+        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=False, server=server, maxwidth=maxwidth)
     elif item_type == "Movie" or item_type == "BoxSet":
-        art['poster'] = downloadUtils.get_artwork(item, "Primary", server=server)
-        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", server=server)
-        art['banner'] = downloadUtils.get_artwork(item, "Banner", server=server)
-        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", server=server)
-        art['clearart'] = downloadUtils.get_artwork(item, "Art", server=server)
-        art['discart'] = downloadUtils.get_artwork(item, "Disc", server=server)
+        art['poster'] = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=maxwidth)
+        art['landscape'] = downloadUtils.get_artwork(item, "Thumb", server=server, maxwidth=maxwidth)
+        art['banner'] = downloadUtils.get_artwork(item, "Banner", server=server, maxwidth=maxwidth)
+        art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", server=server, maxwidth=maxwidth)
+        art['clearart'] = downloadUtils.get_artwork(item, "Art", server=server, maxwidth=maxwidth)
+        art['discart'] = downloadUtils.get_artwork(item, "Disc", server=server, maxwidth=maxwidth)
 
-    art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", server=server)
+    art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=maxwidth)
     if not art['fanart']:
-        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server)
+        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
 
     return art
 

@@ -226,6 +226,9 @@ class CacheArtwork(threading.Thread):
         url += "&ImageTypeLimit=1"
         url += "&format=json"
 
+        settings = xbmcaddon.Addon()
+        max_image_width = int(settings.getSetting('max_image_width'))
+
         data_manager = DataManager()
         results = data_manager.get_content(url)
         if results is None:
@@ -246,7 +249,7 @@ class CacheArtwork(threading.Thread):
 
         # image_types = ["thumb", "poster", "banner", "clearlogo", "tvshow.poster", "tvshow.banner", "tvshow.landscape"]
         for item in results:
-            art = get_art(item, server)
+            art = get_art(item, server, max_image_width)
             for art_type in art:
                 texture_urls.add(art[art_type])
 

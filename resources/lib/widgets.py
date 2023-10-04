@@ -96,8 +96,12 @@ def set_background_image(force=False):
             items = results.get("Items", [])
             background_current_item = 0
             background_items = []
+
+            settings = xbmcaddon.Addon()
+            max_image_width = int(settings.getSetting('max_image_width'))
+
             for item in items:
-                bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server)
+                bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=max_image_width)
                 if bg_image:
                     label = item.get("Name")
                     item_background = {}

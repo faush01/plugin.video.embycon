@@ -1,5 +1,7 @@
 
 import xbmcvfs
+import xbmcaddon
+
 import base64
 import re
 from urllib.parse import urlparse
@@ -26,7 +28,7 @@ PORT_NUMBER = 24276
 log = SimpleLogging(__name__)
 
 
-def get_image_links(url):
+def get_image_links(url, maxwidth=0):
 
     download_utils = DownloadUtils()
     server = download_utils.get_server()
@@ -66,7 +68,7 @@ def get_image_links(url):
 
     art_urls = []
     for iteem in items:
-        art = get_art(item=iteem, server=server)
+        art = get_art(iteem, server, maxwidth=maxwidth)
         art_urls.append(art)
 
     shuffle(art_urls)
@@ -87,7 +89,10 @@ def build_image(path):
     decoded_url = base64.b64decode(request_path).decode("utf-8")
     log.debug("decoded_url : {0}", decoded_url)
 
-    image_urls = get_image_links(decoded_url)
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
+    image_urls = get_image_links(decoded_url, maxwidth=max_image_width)
 
     width, height = 500, 750
     collage = Image.new('RGB', (width, height), (5, 5, 5))

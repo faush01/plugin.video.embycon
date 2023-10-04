@@ -92,6 +92,7 @@
 		<setting id="include_people" type="bool" label="30183" default="false" visible="true" enable="true" />
 		<setting id="hide_unwatched_details" type="bool" label="30023" default="false" visible="true" enable="true" />
 		<setting id="episode_name_format" type="select" label="30019" default="{SeriesName} - {ItemName}" values="{SeriesName} - {ItemName}|{ItemName}|s{SeasonIndex}e{EpisodeIndex} - {ItemName}|{SeriesName} - s{SeasonIndex}e{EpisodeIndex} - {ItemName}" />
+		<setting id="max_image_width" type="slider" label="Max Image Width" default="0" range="0,8,4096" option="int" visible="true" />
 
 		<setting label="30222" type="lsep"/>
 		<setting type="sep" />
