@@ -424,7 +424,7 @@ class DownloadUtils:
 
         return all_art
 
-    def get_artwork(self, data, art_type, parent=False, index=0, server=None):
+    def get_artwork(self, data, art_type, parent=False, index=0, server=None, maxwidth=0):
 
         item_id = data["Id"]
         item_type = data["Type"]
@@ -478,7 +478,10 @@ class DownloadUtils:
             # log.debug("No Image Tag for request:{0} item:{1} parent:{2}", art_type, item_type, parent)
             return ""
 
-        artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, item_id, art_type, index, image_tag)
+        if maxwidth > 0:
+            artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&MaxWidth=%s&Tag=%s" % (server, item_id, art_type, index, maxwidth, image_tag)
+        else:
+            artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, item_id, art_type, index, image_tag)
 
         if self.use_https and not self.verify_cert:
             artwork += "|verifypeer=false"

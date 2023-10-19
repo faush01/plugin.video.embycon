@@ -1138,6 +1138,9 @@ def display_library_views(params):
     if server is None:
         return
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     data_manager = DataManager()
     views_url = "{server}/emby/Users/{userid}/Views?format=json"
     views = data_manager.get_content(views_url)
@@ -1152,8 +1155,8 @@ def display_library_views(params):
         item_type = view.get('Type', None)
         if collection_type in view_types or item_type == "Channel":
             view_name = view.get("Name")
-            art = get_art(item=view, server=server)
-            art['landscape'] = downloadUtils.get_artwork(view, "Primary", server=server)
+            art = get_art(item=view, server=server, maxwidth=max_image_width)
+            art['landscape'] = downloadUtils.get_artwork(view, "Primary", server=server, maxwidth=max_image_width)
 
             plugin_path = "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=library_item&view_id=" + view.get("Id")
 
@@ -1296,6 +1299,9 @@ def set_library_window_values(force=False):
     result = result.get("Items")
     server = downloadUtils.get_server()
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     index = 0
     for item in result:
 
@@ -1317,7 +1323,7 @@ def set_library_window_values(force=False):
             home_window.set_property(prop_name, collection_type)
             log.debug("set_library_window_values: plugin.video.embycon-{0}={1}", prop_name, collection_type)
 
-            thumb = downloadUtils.get_artwork(item, "Primary", server=server)
+            thumb = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=max_image_width)
             prop_name = "view_item.%i.thumb" % index
             home_window.set_property(prop_name, thumb)
             log.debug("set_library_window_values: plugin.video.embycon-{0}={1}", prop_name, thumb)

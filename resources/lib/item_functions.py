@@ -476,7 +476,7 @@ def extract_item_info(item, gui_options):
 
     item_details.number_episodes = item_details.total_episodes
 
-    item_details.art = get_art(item, gui_options["server"])
+    item_details.art = get_art(item, gui_options["server"], maxwidth=gui_options["max_image_width"])
     item_details.rating = item["OfficialRating"]
     item_details.mpaa = item["OfficialRating"]
 

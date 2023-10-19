@@ -854,6 +854,9 @@ def search_results(params):
 
         person_items = person_search_results.get("Items", [])
 
+        settings = xbmcaddon.Addon()
+        max_image_width = int(settings.getSetting('max_image_width'))
+
         server = downloadUtils.get_server()
         list_items = []
         for item in person_items:
@@ -861,7 +864,7 @@ def search_results(params):
             person_name = item.get('Name')
             # image_tags = item.get('ImageTags', {})
             # image_tag = image_tags.get('PrimaryImageTag', '')
-            person_thumbnail = downloadUtils.get_artwork(item, "Primary", server=server)
+            person_thumbnail = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=max_image_width)
 
             action_url = sys.argv[0] + "?mode=NEW_SEARCH_PERSON&person_id=" + person_id
 

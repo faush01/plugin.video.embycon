@@ -37,6 +37,9 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     for item in items:
 
         item_id = item.get("Id")
@@ -87,6 +90,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         gui_options["server"] = server
         gui_options["name_format"] = None
         gui_options["name_format_type"] = ""
+        gui_options["max_image_width"] = max_image_width
         item_details = extract_item_info(item, gui_options)
 
         # create ListItem
@@ -112,7 +116,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         log.debug("Add to played_information: {0}", monitor.played_information)
 
         list_item.setPath(playurl)
-        list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title)
+        list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title, max_image_width)
 
         playlist.add(playurl, list_item)
 
@@ -258,6 +262,9 @@ def add_to_playlist(play_info, monitor):
     item_title = item.get("Name", string_load(30280))
     list_item = xbmcgui.ListItem(label=item_title)
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     # add playurl and data to the monitor
     data = {}
     data["item_id"] = item_id
@@ -270,7 +277,7 @@ def add_to_playlist(play_info, monitor):
     log.debug("Add to played_information: {0}", monitor.played_information)
 
     list_item.setPath(playurl)
-    list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title)
+    list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title, maxwidth=max_image_width)
 
     playlist.add(playurl, list_item)
 
@@ -493,10 +500,14 @@ def play_file(play_info, monitor):
     item_title = result.get("Name", string_load(30280))
 
     # extract item info from result
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     gui_options = {}
     gui_options["server"] = server
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
+    gui_options["max_image_width"] = max_image_width
     item_details = extract_item_info(result, gui_options)
 
     # create ListItem
@@ -544,7 +555,7 @@ def play_file(play_info, monitor):
     log.debug("Add to played_information: {0}", monitor.played_information)
 
     list_item.setPath(playurl)
-    list_item = set_list_item_props(item_id, list_item, result, server, listitem_props, item_title)
+    list_item = set_list_item_props(item_id, list_item, result, server, listitem_props, item_title, maxwidth=max_image_width)
 
     player = xbmc.Player()
 
@@ -611,7 +622,7 @@ def play_file(play_info, monitor):
     next_episode = get_next_episode(result)
 
     if next_episode is not None:
-        next_epp_art = get_art(next_episode, server)
+        next_epp_art = get_art(next_episode, server, maxwidth=max_image_width)
         next_episode["art"] = next_epp_art
 
     data["next_episode"] = next_episode
@@ -694,11 +705,14 @@ def send_next_episode_details(item, next_episode):
         log.debug("No next episode")
         return
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     gui_options = {}
     gui_options["server"] = download_utils.get_server()
-
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
+    gui_options["max_image_width"] = max_image_width
 
     item_details = extract_item_info(item, gui_options)
     next_item_details = extract_item_info(next_episode, gui_options)
@@ -753,10 +767,10 @@ def send_next_episode_details(item, next_episode):
     send_event_notification("upnext_data", next_info)
 
 
-def set_list_item_props(item_id, list_item, result, server, extra_props, title):
+def set_list_item_props(item_id, list_item, result, server, extra_props, title, maxwidth=0):
     # set up item and item info
 
-    art = get_art(result, server=server)
+    art = get_art(result, server=server, maxwidth=maxwidth)
     list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
     list_item.setProperty('fanart_image', art['fanart'])  # back compat
     list_item.setProperty('discart', art['discart'])  # not avail to setArt
