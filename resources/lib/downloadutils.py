@@ -170,6 +170,8 @@ class DownloadUtils:
             filtered_codecs.append("msmpeg4v3")
         if addon_settings.getSetting("force_transcode_mpeg4") == "true":
             filtered_codecs.append("mpeg4")
+        if addon_settings.getSetting("force_transcode_av1") == "true":
+            filtered_codecs.append("av1")
 
         playback_bitrate = addon_settings.getSetting("max_stream_bitrate")
         force_playback_bitrate = addon_settings.getSetting("force_max_stream_bitrate")
