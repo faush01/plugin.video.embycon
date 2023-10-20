@@ -496,6 +496,7 @@ def show_tvshow_pages(menu_params):
     params = {}
     params["IncludeItemTypes"] = "Series"
     params["IsMissing"] = False
+    params["Recursive"] = True
     params["ImageTypeLimit"] = 0
 
     if parent_id:
@@ -527,6 +528,7 @@ def show_tvshow_pages(menu_params):
         params = {}
         params["IncludeItemTypes"] = "Series"
         params["IsMissing"] = False
+        params["Recursive"] = True
         params["ImageTypeLimit"] = 1
         params["SortBy"] = "Name"
         params["SortOrder"] = "Ascending"
@@ -548,13 +550,13 @@ def show_tvshow_pages(menu_params):
         item_data['path'] = item_url
         item_data['media_type'] = 'tvshows'
 
-        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url)}
+        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
 
         collections.append(item_data)
         start_index = start_index + page_limit
 
     for collection in collections:
-        content_url = urllib.quote(collection['path'])
+        content_url = urllib.parse.quote(collection['path'])
         url = sys.argv[0] + ("?url=" + content_url +
                              "&mode=GET_CONTENT" +
                              "&media_type=" + collection["media_type"])

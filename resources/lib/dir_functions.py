@@ -85,15 +85,20 @@ def get_content(url, params):
         progress.update(0, string_load(30113))
 
     # update url for paging
+    start_index_rex = "startindex=([0-9]{1,5})"
+    limit_rex = "&limit=([0-9]{1,5})"
+    limit_rex_p = "&Limit={ItemLimit}"
     start_index = 0
     page_limit = int(settings.getSetting('itemsPerPage'))
+    # if the page_limit in the settings is not set but the url has a limit use the url limit number
+    if page_limit == 0 and re.search(limit_rex, url, flags=re.IGNORECASE):
+        url_limit_result = re.search(limit_rex, url, flags=re.IGNORECASE)
+        page_limit = int(url_limit_result.group(1))
+
     url_prev = None
     url_next = None
     if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         log.debug("Creating Paging URLS: {0}", url)
-        start_index_rex = "startindex=([0-9]{1,5})"
-        limit_rex = "&limit=([0-9]{1,5})"
-        limit_rex_p = "&Limit={ItemLimit}"
 
         # add StartIndex and Limit to the url if they are not there already
         # update limit to page limit if it is alreayd there
