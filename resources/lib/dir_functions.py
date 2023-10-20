@@ -11,6 +11,7 @@ import urllib.error
 import sys
 import os
 import re
+import base64
 
 from .datamanager import DataManager
 from .downloadutils import DownloadUtils
@@ -157,6 +158,8 @@ def get_content(url, params):
             list_item = xbmcgui.ListItem("Prev Page (" + str(start_index - page_limit + 1) + "-" + str(start_index) +
                                          " of " + str(total_records) + ")")
             u = sys.argv[0] + "?url=" + urllib.parse.quote(url_prev) + "&mode=GET_CONTENT&media_type=movies"
+            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_prev.encode("utf-8")).decode("utf-8")}
+            list_item.setArt(art)
             log.debug("ADDING PREV ListItem: {0} - {1}", u, list_item)
             dir_items.insert(0, (u, list_item, True))
 
@@ -167,6 +170,8 @@ def get_content(url, params):
             list_item = xbmcgui.ListItem("Next Page (" + str(start_index + page_limit + 1) + "-" +
                                          str(upper_count) + " of " + str(total_records) + ")")
             u = sys.argv[0] + "?url=" + urllib.parse.quote(url_next) + "&mode=GET_CONTENT&media_type=movies"
+            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_next.encode("utf-8")).decode("utf-8")}
+            list_item.setArt(art)
             log.debug("ADDING NEXT ListItem: {0} - {1}", u, list_item)
             dir_items.append((u, list_item, True))
 
