@@ -9,6 +9,8 @@ through Kodi's standard menu structure. While plugins don't have the same
 flexibility as scripts, they boast significantly quicker development time and a
 more consistent user experience.
 """
+import xbmcgui
+
 from typing import List, Tuple, Optional
 
 __kodistubs__ = True

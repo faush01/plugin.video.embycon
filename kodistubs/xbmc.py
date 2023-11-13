@@ -9,6 +9,8 @@ playing and that allow manipulation of the media player (such as starting a new
 song). You can also find system information using the functions available in
 this library.
 """
+import xbmcgui
+
 from typing import Union, List, Dict, Tuple, Optional
 
 __kodistubs__ = True

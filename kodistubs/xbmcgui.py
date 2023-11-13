@@ -7,6 +7,8 @@
 Offers classes and functions that manipulate the Graphical User Interface
 through windows, dialogs, and various control widgets.
 """
+import xbmc
+
 from typing import Union, List, Dict, Tuple, Optional
 
 __kodistubs__ = True
@@ -2863,7 +2865,7 @@ class Dialog:
     def colorpicker(self, heading: str,
                     selectedcolor: str = "",
                     colorfile: str = "",
-                    colorlist: List['ListItem'] = ()) -> str:
+                    colorlist: List['ListItem'] = []) -> str:
         """
         Show a color selection dialog.
 

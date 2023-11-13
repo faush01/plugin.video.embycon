@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Any, Union, Tuple
 
 import xbmcaddon
 import xbmcplugin
@@ -22,8 +22,8 @@ downloadUtils = DownloadUtils()
 dataManager = DataManager()
 kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
-background_items = []
-background_current_item = 0
+background_items: List[Dict[str, str]] = []
+background_current_item: int = 0
 
 
 @timer
@@ -31,35 +31,35 @@ def set_random_movies() -> None:
     log.debug("set_random_movies Called")
 
     settings = xbmcaddon.Addon()
-    hide_watched = settings.getSetting("hide_watched") == "true"
+    hide_watched: bool = settings.getSetting("hide_watched") == "true"
 
-    url_params = {
-        "Recursive": True,
-        "limit": 20
+    url_params: Dict[str, str] = {
+        "Recursive": str(True),
+        "limit": str(20)
     }
     if hide_watched:
-        url_params["IsPlayed"] = False
+        url_params["IsPlayed"] = str(False)
     url_params["SortBy"] = "Random"
     url_params["IncludeItemTypes"] = "Movie"
-    url_params["ImageTypeLimit"] = 0
+    url_params["ImageTypeLimit"] = str(0)
 
-    url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
+    url: str = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
-    results = downloadUtils.download_url(url, suppress=True)
-    results = json.loads(results)
+    results_str: str = downloadUtils.download_url(url, suppress=True)
+    results_json = json.loads(results_str)
 
-    randon_movies_list = []
-    if results is not None:
-        items = results.get("Items", [])
+    randon_movies_list: List[str] = []
+    if results_json is not None:
+        items: List[Any] = results_json.get("Items", [])
         for item in items:
             randon_movies_list.append(item.get("Id"))
 
     random.shuffle(randon_movies_list)
-    movies_list_string = ",".join(randon_movies_list)
-    home_window = HomeWindow()
+    movies_list_string: str = ",".join(randon_movies_list)
+    home_window: HomeWindow = HomeWindow()
     m = hashlib.md5()
     m.update(movies_list_string.encode('utf-8'))
-    new_widget_hash = m.hexdigest()
+    new_widget_hash: str = m.hexdigest()
 
     log.debug("set_random_movies : {0}", movies_list_string)
     log.debug("set_random_movies : {0}", new_widget_hash)
@@ -67,7 +67,7 @@ def set_random_movies() -> None:
     home_window.set_property("random-movies-changed", new_widget_hash)
 
 
-def set_background_image(force=False):
+def set_background_image(force: bool = False) -> None:
     log.debug("set_background_image Called forced={0}", force)
 
     global background_current_item
@@ -82,22 +82,22 @@ def set_background_image(force=False):
         log.debug("set_background_image: Need to load more backgrounds {0} - {1}",
                   len(background_items), background_current_item)
 
-        url_params = {
-            "Recursive": True,
+        url_params: Dict[str, str] = {
+            "Recursive": str(True),
             "SortBy": "Random",
             "IncludeItemTypes": "Movie,Series",
-            "ImageTypeLimit": 1
+            "ImageTypeLimit": str(1)
         }
         # url_params["limit"] = 60
 
-        url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
+        url: str = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
-        server = downloadUtils.get_server()
-        results = downloadUtils.download_url(url, suppress=True)
-        results = json.loads(results)
+        server: Union[str, None] = downloadUtils.get_server()
+        results_str: str = downloadUtils.download_url(url, suppress=True)
+        results_json = json.loads(results_str)
 
-        if results is not None:
-            items = results.get("Items", [])
+        if results_json is not None:
+            items = results_json.get("Items", [])
             background_current_item = 0
             background_items = []
 
@@ -107,7 +107,7 @@ def set_background_image(force=False):
             for item in items:
                 bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=max_image_width)
                 if bg_image:
-                    label = item.get("Name")
+                    label: str = item.get("Name")
                     item_background = {
                         "image": bg_image,
                         "name": label
@@ -117,43 +117,43 @@ def set_background_image(force=False):
         log.debug("set_background_image: Loaded {0} more backgrounds", len(background_items))
 
     if len(background_items) > 0:
-        bg_image = background_items[background_current_item].get("image")
-        label = background_items[background_current_item].get("name")
-        log.debug("set_background_image: {0} - {1} - {2}", background_current_item, label, bg_image)
+        new_bg_image: str = background_items[background_current_item].get("image", "")
+        new_label: str = background_items[background_current_item].get("name", "")
+        log.debug("set_background_image: {0} - {1} - {2}", background_current_item, new_label, new_bg_image)
 
         background_current_item += 1
         if background_current_item >= len(background_items):
             background_current_item = 0
 
         home_window = HomeWindow()
-        home_window.set_property("random-gb", bg_image)
-        home_window.set_property("random-gb-label", label)
+        home_window.set_property("random-gb", new_bg_image)
+        home_window.set_property("random-gb-label", new_label)
 
 
 @timer
 def check_for_new_content() -> None:
     log.debug("checkForNewContent Called")
 
-    home_window = HomeWindow()
+    home_window: HomeWindow = HomeWindow()
 
-    url_params = {
-        "Recursive": True,
-        "limit": 1,
+    url_params_created: Dict[str, str] = {
+        "Recursive": str(True),
+        "limit": str(1),
         "Fields": "DateCreated,Etag",
         "SortBy": "DateCreated",
         "SortOrder": "Descending",
         "IncludeItemTypes": "Movie,Episode,Audio",
-        "ImageTypeLimit": 0,
+        "ImageTypeLimit": str(0),
         "format": "json"
     }
 
-    added_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
+    added_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params_created)
 
-    added_result = downloadUtils.download_url(added_url, suppress=True)
+    added_result: str = downloadUtils.download_url(added_url, suppress=True)
     result = json.loads(added_result)
     log.debug("LATEST_ADDED_ITEM: {0}", result)
 
-    last_added_date = ""
+    last_added_date: str = ""
     if result is not None:
         items = result.get("Items", [])
         if len(items) > 0:
@@ -161,20 +161,20 @@ def check_for_new_content() -> None:
             last_added_date = item.get("Etag", "")
     log.debug("last_added_date: {0}", last_added_date)
 
-    url_params = {
-        "Recursive": True,
-        "limit": 1,
+    url_params_played: Dict[str,  str] = {
+        "Recursive": str(True),
+        "limit": str(1),
         "Fields": "DateCreated,Etag",
         "SortBy": "DatePlayed",
         "SortOrder": "Descending",
         "IncludeItemTypes": "Movie,Episode,Audio",
-        "ImageTypeLimit": 0,
+        "ImageTypeLimit": str(0),
         "format": "json"
     }
 
-    played_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
+    played_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params_played)
 
-    played_result = downloadUtils.download_url(played_url, suppress=True)
+    played_result: str = downloadUtils.download_url(played_url, suppress=True)
     result = json.loads(played_result)
     log.debug("LATEST_PLAYED_ITEM: {0}", result)
 
@@ -205,11 +205,11 @@ def check_for_new_content() -> None:
 
 
 @timer
-def get_widget_content_cast(handle, params) -> None:
+def get_widget_content_cast(handle, params: Dict[str, str]) -> None:
     log.debug("getWigetContentCast Called: {0}", params)
     server = downloadUtils.get_server()
 
-    item_id = params["id"]
+    item_id: str = params["id"]
     data_manager = DataManager()
     result = data_manager.get_content("{server}/emby/Users/{userid}/Items/" + item_id + "?format=json")
     log.debug("ItemInfo: {0}", result)
@@ -223,7 +223,7 @@ def get_widget_content_cast(handle, params) -> None:
             params["id"] = series_id
             return get_widget_content_cast(handle, params)
 
-    list_items = []
+    list_items: List[Tuple[str, xbmcgui.ListItem, bool]] = []
     if result is not None:
         people = result.get("People", [])
     else:
@@ -262,8 +262,8 @@ def get_widget_content_cast(handle, params) -> None:
             if person_role:
                 list_item.setLabel2(person_role)
 
-            item_tupple = ("", list_item, False)
-            list_items.append(item_tupple)
+            item_tuple: Tuple[str, xbmcgui.ListItem, bool] = ("", list_item, False)
+            list_items.append(item_tuple)
 
     xbmcplugin.setContent(handle, 'artists')
     xbmcplugin.addDirectoryItems(handle, list_items)
@@ -277,40 +277,40 @@ def get_widget_content(handle: int, params: Dict[str, str]) -> int:
     settings = xbmcaddon.Addon()
     hide_watched = settings.getSetting("hide_watched") == "true"
 
-    widget_type = params.get("type")
-    if widget_type is None:
+    widget_type: str = params.get("type", "")
+    if not widget_type:
         log.error("getWigetContent type not set")
         return -1
 
     log.debug("widget_type: {0}", widget_type)
 
     url_verb = "{server}/emby/Users/{userid}/Items"
-    url_params = {
+    url_params: Dict[str, str] = {
         "Limit": "{ItemLimit}",
         "format": "json",
         "Fields": "{field_filters}",
-        "ImageTypeLimit": 1,
-        "IsMissing": False
+        "ImageTypeLimit": str(1),
+        "IsMissing": str(False)
     }
 
     if widget_type == "recent_movies":
         xbmcplugin.setContent(handle, 'movies')
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["SortBy"] = "DateCreated"
         url_params["SortOrder"] = "Descending"
         url_params["Filters"] = "IsNotFolder"
         if hide_watched:
-            url_params["IsPlayed"] = False
-        url_params["IsVirtualUnaired"] = False
+            url_params["IsPlayed"] = str(False)
+        url_params["IsVirtualUnaired"] = str(False)
         url_params["IncludeItemTypes"] = "Movie"
 
     elif widget_type == "inprogress_movies":
         xbmcplugin.setContent(handle, 'movies')
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["SortBy"] = "DatePlayed"
         url_params["SortOrder"] = "Descending"
         url_params["Filters"] = "IsResumable"
-        url_params["IsVirtualUnaired"] = False
+        url_params["IsVirtualUnaired"] = str(False)
         url_params["IncludeItemTypes"] = "Movie"
 
     elif widget_type == "random_movies":
@@ -320,37 +320,37 @@ def get_widget_content(handle: int, params: Dict[str, str]) -> int:
     elif widget_type == "recent_tvshows":
         xbmcplugin.setContent(handle, 'episodes')
         url_verb = '{server}/emby/Users/{userid}/Items/Latest'
-        url_params["GroupItems"] = True
+        url_params["GroupItems"] = str(True)
         # url_params["Limit"] = 200
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["SortBy"] = "DateCreated"
         url_params["SortOrder"] = "Descending"
         url_params["Fields"] = "{field_filters}"
         if hide_watched:
-            url_params["IsPlayed"] = False
-        url_params["IsVirtualUnaired"] = False
+            url_params["IsPlayed"] = str(False)
+        url_params["IsVirtualUnaired"] = str(False)
         url_params["IncludeItemTypes"] = "Episode"
-        url_params["ImageTypeLimit"] = 1
+        url_params["ImageTypeLimit"] = str(1)
         url_params["format"] = "json"
 
     elif widget_type == "recent_episodes":
         xbmcplugin.setContent(handle, 'episodes')
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["SortBy"] = "DateCreated"
         url_params["SortOrder"] = "Descending"
         url_params["Filters"] = "IsNotFolder"
         if hide_watched:
-            url_params["IsPlayed"] = False
-        url_params["IsVirtualUnaired"] = False
+            url_params["IsPlayed"] = str(False)
+        url_params["IsVirtualUnaired"] = str(False)
         url_params["IncludeItemTypes"] = "Episode"
 
     elif widget_type == "inprogress_episodes":
         xbmcplugin.setContent(handle, 'episodes')
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["SortBy"] = "DatePlayed"
         url_params["SortOrder"] = "Descending"
         url_params["Filters"] = "IsResumable"
-        url_params["IsVirtualUnaired"] = False
+        url_params["IsVirtualUnaired"] = str(False)
         url_params["IncludeItemTypes"] = "Episode"
 
     elif widget_type == "nextup_episodes":
@@ -358,25 +358,25 @@ def get_widget_content(handle: int, params: Dict[str, str]) -> int:
         url_verb = "{server}/emby/Shows/NextUp"
         url_params["Limit"] = "{ItemLimit}"
         url_params["userid"] = "{userid}"
-        url_params["Recursive"] = True
+        url_params["Recursive"] = str(True)
         url_params["Fields"] = "{field_filters}"
         url_params["format"] = "json"
-        url_params["ImageTypeLimit"] = 1
+        url_params["ImageTypeLimit"] = str(1)
         url_params["Legacynextup"] = "true"
 
     elif widget_type == "movie_recommendations":
-        suggested_items_url_params = {
+        suggested_items_url_params: Dict[str, str] = {
             "userId": "{userid}",
-            "categoryLimit": 15,
-            "ItemLimit": 20,
-            "ImageTypeLimit": 0
+            "categoryLimit": str(15),
+            "ItemLimit": str(20),
+            "ImageTypeLimit": str(0)
         }
         suggested_items_url = get_emby_url("{server}/emby/Movies/Recommendations", suggested_items_url_params)
 
         data_manager = DataManager()
         suggested_items = data_manager.get_content(suggested_items_url)
-        ids = []
-        set_id = 0
+        ids: List[str] = []
+        set_id: int = 0
         while len(ids) < 20 and suggested_items:
             items = suggested_items[set_id]
             log.debug("BaselineItemName : {0} - {1}", set_id, items.get("BaselineItemName"))
@@ -398,11 +398,11 @@ def get_widget_content(handle: int, params: Dict[str, str]) -> int:
             if set_id >= len(suggested_items):
                 set_id = 0
 
-        id_list = ",".join(ids)
+        id_list: str = ",".join(ids)
         log.debug("Recommended Items : {0}", len(ids), id_list)
         url_params["Ids"] = id_list
 
-    items_url = get_emby_url(url_verb, url_params)
+    items_url: str = get_emby_url(url_verb, url_params)
 
     list_items, detected_type, total_records = process_directory(items_url, None, params, False)
 

@@ -353,12 +353,14 @@ class DownloadUtils:
 
         return play_info_result
 
-    def get_server(self, add_user_id=False):
+    def get_server(self, add_user_id: bool = False) -> Union[str, None]:
         settings = xbmcaddon.Addon()
         host = settings.getSetting('ipaddress')
 
+        server: Union[str, None] = None
+
         if len(host) == 0 or host == "<none>":
-            return None
+            return server
 
         port = settings.getSetting('port')
 
@@ -787,7 +789,11 @@ class DownloadUtils:
                 http_connection = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
-                http_connection = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                http_connection = http.client.HTTPSConnection(server, timeout=http_timeout, context=ctx, check_hostname=False)
+                # http_connection = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
             else:
                 log.debug("Connection: HTTP")
                 http_connection = http.client.HTTPConnection(server, timeout=http_timeout)
