@@ -1,3 +1,5 @@
+from typing import Union
+
 import xbmc
 import xbmcgui
 import xbmcplugin
@@ -17,21 +19,23 @@ class HomeWindow:
     """
 
     def __init__(self):
-        self.id_string = 'plugin.video.embycon-%s'
+        self.id_string: str = 'plugin.video.embycon-%s'
         self.window = xbmcgui.Window(10000)
 
-    def get_property(self, key):
-        key = self.id_string % key
-        value = self.window.getProperty(key)
+    def get_property(self, key: str) -> str:
+        k: str = self.id_string % key
+        v: str = self.window.getProperty(k)
         # log.debug('HomeWindow: getProperty |{0}| -> |{1}|', key, value)
-        return value
+        return v
 
-    def set_property(self, key, value):
+    def set_property(self, key: str, value: Union[str, None]) -> None:
+        if value is None:
+            value = ""
         key = self.id_string % key
         # log.debug('HomeWindow: setProperty |{0}| -> |{1}|', key, value)
         self.window.setProperty(key, value)
 
-    def clear_property(self, key):
+    def clear_property(self, key: str) -> None:
         key = self.id_string % key
         # log.debug('HomeWindow: clearProperty |{0}|', key)
         self.window.clearProperty(key)

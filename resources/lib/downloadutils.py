@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from typing import Dict, Any, List, Union
 
 import xbmcgui
 import xbmcaddon
@@ -36,19 +37,23 @@ def save_user_details(settings, user_name, user_password):
         home_window.set_property("password", user_password)
 
 
-def load_user_details(settings):
-    save_user_to_settings = settings.getSetting("save_user_to_settings") == "true"
+def load_user_details(settings) -> Dict[str, str]:
+    save_user_to_settings: bool = settings.getSetting("save_user_to_settings") == "true"
+    user_name: str = ""
+    user_password: str = ""
     if save_user_to_settings:
         user_name = settings.getSetting("username")
         user_password = settings.getSetting("password")
     else:
-        home_window = HomeWindow()
+        home_window: HomeWindow = HomeWindow()
         user_name = home_window.get_property("username")
         user_password = home_window.get_property("password")
 
-    user_details = {}
-    user_details["username"] = user_name
-    user_details["password"] = user_password
+    user_details: Dict[str, str] = {
+        "username": user_name,
+        "password": user_password
+    }
+
     return user_details
 
 
@@ -185,7 +190,7 @@ class DownloadUtils:
         audio_bitrate = int(audio_playback_bitrate) * 1000
         bitrate = int(playback_bitrate) * 1000
 
-        profile = {
+        profile: dict[str, Any] = {
             "Name": "Kodi",
             "MaxStaticBitrate": bitrate,
             "MaxStreamingBitrate": bitrate,
@@ -530,7 +535,7 @@ class DownloadUtils:
 
         return artwork
 
-    def get_user_id(self):
+    def get_user_id(self) -> str:
 
         window = HomeWindow()
         userid = window.get_property("userid")
@@ -639,9 +644,9 @@ class DownloadUtils:
         resp = self.download_url(url, post_body=message_data, method="POST", suppress=True, authenticate=False)
         log.debug("AuthenticateByName: {0}", resp)
 
-        access_token = None
-        userid = None
-        user_image = None
+        access_token: Union[str, None] = None
+        userid: Union[str, None] = None
+        user_image: Union[str, None] = None
         try:
             result = json.loads(resp)
             access_token = result.get("AccessToken")
@@ -668,7 +673,7 @@ class DownloadUtils:
             window.set_property("userimage", "")
             return ""
 
-    def get_auth_header(self, authenticate=True):
+    def get_auth_header(self, authenticate: bool = True) -> Dict[str, str]:
         client_info = ClientInformation()
         txt_mac = client_info.get_device_id()
         version = client_info.get_version()
@@ -683,17 +688,18 @@ class DownloadUtils:
         if len(device_name) == 0:
             device_name = "EmbyCon"
 
-        headers = {}
-        headers["Accept-encoding"] = "gzip"
-        headers["Accept-Charset"] = "UTF-8,*"
+        headers: Dict[str, str] = {
+            "Accept-encoding": "gzip",
+            "Accept-Charset": "UTF-8,*"
+        }
 
         if authenticate is False:
-            auth_string = "MediaBrowser Client=\"" + client + "\",Device=\"" + device_name + "\",DeviceId=\"" + txt_mac + "\",Version=\"" + version + "\""
+            auth_string: str = "MediaBrowser Client=\"" + client + "\",Device=\"" + device_name + "\",DeviceId=\"" + txt_mac + "\",Version=\"" + version + "\""
             # headers["Authorization"] = authString
             headers['X-Emby-Authorization'] = auth_string
             return headers
         else:
-            userid = self.get_user_id()
+            userid: str = self.get_user_id()
             auth_string = "MediaBrowser UserId=\"" + userid + "\",Client=\"" + client + "\",Device=\"" + device_name + "\",DeviceId=\"" + txt_mac + "\",Version=\"" + version + "\""
             # headers["Authorization"] = authString
             headers['X-Emby-Authorization'] = auth_string
@@ -706,10 +712,10 @@ class DownloadUtils:
             return headers
 
     @timer
-    def download_url(self, url, suppress=False, post_body=None, method="GET", authenticate=True, headers=None):
+    def download_url(self, url: str, suppress: bool = False, post_body=None, method:str = "GET", authenticate: bool = True, headers: Union[Dict[str, str], None] = None) -> str:
         log.debug("DownloadUrl : {0}", url)
 
-        return_data = "null"
+        return_data: str = "null"
         settings = xbmcaddon.Addon()
         user_details = load_user_details(settings)
         username = user_details.get("username", "")
@@ -753,19 +759,18 @@ class DownloadUtils:
             url = url.replace("{random_movies}", random_movies)
 
         log.debug("After: {0}", url)
-        conn = None
+        http_connection: Union[http.client.HTTPConnection, http.client.HTTPSConnection]
 
         try:
 
             url_bits = urlparse(url.strip())
-
-            protocol = url_bits.scheme
-            host_name = url_bits.hostname
-            port = url_bits.port
-            user_name = url_bits.username
-            user_password = url_bits.password
-            url_path = url_bits.path
-            url_puery = url_bits.query
+            protocol: str = url_bits.scheme
+            host_name: Union[str, None] = url_bits.hostname
+            port: Union[int, None] = url_bits.port
+            user_name: Union[str, None] = url_bits.username
+            user_password: Union[str, None] = url_bits.password
+            url_path: str = url_bits.path
+            url_query: str = url_bits.query
 
             if not host_name or host_name == "<none>":
                 return return_data
@@ -775,57 +780,57 @@ class DownloadUtils:
                 local_use_https = True
 
             server = "%s:%s" % (host_name, port)
-            url_path = url_path + "?" + url_puery
+            url_path = url_path + "?" + url_query
 
             if local_use_https and self.verify_cert:
                 log.debug("Connection: HTTPS, Cert checked")
-                conn = http.client.HTTPSConnection(server, timeout=http_timeout)
+                http_connection = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
-                conn = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
+                http_connection = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
             else:
                 log.debug("Connection: HTTP")
-                conn = http.client.HTTPConnection(server, timeout=http_timeout)
+                http_connection = http.client.HTTPConnection(server, timeout=http_timeout)
 
-            head = self.get_auth_header(authenticate)
+            head: Dict[str, str] = self.get_auth_header(authenticate)
 
             if user_name and user_password:
                 # add basic auth headers
-                user_and_pass = b64encode(b"%s:%s" % (user_name, user_password)).decode("ascii")
+                user_and_pass: str = b64encode(("%s:%s" % (user_name, user_password)).encode("utf-8")).decode("utf-8")
                 head["Authorization"] = 'Basic %s' % user_and_pass
 
             head["User-Agent"] = "EmbyCon-" + ClientInformation().get_version()
             log.debug("HEADERS: {0}", head)
 
             if post_body is not None:
+                request_content_type: str = "application/x-www-form-urlencoded"
                 if isinstance(post_body, dict):
-                    content_type = "application/json"
+                    request_content_type = "application/json"
                     post_body = json.dumps(post_body)
-                else:
-                    content_type = "application/x-www-form-urlencoded"
 
-                head["Content-Type"] = content_type
-                log.debug("Content-Type: {0}", content_type)
+                head["Content-Type"] = request_content_type
+                log.debug("Content-Type: {0}", request_content_type)
 
                 log.debug("POST DATA: {0}", post_body)
-                conn.request(method=method, url=url_path, body=post_body, headers=head)
+                http_connection.request(method=method, url=url_path, body=post_body, headers=head)
             else:
-                conn.request(method=method, url=url_path, headers=head)
+                http_connection.request(method=method, url=url_path, headers=head)
 
-            data = conn.getresponse()
+            data: http.client.HTTPResponse = http_connection.getresponse()
             log.debug("HTTP response: {0} {1}", data.status, data.reason)
             log.debug("GET URL HEADERS: {0}", data.getheaders())
 
             if int(data.status) == 200:
-                ret_data = data.read()
-                content_type = data.getheader('content-encoding')
-                log.debug("Data Len Before: {0}", len(ret_data))
+                ret_data_bytes: bytes = data.read()
+                content_type: Union[str, None] = data.getheader("content-encoding")
+                log.debug("Data Len Before: {0}", len(ret_data_bytes))
                 if content_type == "gzip":
-                    ret_data = BytesIO(ret_data)
-                    gzipper = gzip.GzipFile(fileobj=ret_data)
-                    return_data = gzipper.read()
-                else:
-                    return_data = ret_data
+                    ret_data: BytesIO = BytesIO(ret_data_bytes)
+                    g_zipper: gzip.GzipFile = gzip.GzipFile(fileobj=ret_data)
+                    ret_data_bytes = g_zipper.read()
+
+                return_data = ret_data_bytes.decode("utf-8")
+
                 if headers is not None and isinstance(headers, dict):
                     headers.update(data.getheaders())
                 log.debug("Data Len After: {0}", len(return_data))
@@ -860,8 +865,8 @@ class DownloadUtils:
 
         finally:
             try:
-                log.debug("Closing HTTP connection: {0}", conn)
-                conn.close()
+                log.debug("Closing HTTP connection: {0}", http_connection)
+                http_connection.close()
             except:
                 pass
 

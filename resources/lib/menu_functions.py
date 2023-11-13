@@ -1,6 +1,7 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
 
+from typing import List, Dict, Union
 import os
 import sys
 import urllib.request
@@ -23,30 +24,32 @@ from .custom_nodes import CustomNode, load_custom_nodes
 log = SimpleLogging(__name__)
 downloadUtils = DownloadUtils()
 
+
 __addon__ = xbmcaddon.Addon()
 
 
-def show_movie_tags(menu_params):
+def show_movie_tags(menu_params: Dict[str, str]) -> None:
     log.debug("show_movie_tags: {0}", menu_params)
-    parent_id = menu_params.get("parent_id")
+    parent_id: str = menu_params.get("parent_id", "")
 
-    url_params = {}
-    url_params["UserId"] = "{userid}"
-    url_params["SortBy"] = "SortName"
-    url_params["SortOrder"] = "Ascending"
-    url_params["CollapseBoxSetItems"] = False
-    url_params["GroupItemsIntoCollections"] = False
-    url_params["Recursive"] = True
-    url_params["IsMissing"] = False
-    url_params["EnableTotalRecordCount"] = False
-    url_params["EnableUserData"] = False
-    url_params["IncludeItemTypes"] = "Movie"
+    url_params: Dict[str, str] = {
+        "UserId": "{userid}",
+        "SortBy": "SortName",
+        "SortOrder": "Ascending",
+        "CollapseBoxSetItems": str(False),
+        "GroupItemsIntoCollections": str(False),
+        "Recursive": str(True),
+        "IsMissing": str(False),
+        "EnableTotalRecordCount": str(False),
+        "EnableUserData": str(False),
+        "IncludeItemTypes": "Movie"
+    }
 
     if parent_id:
         url_params["ParentId"] = parent_id
 
-    url = get_emby_url("{server}/emby/Tags", url_params)
-    data_manager = DataManager()
+    url: str = get_emby_url("{server}/emby/Tags", url_params)
+    data_manager: DataManager = DataManager()
     result = data_manager.get_content(url)
 
     if not result:
@@ -57,27 +60,30 @@ def show_movie_tags(menu_params):
     log.debug("Tags : {0}", result)
 
     for tag in tags:
-        name = tag["Name"]
-        tag_id = tag["Id"]
+        name: str = tag["Name"]
+        tag_id: str = tag["Id"]
 
-        url_params = {}
-        url_params["IncludeItemTypes"] = "Movie"
-        url_params["CollapseBoxSetItems"] = False
-        url_params["GroupItemsIntoCollections"] = False
-        url_params["Recursive"] = True
-        url_params["IsMissing"] = False
-        url_params["ImageTypeLimit"] = 1
-        url_params["SortBy"] = "Name"
-        url_params["SortOrder"] = "Ascending"
-        url_params["Fields"] = "{field_filters}"
-        url_params["TagIds"] = tag_id
+        movie_tag_url_params: Dict[str, str] = {
+            "IncludeItemTypes": "Movie",
+            "CollapseBoxSetItems": str(False),
+            "GroupItemsIntoCollections": str(False),
+            "Recursive": str(True),
+            "IsMissing": str(False),
+            "ImageTypeLimit": str(1),
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "Fields": "{field_filters}",
+            "TagIds": tag_id
+        }
 
         if parent_id:
-            menu_params["ParentId"] = parent_id
+            movie_tag_url_params["ParentId"] = parent_id
 
-        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
+        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", movie_tag_url_params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
+        art = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")
+        }
 
         content_url = urllib.parse.quote(item_url)
         url = sys.argv[0] + ("?url=" +
@@ -90,22 +96,23 @@ def show_movie_tags(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_movie_years(menu_params):
+def show_movie_years(menu_params: Dict[str, str]) -> None:
     log.debug("show_movie_years: {0}", menu_params)
-    parent_id = menu_params.get("parent_id")
-    group_into_decades = menu_params.get("group") == "true"
+    parent_id: str = menu_params.get("parent_id", "")
+    group_into_decades: bool = menu_params.get("group", "false") == "true"
 
-    url_params = {}
-    url_params["UserId"] = "{userid}"
-    url_params["SortBy"] = "SortName"
-    url_params["SortOrder"] = "Ascending"
-    url_params["CollapseBoxSetItems"] = False
-    url_params["GroupItemsIntoCollections"] = False
-    url_params["Recursive"] = True
-    url_params["IsMissing"] = False
-    url_params["EnableTotalRecordCount"] = False
-    url_params["EnableUserData"] = False
-    url_params["IncludeItemTypes"] = "Movie"
+    url_params: Dict[str, str] = {
+        "UserId": "{userid}",
+        "SortBy": "SortName",
+        "SortOrder": "Ascending",
+        "CollapseBoxSetItems": str(False),
+        "GroupItemsIntoCollections": str(False),
+        "Recursive": str(True),
+        "IsMissing": str(False),
+        "EnableTotalRecordCount": str(False),
+        "EnableUserData": str(False),
+        "IncludeItemTypes": "Movie"
+    }
 
     if parent_id:
         url_params["ParentId"] = parent_id
@@ -118,60 +125,55 @@ def show_movie_years(menu_params):
     if not result:
         return
 
-    years_list = result.get("Items")
-    result_names = {}
+    years_list: List[Dict] = result.get("Items")
+    result_names: Dict[str, List[str]] = {}
     for year in years_list:
-        name = year.get("Name")
-        if group_into_decades:
-            year_int = int(name)
-            decade = str(year_int - year_int % 10)
-            decade_end = str((year_int - year_int % 10) + 9)
-            decade_name = decade + "-" + decade_end
-            result_names[decade_name] = year_int - year_int % 10
-        else:
-            result_names[name] = [name]
+        year_name: str = year.get("Name", "-1")
+        year_int: int = int(year_name)
+        if year_int > -1 and group_into_decades:
+            decade_start: int = year_int - year_int % 10
+            decade_end: int = (year_int - year_int % 10) + 9
+            decade_name: str = str(decade_start) + "-" + str(decade_end)
+            if decade_name not in result_names:
+                result_names[decade_name] = [str(i) for i in range(decade_start, decade_end + 1)]
+        elif year_int > -1:
+            result_names[year_name] = [year_name]
 
-    keys = list(result_names.keys())
+    keys: List[str] = list(result_names.keys())
     keys.sort()
 
-    if group_into_decades:
-        for decade_key in keys:
-            year_list = []
-            decade_start = result_names[decade_key]
-            for include_year in range(decade_start, decade_start + 10):
-                year_list.append(str(include_year))
-            result_names[decade_key] = year_list
+    for year_name in keys:
+        years_list_str: str = ",".join(result_names[year_name])
 
-    for year in keys:
-        name = year
-        value = ",".join(result_names[year])
-
-        params = {}
-        params["IncludeItemTypes"] = "Movie"
-        params["CollapseBoxSetItems"] = False
-        params["GroupItemsIntoCollections"] = False
-        params["Recursive"] = True
-        params["IsMissing"] = False
-        params["ImageTypeLimit"] = 1
-        params["SortBy"] = "Name"
-        params["SortOrder"] = "Ascending"
-        params["Fields"] = "{field_filters}"
-        params["Years"] = value
+        year_params: Dict[str, str] = {
+            "IncludeItemTypes": "Movie",
+            "CollapseBoxSetItems": str(False),
+            "GroupItemsIntoCollections": str(False),
+            "Recursive": str(True),
+            "IsMissing": str(False),
+            "ImageTypeLimit": str(1),
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "Fields": "{field_filters}",
+            "Years": years_list_str
+        }
 
         if parent_id:
-            params["ParentId"] = parent_id
+            year_params["ParentId"] = parent_id
 
-        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", year_params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
+        art: Dict[str, str] = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")
+        }
 
         content_url = urllib.parse.quote(item_url)
         url = sys.argv[0] + ("?url=" +
                              content_url +
                              "&mode=GET_CONTENT" +
                              "&media_type=movies")
-        log.debug("addMenuDirectoryItem: {0} - {1}", name, url)
-        add_menu_directory_item(name, url, art=art)
+        log.debug("addMenuDirectoryItem: {0} - {1}", year_name, url)
+        add_menu_directory_item(year_name, url, art=art)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -182,13 +184,14 @@ def show_movie_pages(menu_params):
     parent_id = menu_params.get("parent_id")
     settings = xbmcaddon.Addon()
 
-    params = {}
-    params["IncludeItemTypes"] = "Movie"
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
-    params["Recursive"] = True
-    params["IsMissing"] = False
-    params["ImageTypeLimit"] = 0
+    params: Dict[str, str] = {
+        "IncludeItemTypes": "Movie",
+        "CollapseBoxSetItems": str(False),
+        "GroupItemsIntoCollections": str(False),
+        "Recursive": str(True),
+        "IsMissing": str(False),
+        "ImageTypeLimit": str(0)
+    }
 
     if parent_id:
         params["ParentId"] = parent_id
@@ -201,58 +204,62 @@ def show_movie_pages(menu_params):
     if result is None:
         return
 
-    total_results = result.get("TotalRecordCount", 0)
+    total_results: int = result.get("TotalRecordCount", 0)
     log.debug("showMoviePages TotalRecordCount {0}", total_results)
 
     if result == 0:
         return
 
-    page_limit = int(settings.getSetting('itemsPerPage'))
+    page_limit: int = int(settings.getSetting('itemsPerPage'))
     if page_limit == 0:
         page_limit = 20
 
-    start_index = 0
-    collections = []
+    start_index: int = 0
+    collections: List[Dict[str, object]] = []
 
     while start_index < total_results:
 
-        params = {}
-        params["IncludeItemTypes"] = "Movie"
-        params["CollapseBoxSetItems"] = False
-        params["GroupItemsIntoCollections"] = False
-        params["Recursive"] = True
-        params["IsMissing"] = False
-        params["ImageTypeLimit"] = 1
-        params["SortBy"] = "Name"
-        params["SortOrder"] = "Ascending"
-        params["Fields"] = "{field_filters}"
-        params["StartIndex"] = start_index
-        params["Limit"] = page_limit
+        movie_url_params: Dict[str, str] = {
+            "IncludeItemTypes": "Movie",
+            "CollapseBoxSetItems": str(False),
+            "GroupItemsIntoCollections": str(False),
+            "Recursive": str(True),
+            "IsMissing": str(False),
+            "ImageTypeLimit": str(1),
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "Fields": "{field_filters}",
+            "StartIndex": str(start_index),
+            "Limit": str(page_limit)
+        }
 
         if parent_id:
-            params["ParentId"] = parent_id
+            movie_url_params["ParentId"] = parent_id
 
-        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", movie_url_params)
 
         page_upper = start_index + page_limit
         if page_upper > total_results:
             page_upper = total_results
 
-        item_data = {}
-        item_data['title'] = "Page (" + str(start_index + 1) + " - " + str(page_upper) + ")"
-        item_data['path'] = item_url
-        item_data['media_type'] = 'movies'
-
-        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
+        art_links: Dict[str, str] = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")
+        }
+        item_data: Dict[str, object] = {
+            'title': "Page (" + str(start_index + 1) + " - " + str(page_upper) + ")",
+            'path': item_url,
+            'media_type': 'movies',
+            "art": art_links
+        }
 
         collections.append(item_data)
         start_index = start_index + page_limit
 
     for collection in collections:
-        content_url = urllib.parse.quote(collection['path'])
+        content_url = urllib.parse.quote(str(collection.get("path", "")))
         url = sys.argv[0] + ("?url=" + content_url +
                              "&mode=GET_CONTENT" +
-                             "&media_type=" + collection["media_type"])
+                             "&media_type=" + str(collection.get("media_type", "")))
         log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), url, collection.get("art"))
         add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
 
@@ -262,34 +269,35 @@ def show_movie_pages(menu_params):
 def show_genre_list(menu_params):
     log.debug("showGenreList: {0}", menu_params)
 
-    server = downloadUtils.get_server()
+    server: str = downloadUtils.get_server()
     if server is None:
         return
 
     parent_id = menu_params.get("parent_id")
     item_type = menu_params.get("item_type")
 
-    kodi_type = "Movies"
-    emby_type = "Movie"
+    kodi_type: str = "Movies"
+    emby_type: str = "Movie"
     if item_type is not None and item_type == "tvshow":
         emby_type = "Series"
         kodi_type = "tvshows"
 
-    params = {}
-    params["IncludeItemTypes"] = emby_type
-    params["UserId"] = "{userid}"
-    params["Recursive"] = True
-    params["SortBy"] = "Name"
-    params["SortOrder"] = "Ascending"
-    params["ImageTypeLimit"] = 1
+    params: Dict[str, str] = {
+        "IncludeItemTypes": emby_type,
+        "UserId": "{userid}",
+        "Recursive": str(True),
+        "SortBy": "Name",
+        "SortOrder": "Ascending",
+        "ImageTypeLimit": str(1)
+    }
 
     if parent_id is not None:
         params["ParentId"] = parent_id
 
-    url = get_emby_url("{server}/emby/Genres", params)
+    genres_url: str = get_emby_url("{server}/emby/Genres", params)
 
     data_manager = DataManager()
-    result = data_manager.get_content(url)
+    result = data_manager.get_content(genres_url)
 
     if result is not None:
         result = result.get("Items")
@@ -300,39 +308,41 @@ def show_genre_list(menu_params):
     xbmcplugin.setContent(int(sys.argv[1]), 'genres')
 
     for genre in result:
-        item_data = {}
-        item_data['title'] = genre.get("Name")
-        item_data['media_type'] = kodi_type
+        item_data: Dict[str, Union[str, Dict[str, str]]] = {
+            'title': genre.get("Name"),
+            'media_type': kodi_type
+        }
 
-        # art = getArt(item=genre, server=server)
-        # item_data['art'] = art
+        genre_params: Dict[str, str] = {
+            "Recursive": str(True),
+            "CollapseBoxSetItems": str(False),
+            "GroupItemsIntoCollections": str(False),
+            "GenreIds": genre.get("Id"),
+            "IncludeItemTypes": emby_type,
+            "ImageTypeLimit": str(1),
+            "Fields": "{field_filters}"
+        }
 
-        params = {}
-        params["Recursive"] = True
-        params["CollapseBoxSetItems"] = False
-        params["GroupItemsIntoCollections"] = False
-        params["GenreIds"] = genre.get("Id")
-        params["IncludeItemTypes"] = emby_type
-        params["ImageTypeLimit"] = 1
-        params["Fields"] = "{field_filters}"
-
-        if parent_id is not None:
+        if genre_params is not None:
             params["ParentId"] = parent_id
 
-        url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+        item_url: str = get_emby_url("{server}/emby/Users/{userid}/Items", genre_params)
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url.encode("utf-8")).decode("utf-8")}
+        art = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")
+        }
         item_data['art'] = art
 
-        item_data['path'] = url
+        item_data['path'] = item_url
         collections.append(item_data)
 
     for collection in collections:
-        url = sys.argv[0] + ("?url=" + urllib.parse.quote(collection['path']) +
-                             "&mode=GET_CONTENT" +
-                             "&media_type=" + collection["media_type"])
-        log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), url, collection.get("art"))
-        add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
+        url_string: str = "{0}?url={1}&mode=GET_CONTENT&media_type={2}"
+        col_url: str = url_string.format(sys.argv[0],
+                                     urllib.parse.quote(str(collection['path']),
+                                     str(collection["media_type"])))
+        log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), col_url, collection.get("art"))
+        add_menu_directory_item(collection.get('title', string_load(30250)), col_url, art=collection.get("art"))
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -342,21 +352,22 @@ def show_movie_alpha_list(menu_params):
 
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
-    settings = xbmcaddon.Addon()
     server = downloadUtils.get_server()
     if server is None:
         return
 
     parent_id = menu_params.get("parent_id")
 
-    url_params = {}
-    url_params["IncludeItemTypes"] = "Movie"
-    url_params["Recursive"] = True
-    url_params["CollapseBoxSetItems"] = False
-    url_params["GroupItemsIntoCollections"] = False
-    url_params["UserId"] = "{userid}"
-    url_params["SortBy"] = "Name"
-    url_params["SortOrder"] = "Ascending"
+    url_params: Dict[str, str] = {
+        "IncludeItemTypes": "Movie",
+        "Recursive": str(True),
+        "CollapseBoxSetItems": str(False),
+        "GroupItemsIntoCollections": str(False),
+        "UserId": "{userid}",
+        "SortBy": "Name",
+        "SortOrder": "Ascending"
+    }
+
     if parent_id is not None:
         url_params["ParentId"] = parent_id
 
@@ -374,61 +385,67 @@ def show_movie_alpha_list(menu_params):
 
     collections = []
     for alphaName in alpha_list:
-        item_data = {}
-        item_data['title'] = alphaName
-        item_data['media_type'] = "Movies"
+        item_data: Dict[str, Union[str, Dict[str, str]]] = {
+            'title': alphaName,
+            'media_type': "Movies"
+        }
 
-        params = {}
-        params["Fields"] = "{field_filters}"
-        params["CollapseBoxSetItems"] = False
-        params["GroupItemsIntoCollections"] = False
-        params["Recursive"] = True
-        params["IncludeItemTypes"] = "Movie"
-        params["SortBy"] = "Name"
-        params["SortOrder"] = "Ascending"
-        params["ImageTypeLimit"] = 1
+        movie_alpha_params: Dict[str, str] = {
+            "Fields": "{field_filters}",
+            "CollapseBoxSetItems": str(False),
+            "GroupItemsIntoCollections": str(False),
+            "Recursive": str(True),
+            "IncludeItemTypes": "Movie",
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "ImageTypeLimit": str(1)
+        }
 
         if parent_id is not None:
-            params["ParentId"] = parent_id
+            movie_alpha_params["ParentId"] = parent_id
 
         if alphaName == "#":
-            params["NameLessThan"] = "A"
+            movie_alpha_params["NameLessThan"] = "A"
         else:
-            params["NameStartsWith"] = alphaName
+            movie_alpha_params["NameStartsWith"] = alphaName
 
-        url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+        url = get_emby_url("{server}/emby/Users/{userid}/Items", movie_alpha_params)
         item_data['path'] = url
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(url.encode("utf-8")).decode("utf-8")}
+        art: Dict[str, str] = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(url.encode("utf-8")).decode("utf-8")
+        }
         item_data['art'] = art
 
         collections.append(item_data)
 
     for collection in collections:
-        url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
-               "&mode=GET_CONTENT&media_type=" + collection["media_type"])
+        url = (sys.argv[0] + "?url=" + urllib.parse.quote(str(collection['path'])) +
+               "&mode=GET_CONTENT&media_type=" + str(collection["media_type"]))
         log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
         add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_tvshow_alpha_list(menu_params):
+def show_tvshow_alpha_list(menu_params: Dict[str, str]):
     log.debug("== ENTER: showTvShowAlphaList() ==")
 
     server = downloadUtils.get_server()
     if server is None:
         return
 
-    parent_id = menu_params.get("parent_id")
+    parent_id: str = menu_params.get("parent_id", "")
 
-    url_params = {}
-    url_params["IncludeItemTypes"] = "Series"
-    url_params["Recursive"] = True
-    url_params["UserId"] = "{userid}"
-    url_params["SortBy"] = "Name"
-    url_params["SortOrder"] = "Ascending"
-    if parent_id is not None:
+    url_params: Dict[str, str] = {
+        "IncludeItemTypes": "Series",
+        "Recursive": str(True),
+        "UserId": "{userid}",
+        "SortBy": "Name",
+        "SortOrder": "Ascending"
+    }
+    
+    if parent_id:
         menu_params["ParentId"] = parent_id
     prefix_url = get_emby_url("{server}/emby/Items/Prefixes", url_params)
 
@@ -444,18 +461,20 @@ def show_tvshow_alpha_list(menu_params):
 
     collections = []
     for alpha_name in alpha_list:
-        item_data = {}
-        item_data['title'] = alpha_name
-        item_data['media_type'] = "tvshows"
+        item_data: Dict[str, Union[str, Dict[str, str]]] = {
+            'title': alpha_name,
+            'media_type': "tvshows"
+        }
 
-        params = {}
-        params["Fields"] = "{field_filters}"
-        params["ImageTypeLimit"] = 1
-        params["IncludeItemTypes"] = "Series"
-        params["SortBy"] = "Name"
-        params["SortOrder"] = "Ascending"
-        params["Recursive"] = True
-        params["IsMissing"] = False
+        params: Dict[str, str] = {
+            "Fields": "{field_filters}",
+            "ImageTypeLimit": str(1),
+            "IncludeItemTypes": "Series",
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "Recursive": str(True),
+            "IsMissing": str(False)
+        }
 
         if parent_id is not None:
             params["ParentId"] = parent_id
@@ -469,14 +488,17 @@ def show_tvshow_alpha_list(menu_params):
 
         item_data['path'] = path
 
-        art = {"thumb": "http://localhost:24276/" + base64.b64encode(path.encode("utf-8")).decode("utf-8")}
+        art = {
+            "thumb": "http://localhost:24276/" + base64.b64encode(path.encode("utf-8")).decode("utf-8")
+        }
         item_data['art'] = art
 
         collections.append(item_data)
 
     for collection in collections:
-        url = (sys.argv[0] + "?url=" + urllib.parse.quote(collection['path']) +
-               "&mode=GET_CONTENT&media_type=" + collection["media_type"])
+        url_pattern: str = "{0}?url={1}&mode=GET_CONTENT&media_type={2}"
+        target_path: str = str(collection['path'])
+        url: str = url_pattern.format(sys.argv[0], urllib.parse.quote(target_path), collection["media_type"])
         log.debug("addMenuDirectoryItem: {0} ({1})", collection.get('title'), url)
         add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
 
@@ -486,19 +508,20 @@ def show_tvshow_alpha_list(menu_params):
 def show_tvshow_pages(menu_params):
     log.debug("showTvShowPages: {0}", menu_params)
 
-    parent_id = menu_params.get("parent_id")
+    parent_id: str = menu_params.get("parent_id")
     settings = xbmcaddon.Addon()
 
-    params = {}
-    params["IncludeItemTypes"] = "Series"
-    params["IsMissing"] = False
-    params["Recursive"] = True
-    params["ImageTypeLimit"] = 0
+    show_params: Dict[str, str] = {
+        "IncludeItemTypes": "Series",
+        "IsMissing": str(False),
+        "Recursive": str(True),
+        "ImageTypeLimit": str(0)
+    }
 
     if parent_id:
-        params["ParentId"] = parent_id
+        show_params["ParentId"] = parent_id
 
-    url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+    url = get_emby_url("{server}/emby/Users/{userid}/Items", show_params)
 
     data_manager = DataManager()
     result = data_manager.get_content(url)
@@ -516,48 +539,50 @@ def show_tvshow_pages(menu_params):
     if page_limit == 0:
         page_limit = 20
 
-    start_index = 0
-    collections = []
+    start_index: int = 0
+    collections: List[Dict[str, Union[str, Dict[str, str]]]] = []
 
     while start_index < total_results:
 
-        params = {}
-        params["IncludeItemTypes"] = "Series"
-        params["IsMissing"] = False
-        params["Recursive"] = True
-        params["ImageTypeLimit"] = 1
-        params["SortBy"] = "Name"
-        params["SortOrder"] = "Ascending"
-        params["Fields"] = "{field_filters}"
-        params["StartIndex"] = start_index
-        params["Limit"] = page_limit
+        page_params: Dict[str, str] = {
+            "IncludeItemTypes": "Series",
+            "IsMissing": str(False),
+            "Recursive": str(True),
+            "ImageTypeLimit": str(1),
+            "SortBy": "Name",
+            "SortOrder": "Ascending",
+            "Fields": "{field_filters}",
+            "StartIndex": str(start_index),
+            "Limit": str(page_limit)
+        }
 
         if parent_id:
-            params["ParentId"] = parent_id
+            page_params["ParentId"] = parent_id
 
-        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+        item_url = get_emby_url("{server}/emby/Users/{userid}/Items", page_params)
 
         page_upper = start_index + page_limit
         if page_upper > total_results:
             page_upper = total_results
 
-        item_data = {}
-        item_data['title'] = "Page (" + str(start_index + 1) + " - " + str(page_upper) + ")"
-        item_data['path'] = item_url
-        item_data['media_type'] = 'tvshows'
-
-        item_data["art"] = {"thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")}
+        item_data: Dict[str, Union[str, Dict[str, str]]] = {
+            'title': "Page (" + str(start_index + 1) + " - " + str(page_upper) + ")",
+            'path': item_url,
+            'media_type': 'tvshows',
+            "art": {
+                "thumb": "http://localhost:24276/" + base64.b64encode(item_url.encode("utf-8")).decode("utf-8")
+            }
+        }
 
         collections.append(item_data)
         start_index = start_index + page_limit
 
     for collection in collections:
-        content_url = urllib.parse.quote(collection['path'])
-        url = sys.argv[0] + ("?url=" + content_url +
-                             "&mode=GET_CONTENT" +
-                             "&media_type=" + collection["media_type"])
-        log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), url, collection.get("art"))
-        add_menu_directory_item(collection.get('title', string_load(30250)), url, art=collection.get("art"))
+        content_url: str = urllib.parse.quote(str(collection['path']))
+        url_pattern: str = "{0}?url={1}&mode=GET_CONTENT&media_type={2}"
+        target_url: str = url_pattern.format(sys.argv[0], content_url, collection["media_type"])
+        log.debug("addMenuDirectoryItem: {0} - {1} - {2}", collection.get('title'), target_url, collection.get("art"))
+        add_menu_directory_item(collection.get('title', string_load(30250)), target_url, art=collection.get("art"))
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -621,10 +646,11 @@ def create_new_node(params):
 def get_node_url(node_info):
     log.debug("get_node_url : {0}", node_info)
 
-    base_params = {}
-    base_params["Fields"] = "{field_filters}"
-    base_params["ImageTypeLimit"] = 1
-    base_params["IsMissing"] = False
+    base_params: Dict[str, str] = {
+        "Fields": "{field_filters}",
+        "ImageTypeLimit": str(1),
+        "IsMissing": str(False)
+    }
 
     if "item_parent" in node_info and node_info["item_parent"]:
         base_params["ParentId"] = node_info["item_parent"]
@@ -691,21 +717,23 @@ def display_homevideos_type(menu_params, view):
     hide_watched = settings.getSetting("hide_watched") == "true"
 
     # All Home Movies
-    base_params = {}
-    base_params["ParentId"] = view.get("Id")
-    base_params["Recursive"] = False
-    base_params["IsMissing"] = False
-    base_params["Fields"] = "{field_filters}"
-    base_params["ImageTypeLimit"] = 1
+    base_params: Dict[str, str] = {
+        "ParentId": view.get("Id"),
+        "Recursive": str(False),
+        "IsMissing": str(False),
+        "Fields": "{field_filters}",
+        "ImageTypeLimit": str(1)
+    }
+
     path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=homevideos"
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # In progress home movies
-    params = {}
+    params: Dict[str, str] = {}
     params.update(base_params)
     params["Filters"] = "IsResumable"
-    params["Recursive"] = True
+    params["Recursive"] = str(True)
     params["Limit"] = "{ItemLimit}"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=homevideos"
@@ -714,12 +742,12 @@ def display_homevideos_type(menu_params, view):
     # Recently added
     params = {}
     params.update(base_params)
-    params["Recursive"] = True
+    params["Recursive"] = str(True)
     params["SortBy"] = "DateCreated"
     params["SortOrder"] = "Descending"
     params["Filters"] = "IsNotFolder"
     if hide_watched:
-        params["IsPlayed"] = False
+        params["IsPlayed"] = str(False)
     params["Limit"] = "{ItemLimit}"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=homevideos"
@@ -756,20 +784,20 @@ def display_tvshow_type(menu_params, view):
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     # All TV Shows
-    base_params = {}
+    base_params: Dict[str, str] = {}
     if view is not None:
         base_params["ParentId"] = view.get("Id")
     base_params["Fields"] = "{field_filters}"
-    base_params["ImageTypeLimit"] = 1
-    base_params["IsMissing"] = False
+    base_params["ImageTypeLimit"] = str(1)
+    base_params["IsMissing"] = str(False)
     base_params["IncludeItemTypes"] = "Series"
-    base_params["Recursive"] = True
+    base_params["Recursive"] = str(True)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=tvshows"
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # Favorite TV Shows
-    params = {}
+    params: Dict[str, str] = {}
     params.update(base_params)
     params["Filters"] = "IsFavorite"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
@@ -779,7 +807,7 @@ def display_tvshow_type(menu_params, view):
     # Tv Shows with unplayed
     params = {}
     params.update(base_params)
-    params["IsPlayed"] = False
+    params["IsPlayed"] = str(False)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=tvshows"
     add_menu_directory_item(view_name + string_load(30285), url)
@@ -865,10 +893,10 @@ def display_music_type(menu_params, view):
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     # all albums
-    params = {}
+    params: Dict[str, str] = {}
     params["ParentId"] = view.get("Id")
-    params["Recursive"] = True
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(True)
+    params["ImageTypeLimit"] = str(1)
     params["IncludeItemTypes"] = "MusicAlbum"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=MusicAlbums"
@@ -877,7 +905,7 @@ def display_music_type(menu_params, view):
     # recently added
     params = {}
     params["ParentId"] = view.get("Id")
-    params["ImageTypeLimit"] = 1
+    params["ImageTypeLimit"] = str(1)
     params["IncludeItemTypes"] = "Audio"
     params["Limit"] = "{ItemLimit}"
     path = get_emby_url("{server}/emby/Users/{userid}/Items/Latest", params)
@@ -887,11 +915,11 @@ def display_music_type(menu_params, view):
     # recently played
     params = {}
     params["ParentId"] = view.get("Id")
-    params["Recursive"] = True
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(True)
+    params["ImageTypeLimit"] = str(1)
     params["IncludeItemTypes"] = "Audio"
     params["Limit"] = "{ItemLimit}"
-    params["IsPlayed"] = True
+    params["IsPlayed"] = str(True)
     params["SortBy"] = "DatePlayed"
     params["SortOrder"] = "Descending"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
@@ -901,11 +929,11 @@ def display_music_type(menu_params, view):
     # most played
     params = {}
     params["ParentId"] = view.get("Id")
-    params["Recursive"] = True
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(True)
+    params["ImageTypeLimit"] = str(1)
     params["IncludeItemTypes"] = "Audio"
     params["Limit"] = "{ItemLimit}"
-    params["IsPlayed"] = True
+    params["IsPlayed"] = str(True)
     params["SortBy"] = "PlayCount"
     params["SortOrder"] = "Descending"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
@@ -915,8 +943,8 @@ def display_music_type(menu_params, view):
     # artists
     params = {}
     params["ParentId"] = view.get("Id")
-    params["Recursive"] = True
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(True)
+    params["ImageTypeLimit"] = str(1)
     path = get_emby_url("{server}/emby/Artists/AlbumArtists", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=MusicArtists"
     add_menu_directory_item(view_name + string_load(30321), url)
@@ -924,20 +952,20 @@ def display_music_type(menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_musicvideos_type(params, view):
-    handle = int(sys.argv[1])
+def display_musicvideos_type(params: Dict[str, str], view):
+    handle: int = int(sys.argv[1])
     xbmcplugin.setContent(handle, 'files')
 
     view_name = view.get("Name")
 
     # artists
-    params = {}
-    params["ParentId"] = view.get("Id")
-    params["Recursive"] = False
-    params["ImageTypeLimit"] = 1
-    params["IsMissing"] = False
-    params["Fields"] = "{field_filters}"
-    path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+    url_params: Dict[str, str] = {}
+    url_params["ParentId"] = view.get("Id")
+    url_params["Recursive"] = str(False)
+    url_params["ImageTypeLimit"] = str(1)
+    url_params["IsMissing"] = str(False)
+    url_params["Fields"] = "{field_filters}"
+    path = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=musicvideos"
     add_menu_directory_item(view_name + string_load(30405), url)
 
@@ -951,10 +979,10 @@ def display_livetv_type(menu_params, view):
     view_name = view.get("Name")
 
     # channels
-    params = {}
+    params: Dict[str, str] = {}
     params["UserId"] = "{userid}"
-    params["Recursive"] = False
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(False)
+    params["ImageTypeLimit"] = str(1)
     params["Fields"] = "{field_filters}"
     path = get_emby_url("{server}/emby/LiveTv/Channels", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=livetv"
@@ -963,10 +991,10 @@ def display_livetv_type(menu_params, view):
     # programs
     params = {}
     params["UserId"] = "{userid}"
-    params["IsAiring"] = True
-    params["ImageTypeLimit"] = 1
+    params["IsAiring"] = str(True)
+    params["ImageTypeLimit"] = str(1)
     params["Fields"] = "ChannelInfo,{field_filters}"
-    params["EnableTotalRecordCount"] = False
+    params["EnableTotalRecordCount"] = str(False)
     path = get_emby_url("{server}/emby/LiveTv/Programs/Recommended", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=livetv"
     add_menu_directory_item(view_name + string_load(30361), url)
@@ -974,10 +1002,10 @@ def display_livetv_type(menu_params, view):
     # recordings
     params = {}
     params["UserId"] = "{userid}"
-    params["Recursive"] = False
-    params["ImageTypeLimit"] = 1
+    params["Recursive"] = str(False)
+    params["ImageTypeLimit"] = str(1)
     params["Fields"] = "{field_filters}"
-    params["EnableTotalRecordCount"] = False
+    params["EnableTotalRecordCount"] = str(False)
     path = get_emby_url("{server}/emby/LiveTv/Recordings", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=livetv"
     add_menu_directory_item(view_name + string_load(30362), url)
@@ -998,16 +1026,16 @@ def display_movies_type(menu_params, view):
     group_movies = settings.getSetting('group_movies') == "true"
     hide_watched = settings.getSetting("hide_watched") == "true"
 
-    base_params = {}
+    base_params: Dict[str, str] = {}
     if view is not None:
         base_params["ParentId"] = view.get("Id")
     base_params["IncludeItemTypes"] = "Movie"
     base_params["CollapseBoxSetItems"] = str(group_movies)
     base_params["GroupItemsIntoCollections"] = str(group_movies)
-    base_params["Recursive"] = True
-    base_params["IsMissing"] = False
+    base_params["Recursive"] = str(True)
+    base_params["IsMissing"] = str(False)
     base_params["Fields"] = "{field_filters}"
-    base_params["ImageTypeLimit"] = 1
+    base_params["ImageTypeLimit"] = str(1)
 
     # All Movies
     path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
@@ -1015,10 +1043,10 @@ def display_movies_type(menu_params, view):
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # Favorite Movies
-    params = {}
+    params: Dict[str, str] = {}
     params.update(base_params)
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
+    params["CollapseBoxSetItems"] = str(False)
+    params["GroupItemsIntoCollections"] = str(False)
     params["Filters"] = "IsFavorite"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies"
@@ -1027,9 +1055,9 @@ def display_movies_type(menu_params, view):
     # Unwatched Movies
     params = {}
     params.update(base_params)
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
-    params["IsPlayed"] = False
+    params["CollapseBoxSetItems"] = str(False)
+    params["GroupItemsIntoCollections"] = str(False)
+    params["IsPlayed"] = str(False)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies"
     add_menu_directory_item(view_name + string_load(30285), url)
@@ -1037,11 +1065,11 @@ def display_movies_type(menu_params, view):
     # Recently Watched Movies
     params = {}
     params.update(base_params)
-    params["IsPlayed"] = True
+    params["IsPlayed"] = str(True)
     params["SortBy"] = "DatePlayed"
     params["SortOrder"] = "Descending"
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
+    params["CollapseBoxSetItems"] = str(False)
+    params["GroupItemsIntoCollections"] = str(False)
     params["Limit"] = "{ItemLimit}"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies&sort=none"
@@ -1054,8 +1082,8 @@ def display_movies_type(menu_params, view):
     params["SortBy"] = "DatePlayed"
     params["SortOrder"] = "Descending"
     params["Limit"] = "{ItemLimit}"
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
+    params["CollapseBoxSetItems"] = str(False)
+    params["GroupItemsIntoCollections"] = str(False)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies&sort=none"
     add_menu_directory_item(view_name + string_load(30267) + " (" + show_x_filtered_items + ")", url)
@@ -1064,13 +1092,13 @@ def display_movies_type(menu_params, view):
     params = {}
     params.update(base_params)
     if hide_watched:
-        params["IsPlayed"] = False
+        params["IsPlayed"] = str(False)
     params["SortBy"] = "DateCreated"
     params["SortOrder"] = "Descending"
     params["Filters"] = "IsNotFolder"
     params["Limit"] = "{ItemLimit}"
-    params["CollapseBoxSetItems"] = False
-    params["GroupItemsIntoCollections"] = False
+    params["CollapseBoxSetItems"] = str(False)
+    params["GroupItemsIntoCollections"] = str(False)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=movies&sort=none"
     add_menu_directory_item(view_name + string_load(30268) + " (" + show_x_filtered_items + ")", url)
@@ -1080,9 +1108,9 @@ def display_movies_type(menu_params, view):
     if view is not None:
         params["ParentId"] = view.get("Id")
     params["Fields"] = "{field_filters}"
-    params["ImageTypeLimit"] = 1
+    params["ImageTypeLimit"] = str(1)
     params["IncludeItemTypes"] = "Boxset"
-    params["Recursive"] = True
+    params["Recursive"] = str(True)
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=boxsets"
     add_menu_directory_item(view_name + string_load(30410), url)
@@ -1175,39 +1203,39 @@ def display_library_views(params):
 
 
 def get_playlist_path(view_info):
-    params = {}
-    params["ParentId"] = view_info.get("Id")
-    params["Fields"] = "{field_filters}"
-    params["ImageTypeLimit"] = 1
-
+    params = {
+        "ParentId": view_info.get("Id"),
+        "Fields": "{field_filters}",
+        "ImageTypeLimit": 1
+    }
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=playlists"
     return url
 
 
 def get_collection_path(view_info):
-    params = {}
-    params["ParentId"] = view_info.get("Id")
-    params["Fields"] = "{field_filters}"
-    params["ImageTypeLimit"] = 1
-    params["IncludeItemTypes"] = "Boxset"
-    params["CollapseBoxSetItems"] = True
-    params["GroupItemsIntoCollections"] = True
-    params["Recursive"] = True
-    params["IsMissing"] = False
-
+    params: Dict[str, str] = {
+        "ParentId": view_info.get("Id"),
+        "Fields": "{field_filters}",
+        "ImageTypeLimit": str(1),
+        "IncludeItemTypes": "Boxset",
+        "CollapseBoxSetItems": str(True),
+        "GroupItemsIntoCollections": str(True),
+        "Recursive": str(True),
+        "IsMissing": str(False)
+    }
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=boxsets"
     return url
 
 
 def get_channel_path(view):
-    params = {}
-    params["ParentId"] = view.get("Id")
-    params["IsMissing"] = False
-    params["ImageTypeLimit"] = 1
-    params["Fields"] = "{field_filters}"
-
+    params: Dict[str, str] = {
+        "ParentId": view.get("Id"),
+        "IsMissing": str(False),
+        "ImageTypeLimit": str(1),
+        "Fields": "{field_filters}"
+    }
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
     url = sys.argv[0] + "?url=" + urllib.parse.quote(path) + "&mode=GET_CONTENT&media_type=files"
     return url
@@ -1238,7 +1266,7 @@ def display_library_view(params):
         display_livetv_type(params, view_info)
 
 
-def show_widgets():
+def show_widgets() -> None:
     settings = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 

@@ -8,7 +8,7 @@ class SimpleLogging:
     name = ""
     enable_logging = False
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         settings = xbmcaddon.Addon()
         prefix = settings.getAddonInfo('name')
         self.name = prefix + '.' + name
@@ -24,15 +24,15 @@ class SimpleLogging:
     def __str__(self):
         return "LoggingEnabled: " + str(self.enable_logging)
 
-    def info(self, fmt, *args, **kwargs):
+    def info(self, fmt: str, *args):
         log_line = self.name + "|INFO|" + self.log_line(fmt, *args)
         xbmc.log(log_line, level=xbmc.LOGINFO)
 
-    def error(self, fmt, *args, **kwargs):
+    def error(self, fmt: str, *args):
         log_line = self.name + "|ERROR|" + self.log_line(fmt, *args)
         xbmc.log(log_line, level=xbmc.LOGERROR)
 
-    def debug(self, fmt, *args, **kwargs):
+    def debug(self, fmt: str, *args):
         if self.enable_logging:
             log_line = self.name + "|DEBUG|" + self.log_line(fmt, *args)
             xbmc.log(log_line, level=xbmc.LOGINFO)
@@ -43,9 +43,9 @@ class SimpleLogging:
         # convert any unicode to utf-8 strings
         for arg in args:
             new_args.append(arg)
-            #if isinstance(arg, unicode):
-            #    new_args.append(arg.encode("utf-8"))
-            #else:
-            #    new_args.append(arg)
+            # if isinstance(arg, unicode):
+            #     new_args.append(arg.encode("utf-8"))
+            # else:
+            #     new_args.append(arg)
         log_line = fmt.format(*new_args)
         return log_line

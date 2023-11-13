@@ -1,5 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 import os.path
+from typing import Dict, List
 
 import xbmcaddon
 import xbmc
@@ -29,16 +30,16 @@ downloadUtils = DownloadUtils()
 log = SimpleLogging(__name__)
 
 
-def get_emby_url(base_url, params):
+def get_emby_url(base_url: str, params: Dict[str, str]) -> str:
     params["format"] = "json"
-    param_list = []
+    param_list: List[str] = []
     for key in params:
+        if type(params[key]) is not str:
+            raise Exception("Param Value Error")
         if params[key] is not None:
             value = params[key]
-            if not isinstance(value, str):
-                value = str(value)
-            param_list.append(key + "=" + urllib.parse.quote_plus(str(value), safe="{}"))
-    param_string = "&".join(param_list)
+            param_list.append(key + "=" + urllib.parse.quote_plus(value, safe="{}"))
+    param_string: str = "&".join(param_list)
     return base_url + "?" + param_string
 
 
@@ -295,12 +296,12 @@ def single_urlencode(text):
     return text
 
 
-def send_event_notification(method, data):
-    message_data = json.dumps(data)
-    source_id = "embycon"
-    base64_data = base64.b64encode(message_data.encode("utf-8"))
-    base64_data = base64_data.decode("utf-8")
-    escaped_data = '\\"[\\"{0}\\"]\\"'.format(base64_data)
+def send_event_notification(method: str, data) -> None:
+    message_data: str = json.dumps(data)
+    source_id: str = "embycon"
+    base64_data: bytes = base64.b64encode(message_data.encode("utf-8"))
+    base64_str: str = base64_data.decode("utf-8")
+    escaped_data: str = '\\"[\\"{0}\\"]\\"'.format(base64_str)
     command = 'NotifyAll({0}.SIGNAL,{1},{2})'.format(source_id, method, escaped_data)
     log.debug("Sending notification event data: {0}", command)
     xbmc.executebuiltin(command)

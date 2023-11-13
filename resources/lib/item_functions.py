@@ -8,6 +8,7 @@ import urllib.error
 from datetime import datetime
 
 from collections import defaultdict
+from typing import List, Dict, Any, Union
 
 import xbmc
 import xbmcaddon
@@ -31,13 +32,13 @@ home_window = HomeWindow()
 
 
 class MediaStream:
-    type = "na"
-    width = 0
-    height = 0
-    channels = 0
-    codec = "na"
-    aspect_ratio = 1.0
-    language = "na"
+    type: str = "na"
+    width: int = 0
+    height: int = 0
+    channels: int = 0
+    codec: str = "na"
+    aspect_ratio: float = 1.0
+    language: str = "na"
 
     # "default" if x is None else x
 
@@ -71,11 +72,11 @@ class MediaStream:
 
 
 class Person:
-    name = ""
-    role = ""
-    thumbnail = ""
+    name: str = ""
+    role: str = ""
+    thumbnail: str = ""
 
-    def __init__(self, n, r, t):
+    def __init__(self, n: str, r: str, t: str) -> None:
         self.name = n
         self.role = r
         self.thumbnail = t
@@ -84,87 +85,87 @@ class Person:
 class ItemDetails:
 
     # objects
-    media_streams = []
-    cast = None
+    media_streams: List[MediaStream] = []
+    cast: List[Person] = []
 
     # values
-    name = None
-    sort_name = None
-    id = None
-    etag = None
-    path = None
-    is_folder = False
-    plot = None
-    series_name = None
-    episode_number = 0
-    season_number = 0
-    episode_sort_number = 0
-    season_sort_number = 0
-    track_number = 0
-    series_id = None
-    art = None
+    name: Union[str, None] = None
+    sort_name: Union[str, None] = None
+    id: Union[str, None] = None
+    etag: Union[str, None] = None
+    path: Union[str, None] = None
+    is_folder: Union[bool, None] = False
+    plot: Union[str, None] = None
+    series_name: Union[str, None] = None
+    episode_number: int = 0
+    season_number: int = 0
+    episode_sort_number: int = 0
+    season_sort_number: int = 0
+    track_number: int = 0
+    series_id: Union[str, None] = None
+    art: Union[Dict[str, str], None] = None
 
-    mpaa = None
-    rating = None
-    critic_rating = 0.0
-    community_rating = 0.0
-    year = None
-    premiere_date = ""
-    date_added = ""
-    location_type = None
-    studio = None
-    production_location = None
-    genres = None
-    play_count = 0
-    director = ""
-    writer = ""
-    tagline = ""
-    status = None
-    tags = None
+    mpaa: Union[str, None] = None
+    rating: Union[str, None] = None
+    critic_rating: float = 0.0
+    community_rating: float = 0.0
+    year: Union[int, None] = None
+    premiere_date: str = ""
+    date_added: str = ""
+    location_type: Union[str, None] = None
+    studio: Union[str, None] = None
+    production_location: Union[str, None] = None
+    genres: Union[str, None] = None
+    play_count: Union[int, None] = 0
+    director: str = ""
+    writer: str = ""
+    tagline: str = ""
+    status: Union[str, None] = None
+    tags: Union[List[str], None] = None
 
-    resume_time = 0
-    duration = 0
-    recursive_item_count = 0
-    recursive_unplayed_items_count = 0
-    total_seasons = 0
-    total_episodes = 0
-    watched_episodes = 0
-    unwatched_episodes = 0
-    number_episodes = 0
-    original_title = None
-    item_type = None
-    subtitle_available = False
-    total_items = 0
+    resume_time: int = 0
+    duration: int = 0
+    recursive_item_count: int = 0
+    recursive_unplayed_items_count: int = 0
+    total_seasons: int = 0
+    total_episodes: int = 0
+    watched_episodes: int = 0
+    unwatched_episodes: int = 0
+    number_episodes: int = 0
+    original_title: Union[str, None] = None
+    item_type: Union[str, None] = None
+    subtitle_available: bool = False
+    total_items: int = 0
 
-    song_artist = ""
-    album_artist = ""
-    album_name = ""
+    song_artist: str = ""
+    album_artist: str = ""
+    album_name: Union[str, None] = ""
 
-    program_channel_name = None
-    program_end_date = None
-    program_start_date = None
+    program_channel_name: Union[str, None] = None
+    program_end_date: Union[str, None] = None
+    program_start_date: Union[str, None] = None
 
-    favorite = "false"
-    overlay = "0"
+    favorite: str = "false"
+    overlay: str = "0"
 
-    name_format = ""
-    mode = ""
+    name_format: str = ""
+    mode: str = ""
 
-    baseline_itemname = None
+    baseline_itemname: Union[str, None] = None
 
-    def set_episode_number(self, value):
+    def set_episode_number(self, value: int):
         if value is not None:
             self.episode_number = value
 
-    def set_season_sort_number(self, value):
+    def set_season_sort_number(self, value: int):
         if value is not None:
             self.season_sort_number = value
 
-    def set_season_number(self, value):
+    def set_season_number(self, value: int):
         if value is not None:
             self.season_number = value
 
-    def set_episode_sort_number(self, value):
+    def set_episode_sort_number(self, value: int):
         if value is not None:
             self.episode_sort_number = value
 
@@ -242,7 +243,7 @@ def extract_media_info(item):
     return media_info
 
 
-def extract_item_info(item, gui_options):
+def extract_item_info(item: Any, gui_options: Dict[str, str]) -> ItemDetails:
 
     item_details = ItemDetails()
 
@@ -338,8 +339,9 @@ def extract_item_info(item, gui_options):
 
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
-        airtime = item["AirTime"]
-        item_details.name = item_details.name + ' - ' + item_details.premiere_date + ' - ' + str(airtime)
+        airtime: str = item["AirTime"]
+        new_name: str = "{0} - {1} - {2}".format(item_details.name, item_details.premiere_date, airtime)
+        item_details.name = new_name
 
     if item_details.item_type == "Program":
         item_details.program_channel_name = item["ChannelName"]
@@ -387,7 +389,7 @@ def extract_item_info(item, gui_options):
     # Process People
     people = item["People"]
     if people is not None:
-        cast = []
+        cast: List[Person] = []
         for person in people:
             person_type = person["Type"]
             if person_type == "Director" and person["Name"] is not None:
@@ -407,8 +409,8 @@ def extract_item_info(item, gui_options):
                                                                 server=gui_options["server"])
                 else:
                     person_thumbnail = ""
-                person = Person(person_name, person_role, person_thumbnail)
-                cast.append(person)
+                new_person: Person = Person(person_name, person_role, person_thumbnail)
+                cast.append(new_person)
         item_details.cast = cast
 
     # Process Studios
@@ -459,7 +461,7 @@ def extract_item_info(item, gui_options):
 
     runtime = item["RunTimeTicks"]
     if item_details.is_folder is False and runtime is not None:
-        item_details.duration = int(runtime) / 10000000
+        item_details.duration = int(int(runtime) / 10000000)
 
     child_count = item["ChildCount"]
     if child_count is not None:

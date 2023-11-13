@@ -7,10 +7,11 @@ import hashlib
 import os
 import pickle
 import time
+from typing import Dict, List, Union
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
-from .item_functions import extract_item_info
+from .item_functions import extract_item_info, ItemDetails
 from .kodi_utils import HomeWindow
 from .translation import string_load
 from .tracking import timer
@@ -25,14 +26,15 @@ log = SimpleLogging(__name__)
 
 
 class CacheItem:
-    item_list = None
-    item_list_hash = None
-    date_saved = None
-    date_last_used = None
-    last_action = None
-    items_url = None
-    file_path = None
-    user_id = None
+    item_list: Union[List[ItemDetails], None] = None
+    item_list_hash: Union[str, None] = None
+    date_saved: Union[float, None] = None
+    date_last_used: Union[float, None] = None
+    last_action: Union[str, None] = None
+    items_url: Union[str, None] = None
+    file_path: str = ""
+    user_id: Union[str, None] = None
+    total_records: int = 0
 
     def __init__(self, *args):
         pass
@@ -40,18 +42,18 @@ class CacheItem:
 
 class DataManager:
 
-    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir: str = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
 
     def __init__(self, *args):
         # log.debug("DataManager __init__")
         pass
 
     @staticmethod
-    def load_json_data(json_data):
+    def load_json_data(json_data: str):
         return json.loads(json_data, object_hook=lambda d: defaultdict(lambda: None, d))
 
     @timer
-    def get_content(self, url):
+    def get_content(self, url: str):
         json_data = DownloadUtils().download_url(url)
         result = self.load_json_data(json_data)
         return result
@@ -70,19 +72,20 @@ class DataManager:
         return cache_file
 
     @timer
-    def get_items(self, url, gui_options, use_cache=False):
+    def get_items(self, url: str, gui_options: Dict[str, str], use_cache: bool = False):
 
         home_window = HomeWindow()
         log.debug("last_content_url : use_cache={0} url={1}", use_cache, url)
         home_window.set_property("last_content_url", url)
 
         download_utils = DownloadUtils()
-        user_id = download_utils.get_user_id()
-        cache_file = self.get_cache_filename(url)
+        user_id: str = download_utils.get_user_id()
+        cache_file: str = self.get_cache_filename(url)
 
         item_list = None
         total_records = 0
         baseline_name = None
+        cache_thread: Union[CacheManagerThread, None]
         cache_thread = CacheManagerThread()
         cache_thread.gui_options = gui_options
 
@@ -155,8 +158,8 @@ class DataManager:
 
 
 class CacheManagerThread(threading.Thread):
-    cached_item = None
-    gui_options = None
+    cached_item: CacheItem
+    gui_options: Dict[str, str]
 
     def __init__(self, *args):
         threading.Thread.__init__(self, *args)
@@ -166,7 +169,7 @@ class CacheManagerThread(threading.Thread):
 
         m = hashlib.md5()
         for item in items:
-            item_string = "%s_%s_%s_%s_%s_%s" % (
+            item_string: str = "%s_%s_%s_%s_%s_%s" % (
                 item.name,
                 item.play_count,
                 item.favorite,
@@ -174,8 +177,8 @@ class CacheManagerThread(threading.Thread):
                 item.recursive_unplayed_items_count,
                 item.etag
             )
-            item_string = item_string.encode("UTF-8")
-            m.update(item_string)
+            item_bytes: bytes = item_string.encode("utf-8")
+            m.update(item_bytes)
 
         return m.hexdigest()
 
@@ -189,12 +192,16 @@ class CacheManagerThread(threading.Thread):
 
         # if the data is fresh then just save it
         # if the data is to old do a reload
-        if (self.cached_item.date_saved is not None
+        if (self.cached_item is not None and
+                self.cached_item.date_saved is not None
                 and (time.time() - self.cached_item.date_saved) < 20
                 and self.cached_item.last_action == "fresh_data"):
             is_fresh = True
 
-        if is_fresh and self.cached_item.item_list is not None and len(self.cached_item.item_list) > 0:
+        if (is_fresh and
+                self.cached_item is not None and
+                self.cached_item.item_list is not None and
+                len(self.cached_item.item_list) > 0):
             log.debug("CacheManagerThread : Data is still fresh, not reloading from server")
             cached_hash = self.get_data_hash(self.cached_item.item_list)
             self.cached_item.item_list_hash = cached_hash
@@ -225,7 +232,7 @@ class CacheManagerThread(threading.Thread):
             if isinstance(results, dict):
                 total_records = results.get("TotalRecordCount", 0)
 
-            loaded_items = []
+            loaded_items: List[ItemDetails] = []
             for item in results:
                 item_data = extract_item_info(item, self.gui_options)
                 loaded_items.append(item_data)
