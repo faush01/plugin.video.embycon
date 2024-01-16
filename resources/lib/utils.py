@@ -271,8 +271,8 @@ def get_art(item, server, maxwidth):
         art['clearlogo'] = downloadUtils.get_artwork(item, "Logo", server=server, maxwidth=maxwidth)
         art['clearart'] = downloadUtils.get_artwork(item, "Art", server=server, maxwidth=maxwidth)
         art['discart'] = downloadUtils.get_artwork(item, "Disc", server=server, maxwidth=maxwidth)
+        art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=maxwidth)
 
-    art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=maxwidth)
     if not art['fanart']:
         art['fanart'] = downloadUtils.get_artwork(item, "Backdrop", parent=True, server=server, maxwidth=maxwidth)
 
