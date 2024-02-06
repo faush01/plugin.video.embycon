@@ -715,7 +715,7 @@ def search_results_person(params):
     person_id = params.get("person_id")
     details_url = ('{server}/emby/Users/{userid}/items' +
                    '?PersonIds=' + person_id +
-                   # '&IncludeItemTypes=Movie' +
+                   '&IncludeItemTypes=Episode,Movie,Series' +
                    '&Recursive=true' +
                    '&Fields={field_filters}' +
                    '&format=json')
