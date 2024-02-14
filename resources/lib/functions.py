@@ -636,12 +636,12 @@ def show_menu(params):
 
     elif selected_action == "view_season":
         xbmc.executebuiltin("Dialog.Close(all,true)")
-        parent_id = result["ParentId"]
+        season_id = result["SeasonId"]
         series_id = result["SeriesId"]
         u = ('{server}/emby/Shows/' + series_id +
              '/Episodes'
              '?userId={userid}' +
-             '&seasonId=' + parent_id +
+             '&seasonId=' + season_id +
              '&IsVirtualUnAired=false' +
              '&IsMissing=false' +
              '&Fields=SpecialEpisodeNumbers,{field_filters}' +
