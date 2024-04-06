@@ -1294,7 +1294,7 @@ class Service(xbmc.Player):
 
     def onPlayBackPaused(self):
         # Will be called when kodi pauses the video
-        log.debug("onPlayBackPaused")
+        log.info("onPlayBackPaused")
 
         play_data = get_playing_data(self.played_information)
 
@@ -1304,7 +1304,7 @@ class Service(xbmc.Player):
 
     def onPlayBackResumed(self):
         # Will be called when kodi resumes the video
-        log.debug("onPlayBackResumed")
+        log.info("onPlayBackResumed")
 
         play_data = get_playing_data(self.played_information)
 
@@ -1314,7 +1314,7 @@ class Service(xbmc.Player):
 
     def onPlayBackSeek(self, time, seek_offset):
         # Will be called when kodi seeks in video
-        log.debug("onPlayBackSeek")
+        log.info("onPlayBackSeek")
         send_progress(self)
 
 

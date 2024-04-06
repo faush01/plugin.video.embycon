@@ -309,7 +309,7 @@ def get_widget_content(handle, params):
         url_params["Ids"] = "{random_movies}"
 
     elif widget_type == "recent_tvshows":
-        xbmcplugin.setContent(handle, 'episodes')
+        xbmcplugin.setContent(handle, 'tvshows')
         url_verb = '{server}/emby/Users/{userid}/Items/Latest'
         url_params["GroupItems"] = True
         #url_params["Limit"] = 200
