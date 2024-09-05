@@ -290,6 +290,10 @@ class DownloadUtils:
                 {
                     "Format": "subrip",
                     "Method": "Embed"
+                },
+                {
+                    "Format": "EIA_608",
+                    "Method": "Embed"
                 }
             ]
         }
