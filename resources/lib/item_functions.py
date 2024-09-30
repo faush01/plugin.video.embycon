@@ -332,9 +332,13 @@ def extract_item_info(item, gui_options):
         tokens = prem_date.split("T")
         item_details.premiere_date = tokens[0]
 
-    create_date = item["DateCreated"]
-    if create_date is not None:
-        item_details.date_added = create_date.split('.')[0].replace('T', " ")
+    # use premier date for date added
+    if gui_options["use_prem_date_for_added"]:
+        item_details.date_added = item_details.premiere_date + " 00:00:00"
+    else:
+        create_date = item["DateCreated"]
+        if create_date is not None:
+            item_details.date_added = create_date.split('.')[0].replace('T', " ")
 
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
@@ -717,11 +721,12 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
 
         info_tag_video.setTagLine(item_details.tagline)
         info_tag_video.setStudios([item_details.studio])
+        info_tag_video.setFirstAired(item_details.premiere_date)
         info_tag_video.setPremiered(item_details.premiere_date)
+        info_tag_video.setDateAdded(item_details.date_added)
         info_tag_video.setPlot(item_details.plot)
         info_tag_video.setDirectors([item_details.director])
         info_tag_video.setWriters([item_details.writer])
-        info_tag_video.setDateAdded(item_details.date_added)
         info_tag_video.setCountries([item_details.production_location])
         if item_details.tags is not None and len(item_details.tags) > 0:
             info_tag_video.setTags(item_details.tags)

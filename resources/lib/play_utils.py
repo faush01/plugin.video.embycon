@@ -91,6 +91,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         gui_options["name_format"] = None
         gui_options["name_format_type"] = ""
         gui_options["max_image_width"] = max_image_width
+        gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
         item_details = extract_item_info(item, gui_options)
 
         # create ListItem
@@ -508,6 +509,7 @@ def play_file(play_info, monitor):
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
     gui_options["max_image_width"] = max_image_width
+    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
     item_details = extract_item_info(result, gui_options)
 
     # create ListItem
@@ -713,6 +715,7 @@ def send_next_episode_details(item, next_episode):
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
     gui_options["max_image_width"] = max_image_width
+    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
 
     item_details = extract_item_info(item, gui_options)
     next_item_details = extract_item_info(next_episode, gui_options)

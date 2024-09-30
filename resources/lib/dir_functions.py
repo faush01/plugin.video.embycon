@@ -75,6 +75,8 @@ def get_content(url, params):
         content_type = 'episodes'
     elif media_type == "playlists":
         view_type = "Playlists"
+    elif media_type == "playlist":
+        view_type = "Playlist"
 
     log.debug("media_type:{0} content_type:{1} view_type:{2} ", media_type, content_type, view_type)
 
@@ -128,6 +130,10 @@ def get_content(url, params):
 
     # use the data manager to get the data
     # result = dataManager.get_content(url)
+
+    # if this is a playlist then use the episode name format for the episodes
+    if media_type == "playlist":
+        params["name_format"] = "Episode|episode_name_format"
 
     # total_records = 0
     # if result is not None and isinstance(result, dict):
@@ -289,6 +295,7 @@ def process_directory(url, progress, params, use_cache_data=False):
     gui_options["name_format"] = name_format
     gui_options["name_format_type"] = name_format_type
     gui_options["max_image_width"] = max_image_width
+    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
     cache_file, item_list, total_records, cache_thread = data_manager.get_items(url, gui_options, use_cache)

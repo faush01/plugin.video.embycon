@@ -158,6 +158,10 @@ msgctxt "#30116"
 msgid "Add unwatched counts to names"
 msgstr ""
 
+msgctxt "#30117"
+msgid "User premiered date as date added"
+msgstr ""
+
 msgctxt "#30118"
 msgid "Add resume percent to names"
 msgstr ""
