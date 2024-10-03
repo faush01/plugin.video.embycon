@@ -386,7 +386,19 @@ def process_directory(url, progress, params, use_cache_data=False):
             item_details.art["poster"] = item_details.art["tvshow.poster"]
             item_details.art["thumb"] = item_details.art["tvshow.poster"]
 
-        if item_details.is_folder is True:
+        if item_details.item_type == "MusicArtist":
+            u = ('{server}/emby/Users/{userid}/items' +
+                 '?AlbumArtistIds=' + item_details.id +
+                 '&IncludeItemTypes=MusicAlbum' +
+                 '&CollapseBoxSetItems=false' +
+                 '&Recursive=true' +
+                 '&format=json')
+            log.debug("TARGET URL = {0}", u)
+            gui_item = add_gui_item(u, item_details, display_options)
+            if gui_item:
+                dir_items.append(gui_item)
+
+        elif item_details.is_folder is True:
             if item_details.item_type == "Series":
                 u = ('{server}/emby/Shows/' + item_details.id +
                      '/Seasons'
@@ -420,17 +432,6 @@ def process_directory(url, progress, params, use_cache_data=False):
                     dir_items.append(gui_item)
             else:
                 log.debug("Dropping empty folder item : {0}", item_details.__dict__)
-
-        elif item_details.item_type == "MusicArtist":
-            u = ('{server}/emby/Users/{userid}/items' +
-                 '?AlbumArtistIds=' + item_details.id +
-                 '&IncludeItemTypes=MusicAlbum' +
-                 '&CollapseBoxSetItems=false' +
-                 '&Recursive=true' +
-                 '&format=json')
-            gui_item = add_gui_item(u, item_details, display_options)
-            if gui_item:
-                dir_items.append(gui_item)
 
         else:
             u = item_details.id
