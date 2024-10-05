@@ -55,19 +55,18 @@ class PlayNextService(threading.Thread):
                     play_data = get_playing_data(self.monitor.played_information)
                     log.debug("play_next_triggered play_data : {0}", play_data)
 
-                    next_episode = play_data.get("next_episode")
-                    item_type = play_data.get("item_type")
+                    if play_data is not None:
+                        next_episode = play_data.get("next_episode")
+                        item_type = play_data.get("item_type")
+                        if next_episode is not None and item_type == "Episode":
+                            settings = xbmcaddon.Addon()
+                            plugin_path = settings.getAddonInfo('path')
+                            plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
-                    if next_episode is not None and item_type == "Episode":
-
-                        settings = xbmcaddon.Addon()
-                        plugin_path = settings.getAddonInfo('path')
-                        plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
-
-                        play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
-                        play_next_dialog.set_episode_info(next_episode)
-                        if play_next_dialog is not None:
-                            play_next_dialog.show()
+                            play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
+                            play_next_dialog.set_episode_info(next_episode)
+                            if play_next_dialog is not None:
+                                play_next_dialog.show()
 
                 is_playing = True
 
@@ -178,7 +177,7 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
     def onClick(self, control_id):
         if control_id == 3013:
             log.debug("PlayNextDialog: Play Next Episode")
-            self.play_called
+            self.play_called = True
             self.auto_close_thread.stop()
             self.close()
             next_item_id = self.episode_info.get("Id")
