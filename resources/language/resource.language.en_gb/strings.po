@@ -1129,3 +1129,7 @@ msgstr ""
 msgctxt "#30454"
 msgid "Collections view ID"
 msgstr ""
+
+msgctxt "#30455"
+msgid "Autoplay first version of an item"
+msgstr ""

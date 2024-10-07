@@ -90,7 +90,7 @@
 				</setting>
 			</group>
 		</category>
-		<category label="30207" id="display_settings" help="">
+		<category label="30207" id="emby_playback_settings" help="">
 			<group id="1" label="30437">
 				<setting id="play_cinema_intros" type="boolean" label="30438" help="">
 					<level>0</level>
@@ -110,6 +110,11 @@
 					<control type="list" format="string">
 						<heading>30441</heading>
 					</control>
+				</setting>
+				<setting id="auto_play_first_version" type="boolean" label="30455" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
 				</setting>
 			</group>
 			<group id="2" label="30238">

@@ -332,6 +332,7 @@ def play_file(play_info, monitor):
     force_auto_resume = settings.getSetting('forceAutoResume') == 'true'
     jump_back_amount = int(settings.getSetting("jump_back_amount"))
     play_cinema_intros = settings.getSetting('play_cinema_intros') == 'true'
+    auto_play_first_version = settings.getSetting("auto_play_first_version") == 'true'
 
     server = download_utils.get_server()
 
@@ -400,7 +401,7 @@ def play_file(play_info, monitor):
         log.debug("Play Failed! There is no MediaSources data!")
         return
 
-    elif len(media_sources) == 1:
+    elif len(media_sources) == 1 or auto_play_first_version:
         selected_media_source = media_sources[0]
 
     elif media_source_id != "":
