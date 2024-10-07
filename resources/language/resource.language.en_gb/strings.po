@@ -1105,3 +1105,27 @@ msgstr ""
 msgctxt "#30448"
 msgid "Force transcode av1"
 msgstr ""
+
+msgctxt "#30449"
+msgid "Max Image Width"
+msgstr ""
+
+msgctxt "#30450"
+msgid "Movies view ID"
+msgstr ""
+
+msgctxt "#30451"
+msgid "TV Shows view ID"
+msgstr ""
+
+msgctxt "#30452"
+msgid "Seasons view ID"
+msgstr ""
+
+msgctxt "#30453"
+msgid "Episodes view ID"
+msgstr ""
+
+msgctxt "#30454"
+msgid "Collections view ID"
+msgstr ""
