@@ -1133,3 +1133,8 @@ msgstr ""
 msgctxt "#30455"
 msgid "Autoplay first version of an item"
 msgstr ""
+
+msgctxt "#30456"
+msgid "Episode"
+msgstr ""
+

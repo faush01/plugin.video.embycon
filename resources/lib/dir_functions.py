@@ -239,7 +239,8 @@ def set_sort(pluginhandle, view_type, default_sort):
         "4": xbmcplugin.SORT_METHOD_DATEADDED,
         "5": xbmcplugin.SORT_METHOD_GENRE,
         "6": xbmcplugin.SORT_METHOD_LABEL,
-        "7": xbmcplugin.SORT_METHOD_VIDEO_RATING
+        "7": xbmcplugin.SORT_METHOD_VIDEO_RATING,
+        "8": xbmcplugin.SORT_METHOD_EPISODE
     }
 
     settings = xbmcaddon.Addon()

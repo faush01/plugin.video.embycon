@@ -731,6 +731,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         if item_details.tags is not None and len(item_details.tags) > 0:
             info_tag_video.setTags(item_details.tags)
 
+        info_tag_video.setDbId(int(item_details.id))
+
         # info_labels["Overlay"] = item_details.overlay # not used ??
         # info_labels["tagline"] = item_details.tagline
         # info_labels["studio"] = item_details.studio
