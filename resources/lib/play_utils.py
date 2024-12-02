@@ -19,7 +19,7 @@ from .translation import string_load
 from .datamanager import DataManager, clear_old_cache_data
 from .item_functions import extract_item_info, add_gui_item
 from .clientinfo import ClientInformation
-from .functions import delete
+from .functions import delete, mark_item_watched
 from .cache_images import CacheArtwork
 from .picture_viewer import PictureViewer
 from .tracking import timer
@@ -1217,6 +1217,7 @@ class Service(xbmc.Player):
     def __init__(self, *args):
         log.debug("Starting monitor service: {0}", args)
         self.played_information = {}
+        self.currently_playing_id = None
 
     def onPlayBackStarted(self):
         # Will be called when xbmc starts playing a file
@@ -1244,6 +1245,9 @@ class Service(xbmc.Player):
         # if we could not find the ID of the current item then return
         if emby_item_id is None:
             return
+
+        # set currently play item id
+        self.currently_playing_id = emby_item_id
 
         log.debug("Sending Playback Started")
         postdata = {
@@ -1288,13 +1292,18 @@ class Service(xbmc.Player):
 
     def onPlayBackEnded(self):
         # Will be called when kodi stops playing a file
-        log.debug("onPlayBackEnded")
+        log.info("onPlayBackEnded")
         stop_all_playback(self.played_information)
+        if self.currently_playing_id is not None:
+            log.info("marking item watched : {0}", self.currently_playing_id)
+            mark_item_watched(self.currently_playing_id)
+        self.currently_playing_id = None
 
     def onPlayBackStopped(self):
         # Will be called when user stops kodi playing a file
-        log.debug("onPlayBackStopped")
+        log.info("onPlayBackStopped")
         stop_all_playback(self.played_information)
+        self.currently_playing_id = None
 
     def onPlayBackPaused(self):
         # Will be called when kodi pauses the video
