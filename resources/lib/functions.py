@@ -241,7 +241,7 @@ def toggle_watched(params):
         mark_item_unwatched(item_id)
 
 
-def mark_item_watched(item_id):
+def mark_item_watched(item_id, refresh=True):
     log.debug("Mark Item Watched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
     downloadUtils.download_url(url, post_body="", method="POST")
@@ -252,10 +252,11 @@ def mark_item_watched(item_id):
         log.debug("markWatched_lastUrl: {0}", last_url)
         home_window.set_property("skip_cache_for_" + last_url, "true")
 
-    xbmc.executebuiltin("Container.Refresh")
+    if refresh:
+        xbmc.executebuiltin("Container.Refresh")
 
 
-def mark_item_unwatched(item_id):
+def mark_item_unwatched(item_id, refresh=True):
     log.debug("Mark Item UnWatched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
     downloadUtils.download_url(url, method="DELETE")
@@ -266,10 +267,11 @@ def mark_item_unwatched(item_id):
         log.debug("markUnwatched_lastUrl: {0}", last_url)
         home_window.set_property("skip_cache_for_" + last_url, "true")
 
-    xbmc.executebuiltin("Container.Refresh")
+    if refresh:
+        xbmc.executebuiltin("Container.Refresh")
 
 
-def mark_item_favorite(item_id):
+def mark_item_favorite(item_id, refresh=True):
     log.debug("Add item to favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
     downloadUtils.download_url(url, post_body="", method="POST")
@@ -279,10 +281,11 @@ def mark_item_favorite(item_id):
     if last_url:
         home_window.set_property("skip_cache_for_" + last_url, "true")
 
-    xbmc.executebuiltin("Container.Refresh")
+    if refresh:
+        xbmc.executebuiltin("Container.Refresh")
 
 
-def unmark_item_favorite(item_id):
+def unmark_item_favorite(item_id, refresh=True):
     log.debug("Remove item from favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
     downloadUtils.download_url(url, method="DELETE")
@@ -292,10 +295,11 @@ def unmark_item_favorite(item_id):
     if last_url:
         home_window.set_property("skip_cache_for_" + last_url, "true")
 
-    xbmc.executebuiltin("Container.Refresh")
+    if refresh:
+        xbmc.executebuiltin("Container.Refresh")
 
 
-def delete(item_id):
+def delete(item_id, refresh=True):
 
     json_data = downloadUtils.download_url("{server}/emby/Users/{userid}/Items/" + item_id + "?format=json")
     item = json.loads(json_data)
@@ -335,7 +339,8 @@ def delete(item_id):
         if last_url:
             home_window.set_property("skip_cache_for_" + last_url, "true")
 
-        xbmc.executebuiltin("Container.Refresh")
+        if refresh:
+            xbmc.executebuiltin("Container.Refresh")
 
 
 def get_params():

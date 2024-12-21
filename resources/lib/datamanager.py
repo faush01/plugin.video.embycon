@@ -253,6 +253,7 @@ class CacheManagerThread(threading.Thread):
                         pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 log.debug("CacheManagerThread : Sending container refresh")
+                time.sleep(1)
                 xbmc.executebuiltin("Container.Refresh")
 
             else:

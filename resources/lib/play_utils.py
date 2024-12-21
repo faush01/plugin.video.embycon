@@ -1296,9 +1296,8 @@ class Service(xbmc.Player):
         log.info("onPlayBackEnded")
         stop_all_playback(self.played_information)
         if self.currently_playing_id is not None:
-            time.sleep(4)
             log.info("marking item watched : {0}", self.currently_playing_id)
-            mark_item_watched(self.currently_playing_id)
+            mark_item_watched(self.currently_playing_id, refresh=False)
         self.currently_playing_id = None
 
     def onPlayBackStopped(self):
