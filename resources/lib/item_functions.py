@@ -38,8 +38,18 @@ class MediaStream:
     codec = "na"
     aspect_ratio = 1.0
     language = "na"
+    hdr_type = ""
 
     # "default" if x is None else x
+
+    def set_hdr_type(self, value):
+        # Kodi options : dolbyvision, hdr10, hlg
+        if value is not None:
+            value = value.lower()
+            if value == "hdr 10":
+                self.hdr_type = "hdr10"
+            elif value in ("hlg", "dolbyvision"):
+                self.hdr_type = value
 
     def set_channels(self, value):
         if value is not None:
@@ -371,6 +381,7 @@ def extract_item_info(item, gui_options):
                     except:
                         pass
                 media_info.set_aspect_ratio(ar)
+                media_info.set_hdr_type(mediaStream["VideoRange"])
                 media_info_list.append(media_info)
             if stream_type == "Audio":
                 media_info = MediaStream()
@@ -762,6 +773,7 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
                 vsd.setCodec(stream.codec)
                 vsd.setWidth(stream.width)
                 vsd.setHeight(stream.height)
+                vsd.setHDRType(stream.hdr_type)
                 info_tag_video.addVideoStream(vsd)
 
                 # list_item.addStreamInfo('video',
