@@ -109,6 +109,8 @@ def set_background_image(force=False):
                     item_background["name"] = label
                     background_items.append(item_background)
 
+            random.shuffle(background_items)
+
         log.debug("set_background_image: Loaded {0} more backgrounds", len(background_items))
 
     if len(background_items) > 0:
