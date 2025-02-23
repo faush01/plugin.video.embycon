@@ -1138,3 +1138,10 @@ msgctxt "#30456"
 msgid "Episode"
 msgstr ""
 
+msgctxt "#30457"
+msgid "Confirm"
+msgstr ""
+
+msgctxt "#30458"
+msgid "Are you sure you want to hide this item?"
+msgstr ""

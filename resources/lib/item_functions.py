@@ -46,10 +46,12 @@ class MediaStream:
         # Kodi options : dolbyvision, hdr10, hlg
         if value is not None:
             value = value.lower()
-            if value == "hdr 10":
+            if value in ("hdr10plus", "hdr10"):
                 self.hdr_type = "hdr10"
-            elif value in ("hlg", "dolbyvision"):
-                self.hdr_type = value
+            elif value == "hyperloghamma":
+                self.hdr_type = "hlg"
+            elif value == "dolbyvision":
+                self.hdr_type = "dolbyvision"
 
     def set_channels(self, value):
         if value is not None:
@@ -381,7 +383,7 @@ def extract_item_info(item, gui_options):
                     except:
                         pass
                 media_info.set_aspect_ratio(ar)
-                media_info.set_hdr_type(mediaStream["VideoRange"])
+                media_info.set_hdr_type(mediaStream["ExtendedVideoType"])
                 media_info_list.append(media_info)
             if stream_type == "Audio":
                 media_info = MediaStream()

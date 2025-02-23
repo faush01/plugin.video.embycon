@@ -573,22 +573,24 @@ def show_menu(params):
         log.debug("Refresh Server Responce: {0}", res)
 
     elif selected_action == "hide":
-        user_details = load_user_details(settings)
-        user_name = user_details["username"]
-        hide_tag_string = "hide-" + user_name
-        url = "{server}/emby/Items/" + item_id + "/Tags/Add"
-        post_tag_data = {"Tags": [{"Name": hide_tag_string}]}
-        res = downloadUtils.download_url(url, post_body=post_tag_data, method="POST")
-        log.debug("Add Tag Responce: {0}", res)
+        return_value = xbmcgui.Dialog().yesno(string_load(30457), string_load(30458))
+        if return_value:
+            user_details = load_user_details(settings)
+            user_name = user_details["username"]
+            hide_tag_string = "hide-" + user_name
+            url = "{server}/emby/Items/" + item_id + "/Tags/Add"
+            post_tag_data = {"Tags": [{"Name": hide_tag_string}]}
+            res = downloadUtils.download_url(url, post_body=post_tag_data, method="POST")
+            log.debug("Add Tag Responce: {0}", res)
 
-        check_for_new_content()
+            check_for_new_content()
 
-        last_url = home_window.get_property("last_content_url")
-        if last_url:
-            log.debug("markUnwatched_lastUrl: {0}", last_url)
-            home_window.set_property("skip_cache_for_" + last_url, "true")
+            last_url = home_window.get_property("last_content_url")
+            if last_url:
+                log.debug("markUnwatched_lastUrl: {0}", last_url)
+                home_window.set_property("skip_cache_for_" + last_url, "true")
 
-        xbmc.executebuiltin("Container.Refresh")
+            xbmc.executebuiltin("Container.Refresh")
 
     elif selected_action == "play_all":
         play_action(params)
