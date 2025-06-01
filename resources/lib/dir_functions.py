@@ -3,21 +3,24 @@
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
+import xbmcvfs
 
 import urllib.request
 import urllib.parse
 import urllib.error
 import sys
+import os
 import re
+import base64
 
 from .datamanager import DataManager
-from .kodi_utils import HomeWindow
 from .downloadutils import DownloadUtils
 from .translation import string_load
 from .simple_logging import SimpleLogging
 from .item_functions import add_gui_item, ItemDetails
 from .utils import send_event_notification
 from .tracking import timer
+from .filelock import FileLock
 
 log = SimpleLogging(__name__)
 
@@ -72,6 +75,8 @@ def get_content(url, params):
         content_type = 'episodes'
     elif media_type == "playlists":
         view_type = "Playlists"
+    elif media_type == "playlist":
+        view_type = "Playlist"
 
     log.debug("media_type:{0} content_type:{1} view_type:{2} ", media_type, content_type, view_type)
 
@@ -83,15 +88,20 @@ def get_content(url, params):
         progress.update(0, string_load(30113))
 
     # update url for paging
+    start_index_rex = "startindex=([0-9]{1,5})"
+    limit_rex = "&limit=([0-9]{1,5})"
+    limit_rex_p = "&Limit={ItemLimit}"
     start_index = 0
     page_limit = int(settings.getSetting('itemsPerPage'))
+    # if the page_limit in the settings is not set but the url has a limit use the url limit number
+    if page_limit == 0 and re.search(limit_rex, url, flags=re.IGNORECASE):
+        url_limit_result = re.search(limit_rex, url, flags=re.IGNORECASE)
+        page_limit = int(url_limit_result.group(1))
+
     url_prev = None
     url_next = None
     if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         log.debug("Creating Paging URLS: {0}", url)
-        start_index_rex = "startindex=([0-9]{1,5})"
-        limit_rex = "&limit=([0-9]{1,5})"
-        limit_rex_p = "&Limit={ItemLimit}"
 
         # add StartIndex and Limit to the url if they are not there already
         # update limit to page limit if it is alreayd there
@@ -121,15 +131,30 @@ def get_content(url, params):
     # use the data manager to get the data
     # result = dataManager.get_content(url)
 
+    # if this is a playlist then use the episode name format for the episodes
+    if media_type == "playlist":
+        params["name_format"] = "Episode|episode_name_format"
+
     # total_records = 0
     # if result is not None and isinstance(result, dict):
     #    total_records = result.get("TotalRecordCount", 0)
 
     use_cache = params.get("use_cache", "true") == "true"
+    dir_items = None
+    try:
+        dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
+    except Exception as e:
+        log.debug("There was an error processing the URL : {0}", e)
+        data_manager = DataManager()
+        cache_file_path = data_manager.get_cache_filename(url)
+        if os.path.isfile(cache_file_path):
+            log.debug("Clearing cache data file of failed process_directory : {0}", url)
+            with FileLock(cache_file_path, timeout=5):
+                xbmcvfs.delete(cache_file_path)
+        raise
 
-    dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
     if dir_items is None:
-        return
+        return 0
 
     log.debug("total_records: {0}", total_records)
 
@@ -139,6 +164,8 @@ def get_content(url, params):
             list_item = xbmcgui.ListItem("Prev Page (" + str(start_index - page_limit + 1) + "-" + str(start_index) +
                                          " of " + str(total_records) + ")")
             u = sys.argv[0] + "?url=" + urllib.parse.quote(url_prev) + "&mode=GET_CONTENT&media_type=movies"
+            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_prev.encode("utf-8")).decode("utf-8")}
+            list_item.setArt(art)
             log.debug("ADDING PREV ListItem: {0} - {1}", u, list_item)
             dir_items.insert(0, (u, list_item, True))
 
@@ -149,6 +176,8 @@ def get_content(url, params):
             list_item = xbmcgui.ListItem("Next Page (" + str(start_index + page_limit + 1) + "-" +
                                          str(upper_count) + " of " + str(total_records) + ")")
             u = sys.argv[0] + "?url=" + urllib.parse.quote(url_next) + "&mode=GET_CONTENT&media_type=movies"
+            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_next.encode("utf-8")).decode("utf-8")}
+            list_item.setArt(art)
             log.debug("ADDING NEXT ListItem: {0} - {1}", u, list_item)
             dir_items.append((u, list_item, True))
 
@@ -194,7 +223,7 @@ def get_content(url, params):
         progress.update(100, string_load(30125))
         progress.close()
 
-    return
+    return len(dir_items)
 
 
 def set_sort(pluginhandle, view_type, default_sort):
@@ -210,7 +239,8 @@ def set_sort(pluginhandle, view_type, default_sort):
         "4": xbmcplugin.SORT_METHOD_DATEADDED,
         "5": xbmcplugin.SORT_METHOD_GENRE,
         "6": xbmcplugin.SORT_METHOD_LABEL,
-        "7": xbmcplugin.SORT_METHOD_VIDEO_RATING
+        "7": xbmcplugin.SORT_METHOD_VIDEO_RATING,
+        "8": xbmcplugin.SORT_METHOD_EPISODE
     }
 
     settings = xbmcaddon.Addon()
@@ -259,10 +289,14 @@ def process_directory(url, progress, params, use_cache_data=False):
             name_format_type = None
             name_format = None
 
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     gui_options = {}
     gui_options["server"] = server
     gui_options["name_format"] = name_format
     gui_options["name_format_type"] = name_format_type
+    gui_options["max_image_width"] = max_image_width
+    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
     cache_file, item_list, total_records, cache_thread = data_manager.get_items(url, gui_options, use_cache)
@@ -270,14 +304,30 @@ def process_directory(url, progress, params, use_cache_data=False):
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
     # build a new url, set the content media type and call get content again
-    flatten_single_season = settings.getSetting("flatten_single_season") == "true"
-    if flatten_single_season and len(item_list) == 1 and item_list[0].item_type == "Season":
+    flatten_tvshow_seasons = settings.getSetting("flatten_tvshow_seasons")
+    if flatten_tvshow_seasons == "1" and len(item_list) == 1 and item_list[0].item_type == "Season":
         season_id = item_list[0].id
         series_id = item_list[0].series_id
         season_url = ('{server}/emby/Shows/' + series_id +
                       '/Episodes'
                       '?userId={userid}' +
                       '&seasonId=' + season_id +
+                      '&IsVirtualUnAired=false' +
+                      '&IsMissing=false' +
+                      '&Fields=SpecialEpisodeNumbers,{field_filters}' +
+                      '&format=json')
+        if progress is not None:
+            progress.close()
+        params["media_type"] = "Episodes"
+        get_content(season_url, params)
+        return None, None, None
+    elif flatten_tvshow_seasons == "2" and len(item_list) > 0 and item_list[0].item_type == "Season":
+        season_id = item_list[0].id
+        series_id = item_list[0].series_id
+        season_url = ('{server}/emby/Shows/' + series_id +
+                      '/Episodes'
+                      '?userId={userid}' +
+                      #'&seasonId=' + season_id +
                       '&IsVirtualUnAired=false' +
                       '&IsMissing=false' +
                       '&Fields=SpecialEpisodeNumbers,{field_filters}' +
@@ -337,7 +387,19 @@ def process_directory(url, progress, params, use_cache_data=False):
             item_details.art["poster"] = item_details.art["tvshow.poster"]
             item_details.art["thumb"] = item_details.art["tvshow.poster"]
 
-        if item_details.is_folder is True:
+        if item_details.item_type == "MusicArtist":
+            u = ('{server}/emby/Users/{userid}/items' +
+                 '?AlbumArtistIds=' + item_details.id +
+                 '&IncludeItemTypes=MusicAlbum' +
+                 '&CollapseBoxSetItems=false' +
+                 '&Recursive=true' +
+                 '&format=json')
+            log.debug("TARGET URL = {0}", u)
+            gui_item = add_gui_item(u, item_details, display_options)
+            if gui_item:
+                dir_items.append(gui_item)
+
+        elif item_details.is_folder is True:
             if item_details.item_type == "Series":
                 u = ('{server}/emby/Shows/' + item_details.id +
                      '/Seasons'
@@ -371,17 +433,6 @@ def process_directory(url, progress, params, use_cache_data=False):
                     dir_items.append(gui_item)
             else:
                 log.debug("Dropping empty folder item : {0}", item_details.__dict__)
-
-        elif item_details.item_type == "MusicArtist":
-            u = ('{server}/emby/Users/{userid}/items' +
-                 '?AlbumArtistIds=' + item_details.id +
-                 '&IncludeItemTypes=MusicAlbum' +
-                 '&CollapseBoxSetItems=false' +
-                 '&Recursive=true' +
-                 '&format=json')
-            gui_item = add_gui_item(u, item_details, display_options)
-            if gui_item:
-                dir_items.append(gui_item)
 
         else:
             u = item_details.id

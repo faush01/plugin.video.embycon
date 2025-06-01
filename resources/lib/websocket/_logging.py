@@ -19,64 +19,45 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
     Boston, MA  02110-1335  USA
 
 """
-import logging
+from ..simple_logging import SimpleLogging
 
-_logger = logging.getLogger('websocket')
-try:
-    from logging import NullHandler
-except ImportError:
-    class NullHandler(logging.Handler):
-        def emit(self, record):
-            pass
-
-_logger.addHandler(NullHandler())
+log = SimpleLogging("web_socket_logging")
 
 _traceEnabled = False
 
-__all__ = ["enableTrace", "dump", "error", "warning", "debug", "trace",
-           "isEnabledForError", "isEnabledForDebug"]
 
-
-def enableTrace(traceable, handler = logging.StreamHandler()):
-    """
-    turn on/off the traceability.
-
-    traceable: boolean value. if set True, traceability is enabled.
-    """
+def enableTrace(traceable):
     global _traceEnabled
     _traceEnabled = traceable
-    if traceable:
-        _logger.addHandler(handler)
-        _logger.setLevel(logging.DEBUG)
 
 
 def dump(title, message):
     if _traceEnabled:
-        _logger.debug("--- " + title + " ---")
-        _logger.debug(message)
-        _logger.debug("-----------------------")
+        log.debug("--- {0} ---", title)
+        log.debug("{0}", message)
+        log.debug("-----------------------")
 
 
 def error(msg):
-    _logger.error(msg)
+    log.error("{0}", msg)
 
 
 def warning(msg):
-    _logger.warning(msg)
+    log.info("{0}", msg)
 
 
 def debug(msg):
-    _logger.debug(msg)
+    log.debug("{0}", msg)
 
 
 def trace(msg):
     if _traceEnabled:
-        _logger.debug(msg)
+        log.debug("{0}", msg)
 
 
 def isEnabledForError():
-    return _logger.isEnabledFor(logging.ERROR)
+    return True
 
 
 def isEnabledForDebug():
-    return _logger.isEnabledFor(logging.DEBUG)
+    return _traceEnabled

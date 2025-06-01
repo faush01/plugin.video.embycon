@@ -9,7 +9,6 @@ import json
 from .simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
-addon = xbmcaddon.Addon()
 
 
 class HomeWindow:
@@ -42,6 +41,7 @@ def add_menu_directory_item(label, path, folder=True, art=None):
     li = xbmcgui.ListItem(label, path=path)
     if art is None:
         art = {}
+        addon = xbmcaddon.Addon()
         art["thumb"] = addon.getAddonInfo('icon')
     li.setArt(art)
 
@@ -60,7 +60,7 @@ def get_kodi_version():
         version_data = result.get("version")
         version = float(str(version_data.get("major")) + "." + str(version_data.get("minor")))
         log.debug("Version: {0} - {1}", version, version_data)
-    except:
+    except Exception:
         version = 0.0
         log.error("Version Error : RAW Version Data: {0}", result)
 

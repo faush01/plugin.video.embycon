@@ -1,5 +1,7 @@
 
 import xbmcvfs
+import xbmcaddon
+
 import base64
 import re
 from urllib.parse import urlparse
@@ -15,18 +17,19 @@ from .datamanager import DataManager
 from .downloadutils import DownloadUtils
 from .utils import get_art
 
+log = SimpleLogging(__name__)
+
+PORT_NUMBER = 24276
 pil_loaded = False
 try:
-    from PIL import ImageFilter, Image, ImageOps
+    from PIL import Image, ImageOps
     pil_loaded = True
 except Exception as err:
     pil_loaded = False
-
-PORT_NUMBER = 24276
-log = SimpleLogging(__name__)
+    log.debug("PIL not loaded : {0}", str(err))
 
 
-def get_image_links(url):
+def get_image_links(url, maxwidth=0):
 
     download_utils = DownloadUtils()
     server = download_utils.get_server()
@@ -66,7 +69,7 @@ def get_image_links(url):
 
     art_urls = []
     for iteem in items:
-        art = get_art(item=iteem, server=server)
+        art = get_art(iteem, server, maxwidth=maxwidth)
         art_urls.append(art)
 
     shuffle(art_urls)
@@ -87,7 +90,10 @@ def build_image(path):
     decoded_url = base64.b64decode(request_path).decode("utf-8")
     log.debug("decoded_url : {0}", decoded_url)
 
-    image_urls = get_image_links(decoded_url)
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
+    image_urls = get_image_links(decoded_url, maxwidth=max_image_width)
 
     width, height = 500, 750
     collage = Image.new('RGB', (width, height), (5, 5, 5))
@@ -124,7 +130,7 @@ def build_image(path):
                 image_data = image_responce.read()
 
                 loaded_image = Image.open(io.BytesIO(image_data))
-                image = ImageOps.fit(loaded_image, size, method=Image.ANTIALIAS, bleed=0.0, centering=(0.5, 0.5))
+                image = ImageOps.fit(loaded_image, size, method=Image.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
 
                 x = int(image_count % cols) * thumbnail_width
                 y = int(image_count/cols) * thumbnail_height
@@ -135,7 +141,7 @@ def build_image(path):
                 del image_data
 
             except Exception as con_err:
-                log.debug("Error loading image : {0}", str(con_err))
+                log.error("Error loading image : {0}", str(con_err))
 
             image_count += 1
 
@@ -216,7 +222,7 @@ class HttpImageServerThread(threading.Thread):
             conn = http.client.HTTPConnection("localhost:%d" % PORT_NUMBER)
             conn.request("QUIT", "/")
             conn.getresponse()
-        except:
+        except Exception:
             pass
 
     def run(self):

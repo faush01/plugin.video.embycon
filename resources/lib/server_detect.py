@@ -152,7 +152,7 @@ def get_server_details():
                 responce_data = json.loads(data)
                 servers.append(responce_data)
                 log.debug("UDP Responce Data : {0}", responce_data)
-            except:
+            except Exception:
                 break
     except Exception as e:
         log.error("UPD Discovery Error: {0}", e)
@@ -298,7 +298,7 @@ def check_server(force=False, change_user=False, notify=False):
         log.debug("jsonData: {0}", json_data)
         try:
             result = json.loads(json_data)
-        except:
+        except Exception:
             result = None
 
         if result is None:
@@ -309,71 +309,67 @@ def check_server(force=False, change_user=False, notify=False):
             selected_id = -1
             users = []
             for user in result:
-                config = user.get("Configuration")
-                if config is not None:
-                    if config.get("IsHidden", False) is False:
-                        name = user.get("Name")
-                        admin = user.get("Policy", {}).get("IsAdministrator", False)
+                is_hidden = False
+                if user.get("Configuration", {}).get("IsHidden", False) is True:
+                    is_hidden = True
 
-                        time_ago = ""
-                        last_active = user.get("LastActivityDate")
-                        if last_active:
-                            last_active_date = datetime_from_string(last_active)
-                            log.debug("LastActivityDate: {0}", last_active_date)
-                            ago = datetime.now() - last_active_date
-                            log.debug("LastActivityDate: {0}", ago)
-                            days = divmod(ago.seconds, 86400)
-                            hours = divmod(days[1], 3600)
-                            minutes = divmod(hours[1], 60)
-                            log.debug("LastActivityDate: {0} {1} {2}", days[0], hours[0], minutes[0])
-                            if days[0]:
-                                time_ago += " %sd" % days[0]
-                            if hours[0]:
-                                time_ago += " %sh" % hours[0]
-                            if minutes[0]:
-                                time_ago += " %sm" % minutes[0]
-                            time_ago = time_ago.strip()
-                            if not time_ago:
-                                time_ago = "Active: now"
-                            else:
-                                time_ago = "Active: %s ago" % time_ago
-                            log.debug("LastActivityDate: {0}", time_ago)
+                if not is_hidden:
+                    name = user.get("Name")
 
-                        user_item = xbmcgui.ListItem(name)
-                        user_image = du.get_user_artwork(user, 'Primary')
-                        if not user_image:
-                            user_image = "DefaultUser.png"
-                        art = {"Thumb": user_image}
-                        user_item.setArt(art)
-                        user_item.setLabel2("TEST")
-
-                        sub_line = time_ago
-
-                        if user.get("HasPassword", False) is True:
-                            sub_line += ", Password"
-                            user_item.setProperty("secure", "true")
-
-                            m = hashlib.md5()
-                            m.update(name.encode("utf-8"))
-                            hashed_username = m.hexdigest()
-                            saved_password = settings.getSetting("saved_user_password_" + hashed_username)
-                            if saved_password:
-                                sub_line += ": Saved"
-
+                    time_ago = ""
+                    last_active = user.get("LastActivityDate")
+                    if last_active:
+                        last_active_date = datetime_from_string(last_active)
+                        log.debug("LastActivityDate: {0}", last_active_date)
+                        ago = datetime.now() - last_active_date
+                        log.debug("LastActivityDate: {0}", ago)
+                        days = divmod(ago.seconds, 86400)
+                        hours = divmod(days[1], 3600)
+                        minutes = divmod(hours[1], 60)
+                        log.debug("LastActivityDate: {0} {1} {2}", days[0], hours[0], minutes[0])
+                        if days[0]:
+                            time_ago += " %sd" % days[0]
+                        if hours[0]:
+                            time_ago += " %sh" % hours[0]
+                        if minutes[0]:
+                            time_ago += " %sm" % minutes[0]
+                        time_ago = time_ago.strip()
+                        if not time_ago:
+                            time_ago = "Active: now"
                         else:
-                            user_item.setProperty("secure", "false")
+                            time_ago = "Active: %s ago" % time_ago
+                        log.debug("LastActivityDate: {0}", time_ago)
 
-                        if admin:
-                            sub_line += ", Admin"
-                        else:
-                            sub_line += ", User"
+                    user_item = xbmcgui.ListItem(name)
+                    user_image = du.get_user_artwork(user, 'Primary')
+                    if not user_image:
+                        user_image = "DefaultUser.png"
+                    art = {"Thumb": user_image}
+                    user_item.setArt(art)
+                    user_item.setLabel2("TEST")
 
-                        user_item.setProperty("manual", "false")
-                        user_item.setLabel2(sub_line)
-                        users.append(user_item)
+                    sub_line = time_ago
 
-                        if current_username == name:
-                            selected_id = len(users) - 1
+                    if user.get("HasPassword", False) is True:
+                        sub_line += ", Password"
+                        user_item.setProperty("secure", "true")
+
+                        m = hashlib.md5()
+                        m.update(name.encode("utf-8"))
+                        hashed_username = m.hexdigest()
+                        saved_password = settings.getSetting("saved_user_password_" + hashed_username)
+                        if saved_password:
+                            sub_line += ": Saved"
+
+                    else:
+                        user_item.setProperty("secure", "false")
+
+                    user_item.setProperty("manual", "false")
+                    user_item.setLabel2(sub_line)
+                    users.append(user_item)
+
+                    if current_username == name:
+                        selected_id = len(users) - 1
 
             if current_username:
                 selection_title = string_load(30180) + " (" + current_username + ")"
@@ -455,6 +451,7 @@ def check_server(force=False, change_user=False, notify=False):
                     log.debug("Saving username with no password: {0}", selected_user_name)
                     save_user_details(settings, selected_user_name, "")
 
+        log.debug("Changed user - checking change : {0}", something_changed)
         if something_changed:
             home_window = HomeWindow()
             home_window.clear_property("userid")
@@ -464,6 +461,8 @@ def check_server(force=False, change_user=False, notify=False):
             du = DownloadUtils()
             du.authenticate()
             du.get_user_id()
+            log.debug("Changed user - reloading skin")
+            xbmc.executebuiltin("Dialog.Close(all,true)")
             xbmc.executebuiltin("ActivateWindow(Home)")
             if "estuary_embycon" in xbmc.getSkinDir():
                 xbmc.executebuiltin("SetFocus(9000, 0, absolute)")

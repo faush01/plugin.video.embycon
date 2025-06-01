@@ -1,3 +1,5 @@
+# Gnu General Public License - see LICENSE.TXT
+
 import xbmcgui
 
 from .simple_logging import SimpleLogging

@@ -234,7 +234,7 @@ class WebSocketClient(threading.Thread):
         ws.post_capabilities()
 
     def on_error(ws, error):
-        log.debug("Error: {0}", error)
+        log.error("Error: {0}", error)
 
     def run(self):
 
@@ -257,11 +257,7 @@ class WebSocketClient(threading.Thread):
         websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (server, token, self.device_id)
         log.debug("websocket url: {0}", websocket_url)
 
-        params = {"setting": "debug.showloginfo"}
-        setting_result = JsonRpc('Settings.getSettingValue').execute(params)
-        current_value = setting_result.get("result", None)
-        if current_value is not None and current_value.get("value", False):
-            enableTrace(True)
+        enableTrace(True)
 
         self._client = WebSocketApp(websocket_url,
                                               on_open=self.on_open,

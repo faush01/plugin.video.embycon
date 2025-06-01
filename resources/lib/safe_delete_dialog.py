@@ -1,6 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import xbmc
 import xbmcgui
 
 from .simple_logging import SimpleLogging
@@ -47,10 +46,10 @@ class SafeDeleteDialog(xbmcgui.WindowXMLDialog):
         else:
             log.debug("SafeDeleteDialog: onAction: {0}", action.getId())
 
-    def onClick(self, controlID):
-        if controlID == 1:
+    def onClick(self, controlId):
+        if controlId == 1:
             self.confirm = True
             self.close()
-        elif controlID == 2:
+        elif controlId == 2:
             self.confirm = False
             self.close()

@@ -1,156 +1,787 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-	<category label="30014">
+<settings version="1">
+	<section id="plugin.video.embycon">
+		<category label="30014" id="emby_server_settings" help="">
+			<group id="1" label="30388">
+				<setting id="detect_local_server_action" type="action" label="30011" help="">
+					<level>0</level>
+					<data>RunScript(plugin.video.embycon,0,?mode=DETECT_SERVER_USER)</data>
+					<control type="button" format="action">
+						<close>true</close>
+					</control>
+				</setting>
+				<setting id="protocol" type="integer" label="30390" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30391">0</option>
+							<option label="30392">1</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30390</heading>
+					</control>
+				</setting>
+				<setting id="ipaddress" type="string" label="30000" help="">
+					<level>0</level>
+					<default>&lt;none&gt;</default>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30000</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="port" type="number" label="30001" help="">
+					<level>0</level>
+					<default>8096</default>
+					<control type="edit" format="integer">
+						<heading>30001</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="verify_cert" type="boolean" label="30003" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+			<group id="2" label="30389">
+				<setting id="change_emby_user_action" type="action" label="30012" help="">
+					<level>0</level>
+					<data>RunScript(plugin.video.embycon,0,?mode=CHANGE_USER)</data>
+					<control type="button" format="action">
+						<close>true</close>
+					</control>
+				</setting>
+				<setting id="username" type="string" label="30024" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30024</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="password" type="string" label="30025" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30025</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="save_user_to_settings" type="boolean" label="30378" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="allow_password_saving" type="boolean" label="30367" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+		</category>
+		<category label="30207" id="emby_playback_settings" help="">
+			<group id="1" label="30437">
+				<setting id="play_cinema_intros" type="boolean" label="30438" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="skip_intros" type="integer" label="30441" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30442">0</option>
+							<option label="30443">1</option>
+							<option label="30444">2</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30441</heading>
+					</control>
+				</setting>
+				<setting id="auto_play_first_version" type="boolean" label="30455" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+			<group id="2" label="30238">
+				<setting id="max_stream_bitrate" type="number" label="30208" help="">
+					<level>0</level>
+					<default>75000</default>
+					<control type="edit" format="integer">
+						<heading>30208</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="allow_direct_file_play" type="boolean" label="30433" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="force_transcode_h265" type="boolean" label="30236" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="force_transcode_mpeg2" type="boolean" label="30239" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="force_transcode_msmpeg4v3" type="boolean" label="30240" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="force_transcode_mpeg4" type="boolean" label="30241" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="force_transcode_av1" type="boolean" label="30448" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="direct_stream_sub_select" type="integer" label="30379" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30380">0</option>
+							<option label="30381">1</option>
+							<option label="30382">2</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30379</heading>
+					</control>
+				</setting>
+			</group>
+			<group id="3" label="30211">
+				<setting id="force_max_stream_bitrate" type="number" label="30434" help="">
+					<level>0</level>
+					<default>7000</default>
+					<control type="edit" format="integer">
+						<heading>30434</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="playback_max_width" type="string" label="30212" help="">
+					<level>0</level>
+					<default>1920</default>
+					<constraints>
+						<options>
+							<option>640</option>
+							<option>720</option>
+							<option>1024</option>
+							<option>1280</option>
+							<option>1440</option>
+							<option>1600</option>
+							<option>1920</option>
+							<option>2600</option>
+							<option>4096</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30212</heading>
+					</control>
+				</setting>
+				<setting id="playback_video_force_8" type="boolean" label="30213" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="audio_codec" type="string" label="30419" help="">
+					<level>0</level>
+					<default>ac3</default>
+					<constraints>
+						<options>
+							<option>ac3</option>
+							<option>aac</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30419</heading>
+					</control>
+				</setting>
+				<setting id="audio_playback_bitrate" type="number" label="30418" help="">
+					<level>0</level>
+					<default>256</default>
+					<control type="edit" format="integer">
+						<heading>30418</heading>
+						<hidden>false</hidden>
+					</control>
+				</setting>
+				<setting id="audio_max_channels" type="integer" label="30420" help="">
+					<level>0</level>
+					<default>8</default>
+					<constraints>
+						<minimum>1</minimum>
+						<step>1</step>
+						<maximum>8</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category label="30214" id="event_settings" help="">
+			<group id="1" label="30440">
+				<setting id="play_next_trigger_time" type="integer" label="30439" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>180</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+			<group id="2" label="30215">
+				<setting id="promptPlayNextEpisodePercentage" type="integer" label="30218" help="">
+					<level>0</level>
+					<default>100</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>100</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="promptPlayNextEpisodePercentage_prompt" type="boolean" label="30219" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="promptDeleteEpisodePercentage" type="integer" label="30217" help="">
+					<level>0</level>
+					<default>100</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>100</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="promptDeleteMoviePercentage" type="integer" label="30220" help="">
+					<level>0</level>
+					<default>100</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>100</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+			<group id="3" label="30121">
+				<setting id="forceAutoResume" type="boolean" label="30322" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="jump_back_amount" type="integer" label="30114" help="">
+					<level>0</level>
+					<default>15</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>60</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+			<group id="4" label="30329">
+				<setting id="stopPlaybackOnScreensaver" type="boolean" label="30332" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="changeUserOnScreenSaver" type="boolean" label="30330" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="cacheImagesOnScreenSaver" type="boolean" label="30333" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="cacheImagesOnScreenSaver_interval" type="integer" label="30400" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>60</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category label="30110" id="interface_display_settings" help="">
+			<group id="1" label="30216">
+				<setting id="addCounts" type="boolean" label="30116" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="addResumePercent" type="boolean" label="30118" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="addSubtitleAvailable" type="boolean" label="30163" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="include_overview" type="boolean" label="30181" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="include_media" type="boolean" label="30182" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="add_user_ratings" type="boolean" label="30348" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="include_people" type="boolean" label="30183" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="hide_unwatched_details" type="boolean" label="30023" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="episode_name_format" type="string" label="30019" help="">
+					<level>0</level>
+					<default>{SeriesName} - {ItemName}</default>
+					<constraints>
+						<options>
+							<option>{SeriesName} - {ItemName}</option>
+							<option>{ItemName}</option>
+							<option>s{SeasonIndex}e{EpisodeIndex} - {ItemName}</option>
+							<option>{SeriesName} - s{SeasonIndex}e{EpisodeIndex} - {ItemName}</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30019</heading>
+					</control>
+				</setting>
+				<setting id="max_image_width" type="integer" label="30449" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>8</step>
+						<maximum>4096</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="use_prem_date_for_added" type="boolean" label="30117" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+			<group id="2" label="30222">
+				<setting id="group_movies" type="boolean" label="30340" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="flatten_tvshow_seasons" type="integer" label="30020" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30445">0</option>
+							<option label="30446">1</option>
+							<option label="30447">2</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30020</heading>
+					</control>
+				</setting>
+				<setting id="show_all_episodes" type="boolean" label="30021" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="show_empty_folders" type="boolean" label="30328" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="hide_watched" type="boolean" label="30432" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+			<group id="3" label="30223">
+				<setting id="itemsPerPage" type="integer" label="30331" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>200</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="show_x_filtered_items" type="integer" label="30018" help="">
+					<level>0</level>
+					<default>20</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>100</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+			<group id="4" label="30224">
+				<setting id="widget_select_action" type="integer" label="30026" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30313">0</option>
+							<option label="30314">1</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30026</heading>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category label="30111" id="background_services_settings" help="">
+			<group id="1" label="30343">
+				<setting id="websocket_enabled" type="boolean" label="30310" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="override_contextmenu" type="boolean" label="30334" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="override_bookmarks" type="boolean" label="30335" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="background_interval" type="integer" label="30341" help="">
+					<level>0</level>
+					<default>20</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>120</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="new_content_check_interval" type="integer" label="30342" help="">
+					<level>0</level>
+					<default>20</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>300</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="random_movie_refresh_interval" type="integer" label="30384" help="">
+					<level>0</level>
+					<default>5</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>1</step>
+						<maximum>60</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category label="30022" id="advanced_embycon_settings" help="">
+			<group id="1" label="30022">
+				<setting id="deviceName" type="string" label="30016" help="">
+					<level>0</level>
+					<default>EmbyCon</default>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30016</heading>
+					</control>
+				</setting>
+				<setting id="http_timeout" type="integer" label="30416" help="">
+					<level>0</level>
+					<default>60</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>300</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="profiling_enabled" type="boolean" label="30010" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="log_debug" type="boolean" label="30027" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="log_timing" type="boolean" label="30015" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="use_cache" type="boolean" label="30345" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="showLoadProgress" type="boolean" label="30120" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="suppressErrors" type="boolean" label="30315" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="speed_test_data_size" type="integer" label="30436" help="">
+					<level>0</level>
+					<default>15</default>
+					<constraints>
+						<minimum>5</minimum>
+						<step>1</step>
+						<maximum>100</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category label="30421" id="embycon_view_settings" help="">
+			<group id="1" label="30421">
+				<setting id="view-movies" type="string" label="30450" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30450</heading>
+					</control>
+				</setting>
+				<setting id="view-tvshows" type="string" label="30451" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30451</heading>
+					</control>
+				</setting>
+				<setting id="view-seasons" type="string" label="30452" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30452</heading>
+					</control>
+				</setting>
+				<setting id="view-episodes" type="string" label="30453" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30453</heading>
+					</control>
+				</setting>
+				<setting id="view-sets" type="string" label="30454" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30454</heading>
+					</control>
+				</setting>
 
-		<setting label="30388" type="lsep"/>
-		<setting label="30011" type="action" action="RunScript(plugin.video.embycon,0,?mode=DETECT_SERVER_USER)" option="close"/>
-		<setting id="protocol" type="select" label="30390" lvalues="30391|30392" default="0" />
-		<setting id="ipaddress" type="text" label="30000" default="&lt;none&gt;" visible="true" enable="true" />
-		<setting id="port" type="text" label="30001" default="8096" visible="true" enable="true" />
-		<setting id="verify_cert" type="bool" label="30003" default="false" visible="true" enable="true" />
-
-		<setting label="30389" type="lsep"/>
-		<setting type="sep" />
-		<setting label="30012" type="action" action="RunScript(plugin.video.embycon,0,?mode=CHANGE_USER)" option="close"/>
-		<setting id="username" type="text" label="30024" />
-		<setting id="password" type="text" option="hidden" label="30025" />
-		<setting id="save_user_to_settings" type="bool" label="30378" default="true" visible="true" enable="true" />
-		<setting id="allow_password_saving" type="bool" label="30367" default="true" visible="true" enable="true" />
-
-	</category>
-	<category label="30207">
-
-		<setting label="30437" type="lsep"/>
-		<setting type="sep" />
-		<setting id="play_cinema_intros" type="bool" label="30438" default="false" visible="true" enable="true" />
-		<setting id="skip_intros" type="select" label="30441" lvalues="30442|30443|30444" default="0" />
-		<!--<setting id="playback_type" type="select" label="30206" lvalues="30209|30210|30211" default="1" />-->
-
-		<setting label="30238" type="lsep"/>
-		<setting type="sep" />
-		<setting id="max_stream_bitrate" type="number" label="30208" default="75000" visible="true"/>
-		<setting id="allow_direct_file_play" type="bool" label="30433" default="false" visible="true" enable="true" />
-		<setting id="force_transcode_h265" type="bool" label="30236" default="false" visible="true" enable="true" />
-		<setting id="force_transcode_mpeg2" type="bool" label="30239" default="false" visible="true" enable="true" />
-		<setting id="force_transcode_msmpeg4v3" type="bool" label="30240" default="false" visible="true" enable="true" />
-		<setting id="force_transcode_mpeg4" type="bool" label="30241" default="false" visible="true" enable="true" />
-		<setting id="force_transcode_av1" type="bool" label="30448" default="false" visible="true" enable="true" />
-		<setting id="direct_stream_sub_select" type="select" label="30379" lvalues="30380|30381|30382" default="0" visible="true"/>
-
-		<setting label="30211" type="lsep"/>
-		<setting type="sep" />
-		<setting id="force_max_stream_bitrate" type="number" label="30434" default="7000" visible="true"/>
-		<setting id="playback_max_width" type="select" label="30212" values="640|720|1024|1280|1440|1600|1920|2600|4096" default="1920" visible="true"/>
-		<setting id="playback_video_force_8" type="bool" label="30213" default="false" visible="true" enable="true"/>
-		<setting id="audio_codec" type="select" label="30419" values="ac3|aac" default="ac3"/>
-		<setting id="audio_playback_bitrate" type="number" label="30418" default="256" visible="true"/>
-		<setting id="audio_max_channels" type="slider" label="30420" default="8" range="2,1,8" option="int" visible="true"/>
-
-		<!--
-		<setting label="30209" type="lsep"/>
-		<setting type="sep" />
-		<setting id="smbusername" type="text" label="30007" default="" enable="true" visible="true"/>
-		<setting id="smbpassword" type="text" label="30008" default="" option="hidden" enable="true" visible="true"/>
-		-->
-
-	</category>
-	<category label="30214">
-
-		<setting label="30440" type="lsep"/>
-		<setting type="sep" />
-		<setting id="play_next_trigger_time" type="slider" label="30439" default="0" range="0,1,180" option="int" visible="true"/>
-
-		<setting label="30215" type="lsep"/>
-		<setting type="sep" />
-		<setting id="promptPlayNextEpisodePercentage" type="slider" label="30218" default="90" range="5,1,100" option="int" visible="true"/>
-		<setting id="promptPlayNextEpisodePercentage_prompt" type="bool" label="30219" default="true" visible="true" enable="true" />
-		<setting id="promptDeleteEpisodePercentage" type="slider" label="30217" default="100" range="5,1,100" option="int" visible="true"/>
-		<setting id="promptDeleteMoviePercentage" type="slider" label="30220" default="100" range="5,1,100" option="int" visible="true"/>
-
-		<setting label="30121" type="lsep"/>
-		<setting type="sep" />
-		<setting id="forceAutoResume" type="bool" label="30322" default="true" visible="true" enable="true" />
-		<setting id="jump_back_amount" type="slider" label="30114" default="15" range="0,1,60" option="int" visible="true"/>
-
-		<setting label="30329" type="lsep"/>
-		<setting type="sep" />
-		<setting id="stopPlaybackOnScreensaver" type="bool" label="30332" default="true" visible="true" enable="true" />
-		<setting id="changeUserOnScreenSaver" type="bool" label="30330" default="true" visible="true" enable="true" />
-		<setting id="cacheImagesOnScreenSaver" type="bool" label="30333" default="true" visible="true" enable="true" />
-		<setting id="cacheImagesOnScreenSaver_interval" type="slider" label="30400" default="0" range="0,1,60" option="int" visible="true"/>
-
-	</category>
-	<category label="30110">
-
-		<setting label="30216" type="lsep"/>
-		<setting type="sep" />
-		<setting id="addCounts" type="bool" label="30116" default="false" visible="true" enable="true" />
-		<setting id="addResumePercent" type="bool" label="30118" default="false" visible="true" enable="true" />
-		<setting id="addSubtitleAvailable" type="bool" label="30163" default="false" visible="true" enable="true" />
-		<setting id="include_overview" type="bool" label="30181" default="true" visible="true" enable="true" />
-		<setting id="include_media" type="bool" label="30182" default="true" visible="true" enable="true" />
-		<setting id="add_user_ratings" type="bool" label="30348" default="true" visible="true" enable="true" />
-		<setting id="include_people" type="bool" label="30183" default="false" visible="true" enable="true" />
-		<setting id="hide_unwatched_details" type="bool" label="30023" default="false" visible="true" enable="true" />
-		<setting id="episode_name_format" type="select" label="30019" default="{SeriesName} - {ItemName}" values="{SeriesName} - {ItemName}|{ItemName}|s{SeasonIndex}e{EpisodeIndex} - {ItemName}|{SeriesName} - s{SeasonIndex}e{EpisodeIndex} - {ItemName}" />
-
-		<setting label="30222" type="lsep"/>
-		<setting type="sep" />
-		<setting id="group_movies" type="bool" label="30340" default="true" visible="true" enable="true" />
-		<setting id="flatten_single_season" type="bool" label="30020" default="true" visible="true" enable="true" />
-		<setting id="show_all_episodes" type="bool" label="30021" default="true" visible="true" enable="true" />
-		<setting id="show_empty_folders" type="bool" label="30328" default="false" visible="true" enable="true" />
-		<setting id="hide_watched" type="bool" label="30432" default="true" visible="true" enable="true" />
-
-		<setting label="30223" type="lsep"/>
-		<setting type="sep" />
-		<setting id="itemsPerPage" type="slider" label="30331" default="0" range="0,1,200" option="int" visible="true"/>
-		<setting id="show_x_filtered_items" type="slider" label="30018" default="20" range="5,1,100" option="int" visible="true"/>
-
-		<setting label="30224" type="lsep"/>
-		<setting type="sep" />
-		<setting id="widget_select_action" type="select" label="30026" lvalues="30313|30314" default="0" visible="true"/>
-
-	</category>
-	<category label="30111">
-
-		<setting label="30343" type="lsep"/>
-		<setting id="websocket_enabled" type="bool" label="30310" default="true" visible="true" enable="true" />
-		<setting id="override_contextmenu" type="bool" label="30334" default="true" visible="true"/>
-		<setting id="background_interval" type="slider" label="30341" default="20" range="0,1,120" option="int" visible="true"/>
-		<setting id="new_content_check_interval" type="slider" label="30342" default="0" range="0,1,300" option="int" visible="true"/>
-		<setting id="random_movie_refresh_interval" type="slider" label="30384" default="5" range="0,1,60" option="int" visible="true"/>
-
-	</category>
-	<category label="30022">
-
-		<setting id="deviceName" type="text" label="30016" default="EmbyCon" visible="true" enable="true" />
-		<setting id="http_timeout" type="slider" label="30416" default="60" range="5,1,300" option="int" visible="true" />
-		<setting id="profiling_enabled" type="bool" label="30010" default="false" visible="true" />
-		<setting id="log_debug" type="bool" label="30027" default="false" visible="true" enable="true" />
-		<setting id="log_timing" type="bool" label="30015" default="false" visible="true" enable="true" />
-		<setting id="use_cache" type="bool" label="30345" default="true" visible="true" enable="true" />
-		<setting id="showLoadProgress" type="bool" label="30120" default="false" visible="true" enable="true" />
-		<setting id="suppressErrors" type="bool" label="30315" default="false" visible="true" enable="true" />
-		<setting id="speed_test_data_size" type="slider" label="30436" default="15" range="5,1,100" option="int" visible="true"/>
-
-	</category>
-	<category label="30421">
-
-		<setting id="view-movies" type="text" label="Movies view ID" default="" visible="true" enable="false" />
-		<setting id="view-tvshows" type="text" label="TV Shows view ID" default="" visible="true" enable="false" />
-		<setting id="view-seasons" type="text" label="Seasons view ID" default="" visible="true" enable="false" />
-		<setting id="view-episodes" type="text" label="Episodes view ID" default="" visible="true" enable="false" />
-		<setting id="view-sets" type="text" label="Collections view ID" default="" visible="true" enable="false" />
-
-	</category>
-	<category label="30422">
-
-		<setting id="sort-Movies" type="select" label="30231" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
-		<setting id="sort-BoxSets" type="select" label="30260" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
-		<setting id="sort-Series" type="select" label="30229" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
-		<setting id="sort-Seasons" type="select" label="30431" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
-		<setting id="sort-Episodes" type="select" label="30235" lvalues="30423|30424|30426|30425|30427|30429|30430|30428" default="0" visible="true"/>
-
-	</category>
+			</group>
+		</category>
+		<category label="30422" id="embycon_sort_settings" help="">
+			<group id="1" label="30422">
+				<setting id="sort-Movies" type="integer" label="30231" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30423">0</option>
+							<option label="30424">1</option>
+							<option label="30426">2</option>
+							<option label="30425">3</option>
+							<option label="30427">4</option>
+							<option label="30429">5</option>
+							<option label="30430">6</option>
+							<option label="30428">7</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30231</heading>
+					</control>
+				</setting>
+				<setting id="sort-BoxSets" type="integer" label="30260" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30423">0</option>
+							<option label="30424">1</option>
+							<option label="30426">2</option>
+							<option label="30425">3</option>
+							<option label="30427">4</option>
+							<option label="30429">5</option>
+							<option label="30430">6</option>
+							<option label="30428">7</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30260</heading>
+					</control>
+				</setting>
+				<setting id="sort-Series" type="integer" label="30229" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30423">0</option>
+							<option label="30424">1</option>
+							<option label="30426">2</option>
+							<option label="30425">3</option>
+							<option label="30427">4</option>
+							<option label="30429">5</option>
+							<option label="30430">6</option>
+							<option label="30428">7</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30229</heading>
+					</control>
+				</setting>
+				<setting id="sort-Seasons" type="integer" label="30431" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30423">0</option>
+							<option label="30424">1</option>
+							<option label="30426">2</option>
+							<option label="30425">3</option>
+							<option label="30427">4</option>
+							<option label="30429">5</option>
+							<option label="30430">6</option>
+							<option label="30428">7</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30431</heading>
+					</control>
+				</setting>
+				<setting id="sort-Episodes" type="integer" label="30235" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30423">0</option>
+							<option label="30424">1</option>
+							<option label="30456">8</option>
+							<option label="30426">2</option>
+							<option label="30425">3</option>
+							<option label="30427">4</option>
+							<option label="30429">5</option>
+							<option label="30430">6</option>
+							<option label="30428">7</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30235</heading>
+					</control>
+				</setting>
+			</group>
+		</category>
+	</section>
 </settings>

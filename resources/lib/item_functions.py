@@ -30,8 +30,76 @@ download_utils = DownloadUtils()
 home_window = HomeWindow()
 
 
+class MediaStream:
+    type = "na"
+    width = 0
+    height = 0
+    channels = 0
+    codec = "na"
+    aspect_ratio = 1.0
+    language = "na"
+    hdr_type = ""
+
+    # "default" if x is None else x
+
+    def set_hdr_type(self, value):
+        # Kodi options : dolbyvision, hdr10, hlg
+        if value is not None:
+            value = value.lower()
+            if value in ("hdr10plus", "hdr10"):
+                self.hdr_type = "hdr10"
+            elif value == "hyperloghamma":
+                self.hdr_type = "hlg"
+            elif value == "dolbyvision":
+                self.hdr_type = "dolbyvision"
+
+    def set_channels(self, value):
+        if value is not None:
+            self.channels = int(value)
+
+    def set_language(self, value):
+        if value is not None:
+            self.language = value
+
+    def set_aspect_ratio(self, value):
+        if value is not None:
+            self.aspect_ratio = float(value)
+
+    def set_type(self, value):
+        if value is not None:
+            self.type = value
+
+    def set_codec(self, value):
+        if value is not None:
+            self.codec = value
+
+    def set_width(self, value):
+        if value is not None:
+            self.width = int(value)
+
+    def set_height(self, value):
+        if value is not None:
+            self.height = int(value)
+
+
+class Person:
+    name = ""
+    role = ""
+    thumbnail = ""
+
+    def __init__(self, n, r, t):
+        self.name = n
+        self.role = r
+        self.thumbnail = t
+
+
 class ItemDetails:
 
+    # objects
+    media_streams = []
+    cast = None
+
+    # values
     name = None
     sort_name = None
     id = None
@@ -62,10 +130,8 @@ class ItemDetails:
     play_count = 0
     director = ""
     writer = ""
-    cast = None
     tagline = ""
     status = None
-    media_streams = None
     tags = None
 
     resume_time = 0
@@ -97,6 +163,22 @@ class ItemDetails:
     mode = ""
 
     baseline_itemname = None
+
+    def set_episode_number(self, value):
+        if value is not None:
+            self.episode_number = value
+
+    def set_season_sort_number(self, value):
+        if value is not None:
+            self.season_sort_number = value
+
+    def set_season_number(self, value):
+        if value is not None:
+            self.season_number = value
+
+    def set_episode_sort_number(self, value):
+        if value is not None:
+            self.episode_sort_number = value
 
 
 def extract_media_info(item):
@@ -186,28 +268,28 @@ def extract_item_info(item, gui_options):
     item_details.original_title = item_details.name
 
     if item_details.item_type == "Episode":
-        item_details.episode_number = item["IndexNumber"]
-        item_details.season_number = item["ParentIndexNumber"]
+        item_details.set_episode_number(item["IndexNumber"])
+        item_details.set_season_number(item["ParentIndexNumber"])
         item_details.series_id = item["SeriesId"]
 
         if item_details.season_number != 0:
-            item_details.season_sort_number = item_details.season_number
-            item_details.episode_sort_number = item_details.episode_number
+            item_details.set_season_sort_number(item_details.season_number)
+            item_details.set_episode_sort_number(item_details.episode_number)
         else:
             special_after_season = item["AirsAfterSeasonNumber"]
             special_before_season = item["AirsBeforeSeasonNumber"]
             special_before_episode = item["AirsBeforeEpisodeNumber"]
 
             if special_after_season:
-                item_details.season_sort_number = special_after_season + 1
+                item_details.set_season_sort_number(special_after_season + 1)
             elif special_before_season:
-                item_details.season_sort_number = special_before_season - 1
+                item_details.set_season_sort_number(special_before_season - 1)
 
             if special_before_episode:
-                item_details.episode_sort_number = special_before_episode - 1
+                item_details.set_episode_sort_number(special_before_episode - 1)
 
     elif item_details.item_type == "Season":
-        item_details.season_number = item["IndexNumber"]
+        item_details.set_season_number(item["IndexNumber"])
         item_details.series_id = item["SeriesId"]
 
     elif item_details.item_type == "Series":
@@ -223,11 +305,6 @@ def extract_item_info(item, gui_options):
     elif item_details.item_type == "MusicAlbum":
         item_details.album_artist = item["AlbumArtist"]
         item_details.album_name = item_details.name
-
-    if item_details.season_number is None:
-        item_details.season_number = 0
-    if item_details.episode_number is None:
-        item_details.episode_number = 0
 
     if item["Taglines"] is not None and len(item["Taglines"]) > 0:
         item_details.tagline = item["Taglines"][0]
@@ -260,16 +337,20 @@ def extract_item_info(item, gui_options):
 
     if year is not None:
         item_details.year = year
-    elif item_details.year is None and prem_date is not None:
+    elif prem_date is not None:
         item_details.year = int(prem_date[:4])
 
     if prem_date is not None:
         tokens = prem_date.split("T")
         item_details.premiere_date = tokens[0]
 
-    create_date = item["DateCreated"]
-    if create_date is not None:
-        item_details.date_added = create_date.split('.')[0].replace('T', " ")
+    # use premier date for date added
+    if gui_options["use_prem_date_for_added"]:
+        item_details.date_added = item_details.premiere_date + " 00:00:00"
+    else:
+        create_date = item["DateCreated"]
+        if create_date is not None:
+            item_details.date_added = create_date.split('.')[0].replace('T', " ")
 
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
@@ -288,34 +369,34 @@ def extract_item_info(item, gui_options):
         for mediaStream in media_streams:
             stream_type = mediaStream["Type"]
             if stream_type == "Video":
-                media_info = {}
-                media_info["type"] = "video"
-                media_info["codec"] = mediaStream["Codec"]
-                media_info["height"] = mediaStream["Height"]
-                media_info["width"] = mediaStream["Width"]
+                media_info = MediaStream()
+                media_info.set_type("video")
+                media_info.set_codec(mediaStream["Codec"])
+                media_info.set_height(mediaStream["Height"])
+                media_info.set_width(mediaStream["Width"])
                 aspect_ratio = mediaStream["AspectRatio"]
-                media_info["apect"] = aspect_ratio
+                ar = 1.85
                 if aspect_ratio is not None and len(aspect_ratio) >= 3:
                     try:
                         aspect_width, aspect_height = aspect_ratio.split(':')
-                        media_info["apect_ratio"] = float(aspect_width) / float(aspect_height)
-                    except:
-                        media_info["apect_ratio"] = 1.85
-                else:
-                    media_info["apect_ratio"] = 1.85
+                        ar = float(aspect_width) / float(aspect_height)
+                    except Exception:
+                        pass
+                media_info.set_aspect_ratio(ar)
+                media_info.set_hdr_type(mediaStream["ExtendedVideoType"])
                 media_info_list.append(media_info)
             if stream_type == "Audio":
-                media_info = {}
-                media_info["type"] = "audio"
-                media_info["codec"] = mediaStream["Codec"]
-                media_info["channels"] = mediaStream["Channels"]
-                media_info["language"] = mediaStream["Language"]
+                media_info = MediaStream()
+                media_info.set_type("audio")
+                media_info.set_codec(mediaStream["Codec"])
+                media_info.set_channels(mediaStream["Channels"])
+                media_info.set_language(mediaStream["Language"])
                 media_info_list.append(media_info)
             if stream_type == "Subtitle":
                 item_details.subtitle_available = True
-                media_info = {}
-                media_info["type"] = "sub"
-                media_info["language"] = mediaStream["Language"]
+                media_info = MediaStream()
+                media_info.set_type("sub")
+                media_info.set_language(mediaStream["Language"])
                 media_info_list.append(media_info)
 
         item_details.media_streams = media_info_list
@@ -343,7 +424,7 @@ def extract_item_info(item, gui_options):
                                                                 server=gui_options["server"])
                 else:
                     person_thumbnail = ""
-                person = {"name": person_name, "role": person_role, "thumbnail": person_thumbnail}
+                person = Person(person_name, person_role, person_thumbnail)
                 cast.append(person)
         item_details.cast = cast
 
@@ -412,7 +493,7 @@ def extract_item_info(item, gui_options):
 
     item_details.number_episodes = item_details.total_episodes
 
-    item_details.art = get_art(item, gui_options["server"])
+    item_details.art = get_art(item, gui_options["server"], maxwidth=gui_options["max_image_width"])
     item_details.rating = item["OfficialRating"]
     item_details.mpaa = item["OfficialRating"]
 
@@ -456,8 +537,6 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         u = sys.argv[0] + "?item_id=" + url + "&mode=PLAY"
 
     # Create the ListItem that will be displayed
-    thumb_path = item_details.art["thumb"]
-
     list_item_name = item_details.name
     item_type = item_details.item_type.lower()
     is_video = item_type not in ['musicalbum', 'audio', 'music']
@@ -521,24 +600,20 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         else:
             item_details.plot = time_info
 
-    if kodi_version > 17:
-        list_item = xbmcgui.ListItem(list_item_name, offscreen=True)
-    else:
-        list_item = xbmcgui.ListItem(list_item_name, iconImage=thumb_path, thumbnailImage=thumb_path)
-
+    list_item = xbmcgui.ListItem(list_item_name, offscreen=True)
     # log.debug("Setting thumbnail as: {0}", thumbPath)
 
     item_properties = {}
 
     # calculate percentage
-    if capped_percentage != 0:
-        item_properties["complete_percentage"] = str(capped_percentage)
+    #if capped_percentage != 0:
+    #    item_properties["complete_percentage"] = str(capped_percentage)
 
     item_properties["IsPlayable"] = 'false'
 
-    if not folder and is_video:
-        item_properties["TotalTime"] = str(item_details.duration)
-        item_properties["ResumeTime"] = str(item_details.resume_time)
+    #if not folder and is_video:
+    #    item_properties["TotalTime"] = str(item_details.duration)
+    #    item_properties["ResumeTime"] = str(item_details.resume_time)
 
     list_item.setArt(item_details.art)
 
@@ -550,36 +625,33 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         item_properties["series_id"] = item_details.series_id
 
     # new way
-    info_labels = {}
+    # info_labels = {}
 
     # add cast
-    if item_details.cast is not None:
-        if kodi_version >= 17:
-            list_item.setCast(item_details.cast)
-        else:
-            info_labels['cast'] = info_labels['castandrole'] = [(cast_member['name'], cast_member['role']) for cast_member in item_details.cast]
+    #if item_details.cast is not None:
+    #    list_item.setCast(item_details.cast)
 
-    info_labels["title"] = list_item_name
-    if item_details.sort_name:
-        info_labels["sorttitle"] = item_details.sort_name
-    else:
-        info_labels["sorttitle"] = list_item_name
+    #info_labels["title"] = list_item_name
+    #if item_details.sort_name:
+    #    info_labels["sorttitle"] = item_details.sort_name
+    #else:
+    #    info_labels["sorttitle"] = list_item_name
 
-    info_labels["duration"] = item_details.duration
-    info_labels["playcount"] = item_details.play_count
+    #info_labels["duration"] = item_details.duration
+    #info_labels["playcount"] = item_details.play_count
     # if item_details.favorite == 'true':
     #    info_labels["top250"] = "1"
 
-    info_labels["rating"] = item_details.rating
-    info_labels["year"] = item_details.year
+    #info_labels["rating"] = item_details.rating
+    #info_labels["year"] = item_details.year
 
-    if item_details.genres is not None and len(item_details.genres) > 0:
-        genres_list = []
-        for genre in item_details.genres:
-            genres_list.append(urllib.parse.quote(genre.encode('utf8')))
-        item_properties["genres"] = urllib.parse.quote("|".join(genres_list))
+    #if item_details.genres is not None and len(item_details.genres) > 0:
+    #    genres_list = []
+    #    for genre in item_details.genres:
+    #        genres_list.append(urllib.parse.quote(genre.encode('utf8')))
+    #    item_properties["genres"] = urllib.parse.quote("|".join(genres_list))
 
-        info_labels["genre"] = " / ".join(item_details.genres)
+    #    info_labels["genre"] = " / ".join(item_details.genres)
 
     mediatype = 'video'
 
@@ -600,91 +672,185 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     elif item_type == 'audio' or item_type == 'music':
         mediatype = 'song'
 
-    info_labels["mediatype"] = mediatype
-
-    if item_type == 'episode':
-        info_labels["episode"] = item_details.episode_number
-        info_labels["season"] = item_details.season_number
-        info_labels["sortseason"] = item_details.season_sort_number
-        info_labels["sortepisode"] = item_details.episode_sort_number
-        info_labels["tvshowtitle"] = item_details.series_name
-        if item_details.season_number == 0:
-            item_properties["IsSpecial"] = "true"
-
-    elif item_type == 'season':
-        info_labels["season"] = item_details.season_number
-        info_labels["episode"] = item_details.total_episodes
-        info_labels["tvshowtitle"] = item_details.series_name
-        if item_details.season_number == 0:
-            item_properties["IsSpecial"] = "true"
-
-    elif item_type == "series":
-        info_labels["episode"] = item_details.total_episodes
-        info_labels["season"] = item_details.total_seasons
-        info_labels["status"] = item_details.status
-        info_labels["tvshowtitle"] = item_details.name
+    # info_labels["mediatype"] = mediatype
 
     if is_video:
+        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video.setMediaType(mediatype)
 
-        info_labels["Overlay"] = item_details.overlay
-        info_labels["tagline"] = item_details.tagline
-        info_labels["studio"] = item_details.studio
-        info_labels["premiered"] = item_details.premiere_date
-        info_labels["plot"] = item_details.plot
-        info_labels["director"] = item_details.director
-        info_labels["writer"] = item_details.writer
-        info_labels["dateadded"] = item_details.date_added
-        info_labels["country"] = item_details.production_location
-        info_labels["mpaa"] = item_details.mpaa
-        info_labels["tag"] = item_details.tags
+        info_tag_video.setTitle(list_item_name)
+        if item_details.sort_name:
+            info_tag_video.setSortTitle(item_details.sort_name)
 
-        if display_options["addUserRatings"]:
-            info_labels["userrating"] = item_details.critic_rating
+        info_tag_video.setPlaycount(item_details.play_count)
+        if item_details.year is not None:
+            info_tag_video.setYear(item_details.year)
+        info_tag_video.setMpaa(item_details.rating)
+
+        if item_details.genres is not None and len(item_details.genres) > 0:
+            info_tag_video.setGenres(item_details.genres)
+
+        if item_details.cast is not None:
+            actors = []
+            for actor in item_details.cast:
+                actors.append(xbmc.Actor(name=actor.name, role=actor.role, thumbnail=actor.thumbnail))
+            info_tag_video.setCast(actors)
+
+        if item_type == 'episode':
+            info_tag_video.setEpisode(item_details.episode_number)
+            info_tag_video.setSeason(item_details.season_number)
+            info_tag_video.setSortSeason(item_details.season_sort_number)
+            info_tag_video.setSortEpisode(item_details.episode_sort_number)
+            info_tag_video.setTvShowTitle(item_details.series_name)
+            # info_labels["episode"] = item_details.episode_number
+            # info_labels["season"] = item_details.season_number
+            # info_labels["sortseason"] = item_details.season_sort_number
+            # info_labels["sortepisode"] = item_details.episode_sort_number
+            # info_labels["tvshowtitle"] = item_details.series_name
+            if item_details.season_number == 0:
+                item_properties["IsSpecial"] = "true"
+
+        elif item_type == 'season':
+            info_tag_video.setSeason(item_details.season_number)
+            info_tag_video.setEpisode(item_details.total_episodes)
+            info_tag_video.setTvShowTitle(item_details.series_name)
+            # info_labels["season"] = item_details.season_number
+            # info_labels["episode"] = item_details.total_episodes
+            # info_labels["tvshowtitle"] = item_details.series_name
+            if item_details.season_number == 0:
+                item_properties["IsSpecial"] = "true"
+
+        elif item_type == "series":
+            info_tag_video.setEpisode(item_details.total_episodes)
+            info_tag_video.setSeason(item_details.total_seasons)
+            info_tag_video.setTvShowStatus(item_details.status)
+            info_tag_video.setTvShowTitle(item_details.name)
+            # info_labels["episode"] = item_details.total_episodes
+            # info_labels["season"] = item_details.total_seasons
+            # info_labels["status"] = item_details.status
+            # info_labels["tvshowtitle"] = item_details.name
+
+        info_tag_video.setTagLine(item_details.tagline)
+        info_tag_video.setStudios([item_details.studio])
+        info_tag_video.setFirstAired(item_details.premiere_date)
+        info_tag_video.setPremiered(item_details.premiere_date)
+        info_tag_video.setDateAdded(item_details.date_added)
+        info_tag_video.setPlot(item_details.plot)
+        info_tag_video.setDirectors([item_details.director])
+        info_tag_video.setWriters([item_details.writer])
+        info_tag_video.setCountries([item_details.production_location])
+        if item_details.tags is not None and len(item_details.tags) > 0:
+            info_tag_video.setTags(item_details.tags)
+
+        info_tag_video.setDbId(int(item_details.id))
+
+        # info_labels["Overlay"] = item_details.overlay # not used ??
+        # info_labels["tagline"] = item_details.tagline
+        # info_labels["studio"] = item_details.studio
+        # info_labels["premiered"] = item_details.premiere_date
+        # info_labels["plot"] = item_details.plot
+        # info_labels["director"] = item_details.director
+        # info_labels["writer"] = item_details.writer
+        # info_labels["dateadded"] = item_details.date_added
+        # info_labels["country"] = item_details.production_location
+        # info_labels["mpaa"] = item_details.mpaa
+        # info_labels["tag"] = item_details.tags
+
+        # if display_options["addUserRatings"]:
+        #    info_labels["userrating"] = item_details.critic_rating
 
         if item_type in ('movie', 'series'):
-            info_labels["trailer"] = "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
+            # info_labels["trailer"] = "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
+            info_tag_video.setTrailer("plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id)
 
-        list_item.setInfo('video', info_labels)
+        # list_item.setInfo('video', info_labels)
         # log.debug("info_labels: {0}", info_labels)
+        for stream in item_details.media_streams:
+            if stream.type == "video":
+                vsd = xbmc.VideoStreamDetail()
+                vsd.setDuration(int(item_details.duration))
+                vsd.setAspect(stream.aspect_ratio)
+                vsd.setCodec(stream.codec)
+                vsd.setWidth(stream.width)
+                vsd.setHeight(stream.height)
+                vsd.setHDRType(stream.hdr_type)
+                info_tag_video.addVideoStream(vsd)
 
-        if item_details.media_streams is not None:
-            for stream in item_details.media_streams:
-                if stream["type"] == "video":
-                    list_item.addStreamInfo('video',
-                                            {'duration': item_details.duration,
-                                             'aspect': stream["apect_ratio"],
-                                             'codec': stream["codec"],
-                                             'width': stream["width"],
-                                             'height': stream["height"]})
-                elif stream["type"] == "audio":
-                    list_item.addStreamInfo('audio',
-                                            {'codec': stream["codec"],
-                                             'channels': stream["channels"],
-                                             'language': stream["language"]})
-                elif stream["type"] == "sub":
-                    list_item.addStreamInfo('subtitle',
-                                            {'language': stream["language"]})
+                # list_item.addStreamInfo('video',
+                #                        {'duration': item_details.duration,
+                #                         'aspect': stream["apect_ratio"],
+                #                         'codec': stream["codec"],
+                #                         'width': stream["width"],
+                #                         'height': stream["height"]})
+
+            elif stream.type == "audio":
+                asd = xbmc.AudioStreamDetail()
+                asd.setCodec(stream.codec)
+                asd.setChannels(stream.channels)
+                asd.setLanguage(stream.language)
+                info_tag_video.addAudioStream(asd)
+
+                # list_item.addStreamInfo('audio',
+                #                        {'codec': stream["codec"],
+                #                         'channels': stream["channels"],
+                #                         'language': stream["language"]})
+
+            elif stream.type == "sub":
+                ssd = xbmc.SubtitleStreamDetail()
+                ssd.setLanguage(stream.language)
+                info_tag_video.addSubtitleStream(ssd)
+
+                # list_item.addStreamInfo('subtitle',
+                #                        {'language': stream["language"]})
 
         item_properties["TotalSeasons"] = str(item_details.total_seasons)
         item_properties["TotalEpisodes"] = str(item_details.total_episodes)
-        item_properties["WatchedEpisodes"] = str(item_details.watched_episodes)
-        item_properties["UnWatchedEpisodes"] = str(item_details.unwatched_episodes)
         item_properties["NumEpisodes"] = str(item_details.number_episodes)
 
-        list_item.setRating("imdb", item_details.community_rating, 0, True)
+        if item_details.watched_episodes is not None and item_details.watched_episodes > 0:
+            item_properties["WatchedEpisodes"] = str(item_details.watched_episodes)
+        item_properties["UnWatchedEpisodes"] = str(item_details.unwatched_episodes)
+        item_properties["SeriesUnwatched"] = str(item_details.unwatched_episodes)
+
+        info_tag_video.setRating(item_details.community_rating, type="imdb")
+        info_tag_video.setUserRating(int(item_details.critic_rating))
+
+        info_tag_video.setResumePoint(item_details.resume_time, item_details.duration)
+        #info_tag_video.setDuration(item_details.duration)
+
+        #list_item.setRating("imdb", item_details.community_rating, 0, True)
         # list_item.setRating("rt", item_details.critic_rating, 0, False)
-        item_properties["TotalTime"] = str(item_details.duration)
+        #item_properties["TotalTime"] = str(item_details.duration)
 
     else:
-        info_labels["tracknumber"] = item_details.track_number
-        if item_details.album_artist:
-            info_labels["artist"] = item_details.album_artist
-        elif item_details.song_artist:
-            info_labels["artist"] = item_details.song_artist
-        info_labels["album"] = item_details.album_name
+        info_tag_music = list_item.getMusicInfoTag()
+        info_tag_music.setMediaType(mediatype)
 
+        info_tag_music.setTitle(list_item_name)
+        info_tag_music.setDuration(int(item_details.duration))
+
+        if item_details.year is not None:
+            info_tag_music.setYear(item_details.year)
+
+        if item_details.genres is not None and len(item_details.genres) > 0:
+            info_tag_music.setGenres(item_details.genres)
+
+        info_tag_music.setTrack(item_details.track_number)
+        info_tag_music.setAlbum(item_details.album_name)
+        if item_details.album_artist:
+            info_tag_music.setAlbumArtist(item_details.album_artist)
+        if item_details.song_artist:
+            info_tag_music.setArtist(item_details.song_artist)
+
+        # info_labels = {}
+        # info_labels["tracknumber"] = item_details.track_number
+        # if item_details.album_artist:
+        #    info_labels["artist"] = item_details.album_artist
+        # elif item_details.song_artist:
+        #    info_labels["artist"] = item_details.song_artist
+        # info_labels["album"] = item_details.album_name
         # log.debug("info_labels: {0}", info_labels)
-        list_item.setInfo('music', info_labels)
+        # list_item.setInfo('music', info_labels)
 
     list_item.setContentLookup(False)
     item_properties["ItemType"] = item_details.item_type
@@ -694,10 +860,6 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         item_properties["suggested_from_watching"] = item_details.baseline_itemname
 
     # log.debug("item_properties: {0}", item_properties)
-    if kodi_version > 17:
-        list_item.setProperties(item_properties)
-    else:
-        for key, value in list(item_properties.items()):
-            list_item.setProperty(key, value)
+    list_item.setProperties(item_properties)
 
     return u, list_item, folder

@@ -10,7 +10,9 @@ from io import BytesIO
 import gzip
 import json
 from urllib.parse import urlparse
-import urllib.request, urllib.parse, urllib.error
+import urllib.request 
+import urllib.parse
+import urllib.error
 from base64 import b64encode
 from collections import defaultdict
 
@@ -290,6 +292,10 @@ class DownloadUtils:
                 {
                     "Format": "subrip",
                     "Method": "Embed"
+                },
+                {
+                    "Format": "EIA_608",
+                    "Method": "Embed"
                 }
             ]
         }
@@ -348,7 +354,7 @@ class DownloadUtils:
 
         return play_info_result
 
-    def get_server(self):
+    def get_server(self, add_user_id=False):
         settings = xbmcaddon.Addon()
         host = settings.getSetting('ipaddress')
 
@@ -379,14 +385,20 @@ class DownloadUtils:
             if url_bits.hostname is not None and len(url_bits.hostname) > 0:
                 host = url_bits.hostname
 
-                if url_bits.username and url_bits.password:
-                    host = "%s:%s@" % (url_bits.username, url_bits.password) + host
+                #if url_bits.username and url_bits.password:
+                #    host = "%s:%s@" % (url_bits.username, url_bits.password) + host
 
                 settings.setSetting("ipaddress", host)
 
             if url_bits.port is not None and url_bits.port > 0:
                 port = str(url_bits.port)
                 settings.setSetting("port", port)
+
+        if add_user_id:
+            window = HomeWindow()
+            user_id = window.get_property("userid")
+            if user_id:
+                host = ("%s@" % user_id) + host
 
         if self.use_https:
             server = "https://" + host + ":" + port
@@ -420,7 +432,7 @@ class DownloadUtils:
 
         return all_art
 
-    def get_artwork(self, data, art_type, parent=False, index=0, server=None):
+    def get_artwork(self, data, art_type, parent=False, index=0, server=None, maxwidth=0):
 
         item_id = data["Id"]
         item_type = data["Type"]
@@ -474,7 +486,10 @@ class DownloadUtils:
             # log.debug("No Image Tag for request:{0} item:{1} parent:{2}", art_type, item_type, parent)
             return ""
 
-        artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, item_id, art_type, index, image_tag)
+        if maxwidth > 0:
+            artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&MaxWidth=%s&Tag=%s" % (server, item_id, art_type, index, maxwidth, image_tag)
+        else:
+            artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (server, item_id, art_type, index, image_tag)
 
         if self.use_https and not self.verify_cert:
             artwork += "|verifypeer=false"
@@ -578,6 +593,7 @@ class DownloadUtils:
                 return ""
             if not userid:
                 userid = window.get_property("userid")
+                user_image = window.get_property("userimage")
 
         if userid and not user_image:
             user_image = 'DefaultUser.png'
@@ -631,12 +647,14 @@ class DownloadUtils:
 
         access_token = None
         userid = None
+        user_image = None
         try:
             result = json.loads(resp)
             access_token = result.get("AccessToken")
             # userid = result["SessionInfo"].get("UserId")
             userid = result["User"].get("Id")
-        except:
+            user_image = self.get_user_artwork(result["User"], 'Primary')
+        except Exception:
             pass
 
         if access_token is not None:
@@ -644,7 +662,7 @@ class DownloadUtils:
             log.debug("User Id: {0}", userid)
             window.set_property("AccessToken", access_token)
             window.set_property("userid", userid)
-            # WINDOW.setProperty("userimage", "")
+            window.set_property("userimage", user_image)
 
             self.post_capabilities()
 
@@ -827,7 +845,7 @@ class DownloadUtils:
                 if int(data.status) == 401:
                     # remove any saved password
                     m = hashlib.md5()
-                    m.update(username)
+                    m.update(username.encode("utf-8"))
                     hashed_username = m.hexdigest()
                     log.error("HTTP response error 401 auth error, removing any saved passwords for user: {0}", hashed_username)
                     settings.setSetting("saved_user_password_" + hashed_username, "")
@@ -850,7 +868,7 @@ class DownloadUtils:
             try:
                 log.debug("Closing HTTP connection: {0}", conn)
                 conn.close()
-            except:
+            except Exception:
                 pass
 
         return return_data

@@ -2,6 +2,7 @@
 import sys
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -33,6 +34,9 @@ def show_server_sessions():
     if results is None:
         return
 
+    settings = xbmcaddon.Addon()
+    max_image_width = int(settings.getSetting('max_image_width'))
+
     list_items = []
     for session in results:
         device_name = session.get("DeviceName", "na")
@@ -59,7 +63,7 @@ def show_server_sessions():
         art = {}
         if now_playing:
             server = download_utils.get_server()
-            art = get_art(now_playing, server)
+            art = get_art(now_playing, server, maxwidth=max_image_width)
 
             runtime = now_playing.get("RunTimeTicks", 0)
             if position_ticks > 0 and runtime > 0:
@@ -95,15 +99,15 @@ def show_server_sessions():
         user_session_details += play_method + "\n"
         user_session_details += transcoding_details + "\n"
 
-        info_labels = {}
-        info_labels["duration"] = str(runtime / 10000000)
-        info_labels["mediatype"] = "movie"
-        info_labels["plot"] = user_session_details
-        list_item.setInfo('video', info_labels)
+        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video.setMediaType("movie")
+        #info_tag_video.setDuration(int(runtime / 10000000))
+        info_tag_video.setResumePoint(int(position_ticks / 10000000), int(runtime / 10000000))
+        info_tag_video.setPlot(user_session_details)
 
-        list_item.setProperty('TotalTime', str(runtime / 10000000))
-        list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
-        list_item.setProperty("complete_percentage", str(percenatge_played))
+        #list_item.setProperty('TotalTime', str(runtime / 10000000))
+        #list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
+        #list_item.setProperty("complete_percentage", str(percenatge_played))
 
         item_tuple = ("", list_item, False)
         list_items.append(item_tuple)

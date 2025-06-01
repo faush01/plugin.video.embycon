@@ -75,7 +75,7 @@ msgid "Filtered episode name format"
 msgstr ""
 
 msgctxt "#30020"
-msgid "Flatten single season"
+msgid "Flatten TV Show seasons"
 msgstr ""
 
 msgctxt "#30021"
@@ -156,6 +156,10 @@ msgstr ""
 
 msgctxt "#30116"
 msgid "Add unwatched counts to names"
+msgstr ""
+
+msgctxt "#30117"
+msgid "User premiered date as date added"
 msgstr ""
 
 msgctxt "#30118"
@@ -654,6 +658,10 @@ msgctxt "#30334"
 msgid "Use EmbyCon context menu"
 msgstr ""
 
+msgctxt "#30335"
+msgid "Use EmbyCon bookmarks dialog"
+msgstr ""
+
 msgctxt "#30337"
 msgid "Song"
 msgstr ""
@@ -1082,6 +1090,58 @@ msgctxt "#30444"
 msgid "Auto skip intro"
 msgstr ""
 
+msgctxt "#30445"
+msgid "No Flattening"
+msgstr ""
+
+msgctxt "#30446"
+msgid "Flatten Single"
+msgstr ""
+
+msgctxt "#30447"
+msgid "Flatten All"
+msgstr ""
+
 msgctxt "#30448"
 msgid "Force transcode av1"
+msgstr ""
+
+msgctxt "#30449"
+msgid "Max Image Width"
+msgstr ""
+
+msgctxt "#30450"
+msgid "Movies view ID"
+msgstr ""
+
+msgctxt "#30451"
+msgid "TV Shows view ID"
+msgstr ""
+
+msgctxt "#30452"
+msgid "Seasons view ID"
+msgstr ""
+
+msgctxt "#30453"
+msgid "Episodes view ID"
+msgstr ""
+
+msgctxt "#30454"
+msgid "Collections view ID"
+msgstr ""
+
+msgctxt "#30455"
+msgid "Autoplay first version of an item"
+msgstr ""
+
+msgctxt "#30456"
+msgid "Episode"
+msgstr ""
+
+msgctxt "#30457"
+msgid "Confirm"
+msgstr ""
+
+msgctxt "#30458"
+msgid "Are you sure you want to hide this item?"
 msgstr ""

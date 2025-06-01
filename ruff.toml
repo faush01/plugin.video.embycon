@@ -1,0 +1,110 @@
+include = [
+  "resources/**/*.py"
+]
+
+exclude = [
+  "resources/lib/websocket/"
+]
+
+target-version = "py38"
+
+[lint]
+extend-ignore = [
+  "A002",
+  #"D203",   # one-blank-line-before-class
+  #"D212",   # multi-line-summary-first-line
+  #"D213",   # multi-line-summary-second-line
+  #"D400",   # ends-in-period	
+  #"D417",   # undocumented-param
+  #"DOC201", # missing return type documentation
+  #"DOC402", # missing yield in docstring
+  #"DOC501", # missing exceptions from docstrings
+  #"E265",   # block comments should start with `# ` (which means no bangpath)
+  #"E501",   # line too long
+  #"EM101",  # exception string literals
+  #"EM102",  # exception f-strings
+  #"ISC001", # single-line-implicit-string-concatenation
+  #"TC006",  # require strings for types used in cast.  (allowing real types improves developer experience)
+  #"TRY003", # long messages in exception class
+  #"ERA001", # commented-out code
+  #"FBT001", # positional bools
+  #"FBT002", # positional bools
+  #"FBT003", # positional bools
+
+  #"ANN002", # TODO: missing type annotations for *args
+  #"ANN003", # TODO: missing type annotations for **kwargs
+  #"BLE001", # TODO: catch blind Exception
+  #"UP042",  # TODO: class inherits from `str` and `Enum`
+
+  #"PLR0914",# TODO: too many local variables
+  #"UP006",  # TODO: dont use Dict use dict instead
+  #"PLR2004",# TODO: dont muse magic numbers
+  #"PERF402",# TODO: list copy
+]
+
+extend-select = [
+  "A",     # built-ins
+  "AIR",   # Airflow
+  #"ANN",   # Type annotations
+  #"ARG",   # used arguments
+  #"ASYNC", # flake8-async
+  #"B",     # flake8-bugbear
+  #"BLE",   # flake8-blind-except
+  #"C",     # pylint conventions
+  #"CPY",   # copyright
+  #"D",     # pydocstyle
+  #"DTZ",   # flake8-datetimz
+  #"E",     # pylint error
+  #"EM",    # flake8-errmsg
+  #"ERA",   # eradicate
+  #"F",     # pyflakes
+  #"FA",    # future annotations
+  #"FAST",  # FastAPI
+  #"FBT",   # use named arguments for boolean flags
+  #"FLY",   # flynt
+  #"FURB",  # preview rules
+  #"G",     # logging format
+  #"I",     # isort
+  #"ICN",   # import convention
+  #"INP",   # implicit namespace package
+  #"INT",   # flake8-gettext
+  #"ISC",   # implicit str concat
+  #"LOG",   # logging
+  #"N",     # pep8-naming
+  #"NPY",   # numpy-specific rules
+  #"PD",    # panda-vet
+  #"PERF",  # perflint
+  #"PGH",   # pygrep-hooks
+  #"PIE",   # flake-pie
+  #"PL",    # pylint
+  #"PT",    # pytest style
+  #"PTH",   # use pathlib
+  #"PYI",   # flake8-pyi
+  #"Q",     # quotes
+  #"R",     # pylint refactor
+  #"RET",   # return
+  #"RSE",   # raise
+  #"RUF",   # ruff specific rules
+  #"S",     # flake8-bandidt
+  #"SIM",   # flake8-simplify
+  #"SLF",   # self
+  #"SLOT",  # flake8-slots
+  #"T10",   # flake8-debugger
+  #"T20",   # print isn't used
+  #"TCH",   # flake8-type-checking
+  #"TID",   # flake8-tidy-imports
+  #"TRY",   # tryceratops
+  #"UP",    # pyupgrade
+  #"W",     # pylint warning
+  #"YTT",   # flake8-2020
+  #"FIX", # fixme
+  #"TD", # todos
+]
+preview = true
+
+[lint.pydocstyle]
+convention = "google"
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 20

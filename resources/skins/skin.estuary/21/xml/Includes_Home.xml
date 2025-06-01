@@ -66,11 +66,11 @@
 			</control>
 			-->
 			<control type="image">
-				<left>20</left>
+				<left>25</left>
 				<top>175</top>
-				<width>32</width>
-				<height>32</height>
-				<texture>$VAR[WallWatchedIconVar]</texture>
+				<width>28</width>
+				<height>28</height>
+				<texture>$VAR[ItemStatusIconVar]</texture>
 			</control>
 			<control type="textbox">
 				<left>28</left>
@@ -173,7 +173,7 @@
 				<top>238</top>
 				<width>32</width>
 				<height>32</height>
-				<texture>$VAR[WallWatchedIconVar]</texture>
+				<texture>$VAR[ItemStatusIconVar]</texture>
 			</control>
 			<control type="progress">
 				<left>35</left>
@@ -213,43 +213,9 @@
 			</control>
 		</definition>
 	</include>
-	<include name="PVRWidget">
-		<control type="image">
-			<top>80</top>
-			<left>16</left>
-			<width>670</width>
-			<height>225</height>
-			<texture border="21">dialogs/dialog-bg.png</texture>
-		</control>
-		<control type="image">
-			<left>55</left>
-			<top>122</top>
-			<width>140</width>
-			<height>140</height>
-			<aspectratio>keep</aspectratio>
-			<texture background="true" fallback="DefaultVideo.png">$PARAM[icon]</texture>
-		</control>
-		<control type="label">
-			<left>225</left>
-			<top>127</top>
-			<height>25</height>
-			<width>420</width>
-			<label>$PARAM[header]</label>
-			<aligny>center</aligny>
-			<font>font36_title</font>
-			<shadowcolor>black</shadowcolor>
-		</control>
-		<control type="label">
-			<left>225</left>
-			<top>172</top>
-			<height>105</height>
-			<width>420</width>
-			<label>$PARAM[label1][CR]$PARAM[label2]</label>
-			<font>font12</font>
-			<shadowcolor>black</shadowcolor>
-		</control>
-	</include>
 	<include name="WidgetListPoster">
+		<param name="onclick_condition">false</param>
+		<param name="browse_mode">auto</param>
 		<definition>
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
@@ -376,6 +342,7 @@
 		<param name="visible">True</param>
 		<param name="sortorder">ascending</param>
 		<param name="widget_limit">15</param>
+		<param name="browse_mode">auto</param>
 		<definition>
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
@@ -437,6 +404,8 @@
 		<param name="sortorder">ascending</param>
 		<param name="widget_limit">15</param>
 		<param name="fallback_icon">DefaultAudio.png</param>
+		<param name="onclick_condition">false</param>
+		<param name="browse_mode">auto</param>
 		<definition>
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
@@ -453,6 +422,7 @@
 				<top>120</top>
 				<right>0</right>
 				<height>500</height>
+				<onclick condition="$PARAM[onclick_condition]">$PARAM[onclick_action]</onclick>
 				<include content="WidgetListCommon">
 					<param name="list_id" value="$PARAM[list_id]"/>
 				</include>
@@ -487,7 +457,7 @@
 						</include>
 					</control>
 				</focusedlayout>
-				<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]" target="$PARAM[widget_target]" limit="$PARAM[widget_limit]">$PARAM[content_path]</content>
+				<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]" target="$PARAM[widget_target]" limit="$PARAM[widget_limit]" browse="$PARAM[browse_mode]">$PARAM[content_path]</content>
 			</control>
 		</definition>
 	</include>
@@ -498,6 +468,7 @@
 		<param name="additional_movie_items">false</param>
 		<param name="additional_tvshow_items">false</param>
 		<param name="visible">true</param>
+		<param name="browse">auto</param>
 		<definition>
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
@@ -525,7 +496,7 @@
 							<width>316</width>
 							<height>200</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
@@ -563,7 +534,7 @@
 							<width>316</width>
 							<height>200</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
@@ -594,9 +565,9 @@
 						</control>
 					</control>
 				</focusedlayout>
-				<content target="$PARAM[widget_target]" limit="$PARAM[item_limit]">$PARAM[content_path]</content>
 				<include condition="$PARAM[additional_movie_items]" content="MovieSubmenuItems" />
 				<include condition="$PARAM[additional_tvshow_items]" content="TVShowSubmenuItems" />
+				<content target="$PARAM[widget_target]" limit="$PARAM[item_limit]" browse="$PARAM[browse_mode]">$PARAM[content_path]</content>
 			</control>
 		</definition>
 	</include>
@@ -626,12 +597,13 @@
 			</item>
 		</content>
 	</include>
-	<include name="WidgetListChannels">
+	<include name="WidgetListPVR">
 		<param name="item_treshold">0</param>
-		<param name="item_limit">15</param>
 		<param name="icon">$INFO[ListItem.Icon]</param>
 		<param name="label">$INFO[ListItem.Label]</param>
 		<param name="label2">$INFO[ListItem.Title]</param>
+		<param name="info_update">0</param>
+		<param name="browse_mode">auto</param>
 		<definition>
 			<include content="CategoryLabel">
 				<param name="label">$PARAM[widget_header]</param>
@@ -651,41 +623,56 @@
 					<param name="list_id" value="$PARAM[list_id]"/>
 				</include>
 				<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,$PARAM[item_treshold]) | [Container($PARAM[list_id]).IsUpdating + Integer.IsEqual(Container($PARAM[list_id]).NumItems,0)]</visible>
-				<itemlayout width="310" height="500">
+				<itemlayout width="310" height="500" infoupdate="$PARAM[info_update]">
 					<control type="group">
 						<left>70</left>
 						<control type="image">
 							<width>319</width>
 							<height>340</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
 							<top>43</top>
 							<left>38</left>
 							<width>245</width>
-							<height>200</height>
+							<height>190</height>
 							<texture fallback="DefaultTVShows.png">$PARAM[icon]</texture>
 							<aspectratio>keep</aspectratio>
+						</control>
+						<control type="group">
+							<visible>!String.IsEqual(ListItem.Property(node.type),target_folder)</visible>
+							<control type="label">
+								<left>42</left>
+								<top>247</top>
+								<width>245</width>
+								<height>70</height>
+								<label>$PARAM[label]</label>
+								<font>font12</font>
+								<shadowcolor>text_shadow</shadowcolor>
+								<align>center</align>
+								<aligny>top</aligny>
+							</control>
+							<control type="label">
+								<left>42</left>
+								<top>277</top>
+								<width>245</width>
+								<height>65</height>
+								<label>$PARAM[label2]</label>
+								<font>font12</font>
+								<shadowcolor>text_shadow</shadowcolor>
+								<align>center</align>
+								<aligny>top</aligny>
+							</control>
 						</control>
 						<control type="label">
 							<left>42</left>
 							<top>247</top>
 							<width>245</width>
 							<height>70</height>
-							<label>$PARAM[label]</label>
-							<font>font12</font>
-							<shadowcolor>text_shadow</shadowcolor>
-							<align>center</align>
-							<aligny>top</aligny>
-						</control>
-						<control type="label">
-							<left>42</left>
-							<top>277</top>
-							<width>245</width>
-							<height>65</height>
-							<label>$PARAM[label2]</label>
+							<visible>String.IsEqual(ListItem.Property(node.type),target_folder)</visible>
+							<label>$INFO[ListItem.Label]</label>
 							<font>font12</font>
 							<shadowcolor>text_shadow</shadowcolor>
 							<align>center</align>
@@ -696,11 +683,31 @@
 							<top>30</top>
 							<width>32</width>
 							<height>32</height>
-							<texture>$VAR[WallWatchedIconVar]</texture>
+							<texture>$VAR[ItemStatusIconVar]</texture>
+						</control>
+						<control type="progress">
+							<left>20</left>
+							<top>300</top>
+							<width>280</width>
+							<height>1</height>
+							<texturebg></texturebg>
+							<midtexture colordiffuse="button_focus" border="3">progress/texturebg_alt_white.png</midtexture>
+							<info>ListItem.PercentPlayed</info>
+							<visible>!Integer.IsEqual(ListItem.PercentPlayed,0)</visible>
+						</control>
+						<control type="progress">
+							<left>20</left>
+							<top>300</top>
+							<width>280</width>
+							<height>1</height>
+							<texturebg></texturebg>
+							<midtexture colordiffuse="button_focus" border="3">progress/texturebg_alt_white.png</midtexture>
+							<info>ListItem.Progress</info>
+							<visible>!Integer.IsEqual(ListItem.Progress,0)</visible>
 						</control>
 					</control>
 				</itemlayout>
-				<focusedlayout width="310" height="500">
+				<focusedlayout width="310" height="500" infoupdate="$PARAM[info_update]">
 					<control type="group">
 						<depth>DepthContentPopout</depth>
 						<left>70</left>
@@ -714,7 +721,7 @@
 							<width>319</width>
 							<height>340</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
@@ -728,28 +735,44 @@
 							<top>43</top>
 							<left>38</left>
 							<width>245</width>
-							<height>200</height>
+							<height>190</height>
 							<texture fallback="DefaultTVShows.png">$PARAM[icon]</texture>
 							<aspectratio>keep</aspectratio>
+						</control>
+						<control type="group">
+							<visible>!String.IsEqual(ListItem.Property(node.type),target_folder)</visible>
+							<control type="label">
+								<left>42</left>
+								<top>247</top>
+								<width>245</width>
+								<height>70</height>
+								<label>$PARAM[label]</label>
+								<font>font12</font>
+								<shadowcolor>text_shadow</shadowcolor>
+								<align>center</align>
+								<scroll>true</scroll>
+								<aligny>top</aligny>
+							</control>
+							<control type="label">
+								<left>42</left>
+								<top>277</top>
+								<width>245</width>
+								<height>65</height>
+								<label>$PARAM[label2]</label>
+								<font>font12</font>
+								<shadowcolor>text_shadow</shadowcolor>
+								<align>center</align>
+								<scroll>true</scroll>
+								<aligny>top</aligny>
+							</control>
 						</control>
 						<control type="label">
 							<left>42</left>
 							<top>247</top>
 							<width>245</width>
 							<height>70</height>
-							<label>$PARAM[label]</label>
-							<font>font12</font>
-							<shadowcolor>text_shadow</shadowcolor>
-							<align>center</align>
-							<scroll>true</scroll>
-							<aligny>top</aligny>
-						</control>
-						<control type="label">
-							<left>42</left>
-							<top>277</top>
-							<width>245</width>
-							<height>65</height>
-							<label>$PARAM[label2]</label>
+							<visible>String.IsEqual(ListItem.Property(node.type),target_folder)</visible>
+							<label>$INFO[ListItem.Label]</label>
 							<font>font12</font>
 							<shadowcolor>text_shadow</shadowcolor>
 							<align>center</align>
@@ -761,11 +784,31 @@
 							<top>30</top>
 							<width>32</width>
 							<height>32</height>
-							<texture>$VAR[WallWatchedIconVar]</texture>
+							<texture>$VAR[ItemStatusIconVar]</texture>
+						</control>
+						<control type="progress">
+							<left>20</left>
+							<top>300</top>
+							<width>280</width>
+							<height>1</height>
+							<texturebg></texturebg>
+							<midtexture colordiffuse="button_focus" border="3">progress/texturebg_alt_white.png</midtexture>
+							<info>ListItem.PercentPlayed</info>
+							<visible>!Integer.IsEqual(ListItem.PercentPlayed,0)</visible>
+						</control>
+						<control type="progress">
+							<left>20</left>
+							<top>300</top>
+							<width>280</width>
+							<height>1</height>
+							<texturebg></texturebg>
+							<midtexture colordiffuse="button_focus" border="3">progress/texturebg_alt_white.png</midtexture>
+							<info>ListItem.Progress</info>
+							<visible>!Integer.IsEqual(ListItem.Progress,0)</visible>
 						</control>
 					</control>
 				</focusedlayout>
-				<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]" target="$PARAM[widget_target]" limit="$PARAM[item_limit]">$PARAM[content_path]</content>
+				<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]" target="$PARAM[widget_target]" limit="$PARAM[item_limit]" browse="$PARAM[browse_mode]">$PARAM[content_path]</content>
 			</control>
 		</definition>
 	</include>
@@ -795,7 +838,7 @@
 							<width>254</width>
 							<height>280</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
@@ -846,7 +889,7 @@
 							<width>254</width>
 							<height>280</height>
 							<texture>dialogs/dialog-bg-nobo.png</texture>
-							<bordertexture border="21">overlays/shadow.png</bordertexture>
+							<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 							<bordersize>20</bordersize>
 						</control>
 						<control type="image">
@@ -1111,7 +1154,7 @@
 				<width>1820</width>
 				<height>920</height>
 				<texture>dialogs/dialog-bg-nobo.png</texture>
-				<bordertexture border="21">overlays/shadow.png</bordertexture>
+				<bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
 				<bordersize>20</bordersize>
 			</control>
 			<control type="image" id="700$PARAM[item_id]2">

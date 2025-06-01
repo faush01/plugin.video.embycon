@@ -5,7 +5,6 @@ import xbmc
 import json
 import hashlib
 import random
-import time
 
 from .downloadutils import DownloadUtils
 from .utils import get_emby_url
@@ -96,14 +95,20 @@ def set_background_image(force=False):
             items = results.get("Items", [])
             background_current_item = 0
             background_items = []
+
+            settings = xbmcaddon.Addon()
+            max_image_width = int(settings.getSetting('max_image_width'))
+
             for item in items:
-                bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server)
+                bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=max_image_width)
                 if bg_image:
                     label = item.get("Name")
                     item_background = {}
                     item_background["image"] = bg_image
                     item_background["name"] = label
                     background_items.append(item_background)
+
+            random.shuffle(background_items)
 
         log.debug("set_background_image: Loaded {0} more backgrounds", len(background_items))
 
@@ -133,7 +138,7 @@ def check_for_new_content():
     url_params["Fields"] = "DateCreated,Etag"
     url_params["SortBy"] = "DateCreated"
     url_params["SortOrder"] = "Descending"
-    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["IncludeItemTypes"] = "Movie,Episode,Audio"
     url_params["ImageTypeLimit"] = 0
     url_params["format"] = "json"
 
@@ -157,7 +162,7 @@ def check_for_new_content():
     url_params["Fields"] = "DateCreated,Etag"
     url_params["SortBy"] = "DatePlayed"
     url_params["SortOrder"] = "Descending"
-    url_params["IncludeItemTypes"] = "Movie,Episode"
+    url_params["IncludeItemTypes"] = "Movie,Episode,Audio"
     url_params["ImageTypeLimit"] = 0
     url_params["format"] = "json"
 
@@ -234,11 +239,7 @@ def get_widget_content_cast(handle, params):
             if person_tag:
                 person_thumbnail = downloadUtils.image_url(person_id, "Primary", 0, 400, 400, person_tag, server=server)
 
-            if kodi_version > 17:
-                list_item = xbmcgui.ListItem(label=person_name, offscreen=True)
-            else:
-                list_item = xbmcgui.ListItem(label=person_name)
-
+            list_item = xbmcgui.ListItem(label=person_name, offscreen=True)
             list_item.setProperty("id", person_id)
 
             if person_thumbnail:
@@ -247,9 +248,9 @@ def get_widget_content_cast(handle, params):
                 art_links["poster"] = person_thumbnail
                 list_item.setArt(art_links)
 
-            labels = {}
-            labels["mediatype"] = "artist"
-            list_item.setInfo(type="music", infoLabels=labels)
+            #labels = {}
+            #labels["mediatype"] = "artist"
+            #list_item.setInfo(type="music", infoLabels=labels)
 
             if person_role:
                 list_item.setLabel2(person_role)
@@ -309,10 +310,10 @@ def get_widget_content(handle, params):
         url_params["Ids"] = "{random_movies}"
 
     elif widget_type == "recent_tvshows":
-        xbmcplugin.setContent(handle, 'episodes')
+        xbmcplugin.setContent(handle, 'tvshows')
         url_verb = '{server}/emby/Users/{userid}/Items/Latest'
         url_params["GroupItems"] = True
-        url_params["Limit"] = 200
+        #url_params["Limit"] = 200
         url_params["Recursive"] = True
         url_params["SortBy"] = "DateCreated"
         url_params["SortOrder"] = "Descending"
@@ -397,15 +398,16 @@ def get_widget_content(handle, params):
     list_items, detected_type, total_records = process_directory(items_url, None, params, False)
 
     # remove resumable items from next up
+    '''
     if widget_type == "nextup_episodes":
         filtered_list = []
         for item in list_items:
-            resume_time = item[1].getProperty("ResumeTime")
+            vit = item[1].getVideoInfoTag()
+            resume_time = vit.getResumeTime()
             if resume_time is None or float(resume_time) == 0.0:
                 filtered_list.append(item)
         list_items = filtered_list
-
-    # list_items = populateWidgetItems(items_url, widget_type)
+    '''
 
     if detected_type is not None:
         # if the media type is not set then try to use the detected type
@@ -426,3 +428,5 @@ def get_widget_content(handle, params):
 
     xbmcplugin.addDirectoryItems(handle, list_items)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+
+    return len(list_items)

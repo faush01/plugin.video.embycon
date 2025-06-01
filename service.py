@@ -23,7 +23,7 @@ from resources.lib.tracking import set_timing_enabled
 from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
 from resources.lib.skin_cloner import check_skin_installed
-from resources.lib.version_check import VersionCheck
+from resources.lib.chapter_dialog import ChapterDialogMonitor
 
 settings = xbmcaddon.Addon()
 
@@ -49,10 +49,27 @@ while not monitor.abortRequested():
     i += 1
     xbmc.sleep(100)
 
-server = DownloadUtils().get_server()
-if server is None:
-    # wait for 10 sec if server is not set
-    kodi_monitor.waitForAbort(20)
+# notify of debug logging
+enable_logging = settings.getSetting('log_debug') == "true"
+if enable_logging:
+    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
+                                  "Debug logging enabled!",
+                                  time=3000,
+                                  icon=xbmcgui.NOTIFICATION_WARNING)
+
+# make sure we have a server before starting the service
+du = DownloadUtils()
+while not monitor.abortRequested():
+    server = du.get_server()
+    if server is not None:
+        break
+    kodi_monitor.waitForAbort(5)
+
+if monitor.abortRequested():
+    log.debug("Abort requested before service started")
+    exit(0)
+
+log.debug("Service starting up")
 
 check_server()
 
@@ -64,9 +81,6 @@ try:
     download_utils.get_user_id()
 except Exception as error:
     log.error("Error with initial service auth: {0}", error)
-
-# do a version check
-VersionCheck().start()
 
 image_server = HttpImageServerThread()
 image_server.start()
@@ -107,17 +121,17 @@ if context_menu:
     context_monitor = ContextMonitor()
     context_monitor.start()
 
+# Start the bookmark/chapter monitor
+chapter_dialog_monitor = None
+emby_bookmarks = settings.getSetting('override_bookmarks') == "true"
+if emby_bookmarks:
+    chapter_dialog_monitor = ChapterDialogMonitor()
+    chapter_dialog_monitor.start()
+
 background_interval = int(settings.getSetting('background_interval'))
 newcontent_interval = int(settings.getSetting('new_content_check_interval'))
 random_movie_list_interval = int(settings.getSetting('random_movie_refresh_interval'))
 random_movie_list_interval = random_movie_list_interval * 60
-
-enable_logging = settings.getSetting('log_debug') == "true"
-if enable_logging:
-    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
-                                  "Debug logging enabled!",
-                                  time=3000,
-                                  icon=xbmcgui.NOTIFICATION_WARNING)
 
 prev_user_id = home_window.get_property("userid")
 
@@ -188,6 +202,9 @@ if play_next_service:
 # call stop on the context menu monitor
 if context_monitor:
     context_monitor.stop_monitor()
+
+if chapter_dialog_monitor:
+    chapter_dialog_monitor.stop_monitor()
 
 # stop the WebSocket Client
 websocket_client.stop_client()
