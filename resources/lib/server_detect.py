@@ -152,7 +152,7 @@ def get_server_details():
                 responce_data = json.loads(data)
                 servers.append(responce_data)
                 log.debug("UDP Responce Data : {0}", responce_data)
-            except:
+            except Exception:
                 break
     except Exception as e:
         log.error("UPD Discovery Error: {0}", e)
@@ -298,7 +298,7 @@ def check_server(force=False, change_user=False, notify=False):
         log.debug("jsonData: {0}", json_data)
         try:
             result = json.loads(json_data)
-        except:
+        except Exception:
             result = None
 
         if result is None:

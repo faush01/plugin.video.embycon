@@ -5,7 +5,6 @@ import xbmc
 import json
 import hashlib
 import random
-import time
 
 from .downloadutils import DownloadUtils
 from .utils import get_emby_url

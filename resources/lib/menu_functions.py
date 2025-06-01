@@ -342,7 +342,6 @@ def show_movie_alpha_list(menu_params):
 
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
-    settings = xbmcaddon.Addon()
     server = downloadUtils.get_server()
     if server is None:
         return

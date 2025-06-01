@@ -23,9 +23,6 @@ def check_skin_installed():
     log.debug("EmbyCon Skin Details: {0}", result)
 
     installed = result.get("result") is not None
-    version = 'na'
-    if installed:
-        version = result.get("result").get("addon").get("version")
 
     if not installed:
         clone_default_skin()
@@ -133,7 +130,7 @@ def clone_skin():
             log.debug("Copying modified skin files : source:{0} destination:{1}", source, destination)
             xbmcvfs.copy(source, destination)
         else:
-            log.debug("Copying modified skin files : source:{0} destination:{1} !Skipping, source not available!", source, destination)
+            log.debug("Copying modified skin files : source:{0} !Skipping, source not available!", source)
 
     xbmc.executebuiltin("UpdateLocalAddons")
 

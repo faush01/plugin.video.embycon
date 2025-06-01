@@ -1,5 +1,4 @@
 # Gnu General Public License - see LICENSE.TXT
-import os.path
 
 import xbmcaddon
 import xbmc

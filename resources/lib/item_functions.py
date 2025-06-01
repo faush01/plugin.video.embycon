@@ -380,7 +380,7 @@ def extract_item_info(item, gui_options):
                     try:
                         aspect_width, aspect_height = aspect_ratio.split(':')
                         ar = float(aspect_width) / float(aspect_height)
-                    except:
+                    except Exception:
                         pass
                 media_info.set_aspect_ratio(ar)
                 media_info.set_hdr_type(mediaStream["ExtendedVideoType"])
@@ -537,8 +537,6 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         u = sys.argv[0] + "?item_id=" + url + "&mode=PLAY"
 
     # Create the ListItem that will be displayed
-    thumb_path = item_details.art["thumb"]
-
     list_item_name = item_details.name
     item_type = item_details.item_type.lower()
     is_video = item_type not in ['musicalbum', 'audio', 'music']

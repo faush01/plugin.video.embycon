@@ -184,7 +184,6 @@ class CacheManagerThread(threading.Thread):
         log.debug("CacheManagerThread : Started")
         # log.debug("CacheManagerThread : Cache Item : {0}", self.cached_item.__dict__)
 
-        home_window = HomeWindow()
         is_fresh = False
 
         # if the data is fresh then just save it

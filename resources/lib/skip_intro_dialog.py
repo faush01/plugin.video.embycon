@@ -4,7 +4,6 @@ import xbmc
 import xbmcgui
 import xbmcaddon
 
-import time
 import threading
 
 from .simple_logging import SimpleLogging
@@ -117,8 +116,8 @@ class SkipIntroDialog(xbmcgui.WindowXMLDialog):
         else:
             log.debug("SkipIntroPromptDialog: onAction: {0}", action.getId())
 
-    def onClick(self, controlID):
-        if controlID == 1:
+    def onClick(self, controlId):
+        if controlId == 1:
             self.confirm = True
             self.dialog_open = False
             self.close()

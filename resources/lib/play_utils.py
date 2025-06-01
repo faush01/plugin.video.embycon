@@ -1,5 +1,4 @@
 # Gnu General Public License - see LICENSE.TXT
-import time
 
 import xbmc
 import xbmcgui
@@ -862,7 +861,7 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
 
             try:
                 track = "%s - %s - %s %s" % (index, stream['Language'], codec, channel_layout)
-            except:
+            except Exception:
                 track = "%s - %s %s" % (index, codec, channel_layout)
 
             audio_streams_list[track] = index
@@ -871,7 +870,7 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
         elif 'Subtitle' in stream['Type']:
             try:
                 track = "%s - %s" % (index, stream['Language'])
-            except:
+            except Exception:
                 track = "%s - %s" % (index, stream['Codec'])
 
             default = stream['IsDefault']

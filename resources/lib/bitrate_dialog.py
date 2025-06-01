@@ -1,4 +1,3 @@
-import xbmc
 import xbmcgui
 
 from .simple_logging import SimpleLogging

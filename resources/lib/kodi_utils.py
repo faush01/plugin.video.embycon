@@ -60,7 +60,7 @@ def get_kodi_version():
         version_data = result.get("version")
         version = float(str(version_data.get("major")) + "." + str(version_data.get("minor")))
         log.debug("Version: {0} - {1}", version, version_data)
-    except:
+    except Exception:
         version = 0.0
         log.error("Version Error : RAW Version Data: {0}", result)
 

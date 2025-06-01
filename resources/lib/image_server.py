@@ -22,7 +22,7 @@ log = SimpleLogging(__name__)
 PORT_NUMBER = 24276
 pil_loaded = False
 try:
-    from PIL import ImageFilter, Image, ImageOps
+    from PIL import Image, ImageOps
     pil_loaded = True
 except Exception as err:
     pil_loaded = False
@@ -222,7 +222,7 @@ class HttpImageServerThread(threading.Thread):
             conn = http.client.HTTPConnection("localhost:%d" % PORT_NUMBER)
             conn.request("QUIT", "/")
             conn.getresponse()
-        except:
+        except Exception:
             pass
 
     def run(self):

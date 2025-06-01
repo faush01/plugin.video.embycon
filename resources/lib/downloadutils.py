@@ -10,7 +10,9 @@ from io import BytesIO
 import gzip
 import json
 from urllib.parse import urlparse
-import urllib.request, urllib.parse, urllib.error
+import urllib.request 
+import urllib.parse
+import urllib.error
 from base64 import b64encode
 from collections import defaultdict
 
@@ -652,7 +654,7 @@ class DownloadUtils:
             # userid = result["SessionInfo"].get("UserId")
             userid = result["User"].get("Id")
             user_image = self.get_user_artwork(result["User"], 'Primary')
-        except:
+        except Exception:
             pass
 
         if access_token is not None:
@@ -866,7 +868,7 @@ class DownloadUtils:
             try:
                 log.debug("Closing HTTP connection: {0}", conn)
                 conn.close()
-            except:
+            except Exception:
                 pass
 
         return return_data
