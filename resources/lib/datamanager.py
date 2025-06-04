@@ -15,13 +15,62 @@ from .kodi_utils import HomeWindow
 from .translation import string_load
 from .tracking import timer
 from .filelock import FileLock
+from .data_models import (
+    DataSet, 
+    Item, 
+    MediaStream, 
+    MediaSource, 
+    Studio, 
+    GenreItem, 
+    UserData)
 
 import xbmc
 import xbmcaddon
 import xbmcvfs
 import xbmcgui
 
+
 log = SimpleLogging(__name__)
+
+
+# --- Custom Data Loader ---
+def process_json_data(json_raw_data: str) -> DataSet:
+    """Load and parse the JSON data file into nested dataclasses."""
+
+    def parse_media_stream(ms):
+        return MediaStream(**ms)
+    def parse_media_source(ms):
+        if 'MediaStreams' in ms:
+            ms['MediaStreams'] = [parse_media_stream(s) for s in ms['MediaStreams']]
+        return MediaSource(**ms)
+    def parse_studio(st):
+        return Studio(**st)
+    def parse_genre_item(gi):
+        return GenreItem(**gi)
+    def parse_user_data(ud):
+        return UserData(**ud)
+
+    def parse_item(item):
+        if 'MediaSources' in item:
+            item['MediaSources'] = [parse_media_source(ms) for ms in item['MediaSources']]
+        if 'Studios' in item:
+            item['Studios'] = [parse_studio(st) for st in item['Studios']]
+        if 'GenreItems' in item:
+            item['GenreItems'] = [parse_genre_item(gi) for gi in item['GenreItems']]
+        if 'UserData' in item:
+            item['UserData'] = parse_user_data(item['UserData'])
+        if 'MediaStreams' in item:
+            item['MediaStreams'] = [parse_media_stream(ms) for ms in item['MediaStreams']]
+        return Item(**item)
+
+    raw_json = json.loads(json_raw_data)
+    if raw_json is None or not isinstance(raw_json, dict) or 'Items' not in raw_json:
+        log.error("JSON data does not contain 'Items' key")
+        return DataSet(Items=[])
+
+    items = [parse_item(i) for i in raw_json['Items']]
+    del raw_json
+    return DataSet(Items=items)
 
 
 class CacheItem:
@@ -46,6 +95,13 @@ class DataManager:
         # log.debug("DataManager __init__")
         pass
 
+    @timer
+    def get_content_dataset(self, url) -> DataSet:
+        json_data = DownloadUtils().download_url(url)
+        dataset_data: DataSet = process_json_data(json_data)
+        log.info("new_data DataSet : {0}", dataset_data)
+        return dataset_data
+        
     @staticmethod
     def load_json_data(json_data):
         return json.loads(json_data, object_hook=lambda d: defaultdict(lambda: None, d))
