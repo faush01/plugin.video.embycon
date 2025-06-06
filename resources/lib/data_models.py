@@ -91,10 +91,33 @@ class GenreItem:
 @dataclass
 class UserData:
     PlaybackPositionTicks: int
-    PlayCount: int
-    IsFavorite: bool
-    Played: bool
+    PlayedPercentage: Optional[float] = 0.0
+    UnplayedItemCount: Optional[int] = 0
+    PlayCount: Optional[int] = 0
+    IsFavorite: bool = False
+    Played: bool = False
 
+@dataclass
+class TagItem:
+    Name: str
+    Id: int
+
+@dataclass
+class ImageTags:
+    Primary: Optional[str] = None
+    Thumb: Optional[str] = None
+    Logo: Optional[str] = None
+    Banner: Optional[str] = None
+    Art: Optional[str] = None
+    Disc: Optional[str] = None
+
+@dataclass
+class ProviderIds:
+    Imdb: Optional[str] = None
+    Tmdb: Optional[str] = None
+    Tvdb: Optional[str] = None
+    TvRage: Optional[str] = None
+    
 @dataclass
 class Item:
     Name: str
@@ -102,6 +125,7 @@ class Item:
     Id: str
     Etag: str
     DateCreated: str
+    Guid: Optional[str] = None
     Container: Optional[str] = None
     SortName: Optional[str] = None
     PremiereDate: Optional[str] = None
@@ -122,12 +146,43 @@ class Item:
     Type: Optional[str] = None
     Studios: List[Studio] = field(default_factory=list)
     GenreItems: List[GenreItem] = field(default_factory=list)
-    TagItems: List[Any] = field(default_factory=list)
+    TagItems: List[TagItem] = field(default_factory=list)
     UserData: Optional[UserData] = None # type: ignore
     MediaStreams: List[MediaStream] = field(default_factory=list)
-    ImageTags: Optional[Dict[str, str]] = field(default_factory=dict)
+    ImageTags: Optional[ImageTags] = None # type: ignore
     BackdropImageTags: List[str] = field(default_factory=list)
     MediaType: Optional[str] = None
+    CanDelete: Optional[bool] = None
+    CanDownload: Optional[bool] = None
+    PresentationUniqueKey: Optional[str] = None
+    ForcedSortName: Optional[str] = None
+    ExternalUrls: List[str] = field(default_factory=list)
+    RemoteTrailers: List[str] = field(default_factory=list)
+    ProviderIds: Optional[Dict[str, str]] = field(default_factory=dict)
+    ParentId: Optional[str] = None
+    ChildCount: Optional[int] = None
+    DisplayPreferencesId: Optional[str] = None
+    PrimaryImageAspectRatio: Optional[float] = None
+    CollectionType: Optional[str] = None
+    LockedFields: Optional[List[str]] = field(default_factory=list)
+    LockData: Optional[bool] = None
+    RecursiveItemCount: Optional[int] = None
+    Status: Optional[str] = None
+    AirDays: List[str] = field(default_factory=list)
+    IndexNumber: Optional[int] = None
+    ParentLogoItemId: Optional[str] = None
+    ParentBackdropItemId: Optional[str] = None
+    ParentBackdropImageTags: Optional[List[str]] = field(default_factory=list)
+    SeriesName: Optional[str] = None
+    SeriesId: Optional[str] = None
+    SeriesPrimaryImageTag: Optional[str] = None
+    ParentLogoImageTag: Optional[str] = None
+    ParentThumbItemId: Optional[str] = None
+    ParentThumbImageTag: Optional[str] = None
+    ParentIndexNumber: Optional[int] = None
+    SeasonId: Optional[str] = None
+    SeasonName: Optional[str] = None
+
 
 @dataclass
 class DataSet:

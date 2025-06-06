@@ -1,5 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 
+from typing import Optional, List, Any
 import json
 from collections import defaultdict
 import threading
@@ -22,7 +23,9 @@ from .data_models import (
     MediaSource, 
     Studio, 
     GenreItem, 
-    UserData)
+    UserData,
+    TagItem,
+    ImageTags)
 
 import xbmc
 import xbmcaddon
@@ -37,54 +40,67 @@ log = SimpleLogging(__name__)
 def process_json_data(json_raw_data: str) -> DataSet:
     """Load and parse the JSON data file into nested dataclasses."""
 
-    def parse_media_stream(ms):
-        return MediaStream(**ms)
+    log.info("loading emby data in dataclasses")
+
     def parse_media_source(ms):
         if 'MediaStreams' in ms:
-            ms['MediaStreams'] = [parse_media_stream(s) for s in ms['MediaStreams']]
+            ms['MediaStreams'] = [MediaStream(**s) for s in ms['MediaStreams']]
         return MediaSource(**ms)
-    def parse_studio(st):
-        return Studio(**st)
-    def parse_genre_item(gi):
-        return GenreItem(**gi)
-    def parse_user_data(ud):
-        return UserData(**ud)
 
     def parse_item(item):
         if 'MediaSources' in item:
             item['MediaSources'] = [parse_media_source(ms) for ms in item['MediaSources']]
         if 'Studios' in item:
-            item['Studios'] = [parse_studio(st) for st in item['Studios']]
+            item['Studios'] = [Studio(**st) for st in item['Studios']]
         if 'GenreItems' in item:
-            item['GenreItems'] = [parse_genre_item(gi) for gi in item['GenreItems']]
+            item['GenreItems'] = [GenreItem(**gi) for gi in item['GenreItems']]
         if 'UserData' in item:
-            item['UserData'] = parse_user_data(item['UserData'])
+            item['UserData'] = UserData(**(item['UserData']))
         if 'MediaStreams' in item:
-            item['MediaStreams'] = [parse_media_stream(ms) for ms in item['MediaStreams']]
+            item['MediaStreams'] = [MediaStream(**ms) for ms in item['MediaStreams']]
+        if 'TagItems' in item:
+            item['TagItems'] = [TagItem(**ti) for ti in item['TagItems']]
+        if 'ImageTags' in item:
+            item['ImageTags'] = ImageTags(**(item['ImageTags']))     
         return Item(**item)
 
     raw_json = json.loads(json_raw_data)
     if raw_json is None or not isinstance(raw_json, dict) or 'Items' not in raw_json:
-        log.error("JSON data does not contain 'Items' key")
+        log.debug("JSON data does not contain 'Items' key")
         return DataSet(Items=[])
 
     items = [parse_item(i) for i in raw_json['Items']]
     del raw_json
-    return DataSet(Items=items)
+    new_dataset = DataSet(Items=items)
+
+    log.info("process_json_data : {0}", new_dataset)
+
+    m = hashlib.md5()
+    m.update(json_raw_data)
+    file_name = m.hexdigest()
+    file_name = os.path.join("C:\\Temp\\test_pickle_files", file_name + ".pickle")
+    with open(file_name, 'wb') as handle:
+        pickle.dump(new_dataset, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    #loaded_data = None
+    #with open(file_name, 'rb') as handle:
+    #    loaded_data = pickle.load(handle)
+    #log.info("process_json_data reloaded : {0}", loaded_data)
+
+    return new_dataset
 
 
 class CacheItem:
-    item_list = None
-    item_list_hash = None
-    date_saved = None
-    date_last_used = None
-    last_action = None
-    items_url = None
-    file_path = None
-    user_id = None
-
     def __init__(self, *args):
-        pass
+        self.item_list: Optional[List[Any]] = None
+        self.item_list_hash: Optional[str] = None
+        self.date_saved: Optional[float] = None
+        self.date_last_used: Optional[float] = None
+        self.last_action: Optional[str] = None
+        self.items_url: Optional[str] = None
+        self.file_path: Optional[str] = None
+        self.user_id: Optional[str] = None
+        self.total_records: Optional[int] = None
 
 
 class DataManager:
@@ -99,7 +115,6 @@ class DataManager:
     def get_content_dataset(self, url) -> DataSet:
         json_data = DownloadUtils().download_url(url)
         dataset_data: DataSet = process_json_data(json_data)
-        log.info("new_data DataSet : {0}", dataset_data)
         return dataset_data
         
     @staticmethod
@@ -110,6 +125,7 @@ class DataManager:
     def get_content(self, url):
         json_data = DownloadUtils().download_url(url)
         result = self.load_json_data(json_data)
+        #process_json_data(json_data)
         return result
 
     def get_cache_filename(self, url):
@@ -211,11 +227,10 @@ class DataManager:
 
 
 class CacheManagerThread(threading.Thread):
-    cached_item = None
-    gui_options = None
-
     def __init__(self, *args):
         threading.Thread.__init__(self, *args)
+        self.cached_item: Optional[CacheItem] = None
+        self.gui_options = None
 
     @staticmethod
     def get_data_hash(items):
@@ -242,6 +257,10 @@ class CacheManagerThread(threading.Thread):
 
         is_fresh = False
 
+        if self.cached_item is None:
+            log.debug("CacheManagerThread : No cached item")
+            return
+
         # if the data is fresh then just save it
         # if the data is to old do a reload
         if (self.cached_item.date_saved is not None
@@ -258,7 +277,7 @@ class CacheManagerThread(threading.Thread):
             self.cached_item.date_last_used = time.time()
 
             with FileLock(self.cached_item.file_path, timeout=5):
-                with open(self.cached_item.file_path, 'wb') as handle:
+                with open(str(self.cached_item.file_path), 'wb') as handle:
                     pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         else:
@@ -304,7 +323,7 @@ class CacheManagerThread(threading.Thread):
                 self.cached_item.total_records = total_records
 
                 with FileLock(self.cached_item.file_path, timeout=5):
-                    with open(self.cached_item.file_path, 'wb') as handle:
+                    with open(str(self.cached_item.file_path), 'wb') as handle:
                         pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 log.debug("CacheManagerThread : Sending container refresh")
@@ -314,7 +333,7 @@ class CacheManagerThread(threading.Thread):
             else:
                 self.cached_item.date_last_used = time.time()
                 with FileLock(self.cached_item.file_path, timeout=5):
-                    with open(self.cached_item.file_path, 'wb') as handle:
+                    with open(str(self.cached_item.file_path), 'wb') as handle:
                         pickle.dump(self.cached_item, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 log.debug("CacheManagerThread : Updating last used date for cache data")
 
