@@ -1136,7 +1136,7 @@ msgstr "多版本时自动播放项目的第一个版本"
 
 msgctxt "#30456"
 msgid "Episode"
-msgstr "剧集"  # 与 #30235 保持一致
+msgstr "剧集"
 
 msgctxt "#30457"
 msgid "Confirm"
