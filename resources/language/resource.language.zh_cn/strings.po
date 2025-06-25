@@ -32,11 +32,11 @@ msgstr "密码"
 
 msgctxt "#30007"
 msgid "Samba username"
-msgstr "Samba 用户名"
+msgstr "SMB用户名"
 
 msgctxt "#30008"
 msgid "Samba password"
-msgstr "Samba 密码"
+msgstr "SMB密码"
 
 msgctxt "#30010"
 msgid "Enable performance profiling"
@@ -56,7 +56,7 @@ msgstr "Emby"
 
 msgctxt "#30015"
 msgid "Log timing data"
-msgstr "记录时间数据"
+msgstr "日志时间数据"
 
 msgctxt "#30016"
 msgid "Device display name"
@@ -80,7 +80,7 @@ msgstr "剧集季数展开方式"
 
 msgctxt "#30021"
 msgid "Show all episodes item"
-msgstr "显示“所有剧集”项"
+msgstr "显示所有剧集项"
 
 msgctxt "#30022"
 msgid "Advanced"
@@ -384,7 +384,7 @@ msgstr "电影 - 收藏"
 
 msgctxt "#30260"
 msgid "BoxSets"
-msgstr "合集"
+msgstr "影视合集"
 
 msgctxt "#30261"
 msgid "TV Shows"
@@ -396,15 +396,15 @@ msgstr "剧集 - 收藏"
 
 msgctxt "#30263"
 msgid "Episodes - Recently Added"
-msgstr "剧集 - 最近添加"
+msgstr "单集 - 最近添加"
 
 msgctxt "#30264"
 msgid "Episodes - In Progress"
-msgstr "剧集 - 正在播放"
+msgstr "单集 - 正在播放"
 
 msgctxt "#30265"
 msgid "Episodes - Next Up"
-msgstr "剧集 - 下一集"
+msgstr "单集 - 下一集"
 
 msgctxt "#30266"
 msgid "Movies - Pages"
@@ -600,7 +600,7 @@ msgstr "播放"
 
 msgctxt "#30315"
 msgid "Suppress notifications for connection errors"
-msgstr "抑制连接错误通知"
+msgstr "忽略连接错误通知"
 
 msgctxt "#30316"
 msgid "Connection Error"
@@ -688,7 +688,7 @@ msgstr "新内容检查间隔 (单位：分钟，0 = 禁用)"
 
 msgctxt "#30343"
 msgid "Changes Require Kodi Restart"
-msgstr "更改需要重启"
+msgstr "更改需要重启Kodi"
 
 msgctxt "#30344"
 msgid "Number of images removed from cache : %s"
@@ -740,7 +740,7 @@ msgstr " - 经常播放"
 
 msgctxt "#30354"
 msgid "Go To Series"
-msgstr "转到剧集系列"
+msgstr "转到系列"
 
 msgctxt "#30356"
 msgid "Loading existing image list"
@@ -968,7 +968,7 @@ msgstr " - 标签"
 
 msgctxt "#30414"
 msgid " - Favorites"
-msgstr " - 收藏"  # 与 #30259, #30262 保持一致
+msgstr " - 收藏"
 
 msgctxt "#30415"
 msgid " - Favorite Collections"
@@ -1044,7 +1044,7 @@ msgstr "在列表中隐藏已观看项目"
 
 msgctxt "#30433"
 msgid "Allow direct file playback"
-msgstr "允许直接文件播放"
+msgstr "允许直接播放文件"
 
 msgctxt "#30434"
 msgid "Force transcode stream bitrate (kbs)"
@@ -1124,7 +1124,7 @@ msgstr "季视图 ID"
 
 msgctxt "#30453"
 msgid "Episodes view ID"
-msgstr "剧集视图 ID"
+msgstr "单集视图 ID"
 
 msgctxt "#30454"
 msgid "Collections view ID"
@@ -1136,7 +1136,7 @@ msgstr "多版本时自动播放项目的第一个版本"
 
 msgctxt "#30456"
 msgid "Episode"
-msgstr "剧集"
+msgstr "单集"
 
 msgctxt "#30457"
 msgid "Confirm"
