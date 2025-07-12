@@ -12,7 +12,7 @@ msgstr ""
 
 msgctxt "#30000"
 msgid "Host"
-msgstr "主机/IP地址"
+msgstr "主机"
 
 msgctxt "#30001"
 msgid "Port"
@@ -36,7 +36,7 @@ msgstr "SMB用户名"
 
 msgctxt "#30008"
 msgid "Samba password"
-msgstr "SMB密码"
+msgstr "SMB 密码"
 
 msgctxt "#30010"
 msgid "Enable performance profiling"
@@ -380,7 +380,7 @@ msgstr "电影 - 正在播放"
 
 msgctxt "#30259"
 msgid "Movies - Favorites"
-msgstr "电影 - 收藏"
+msgstr "电影 - 收藏夹"
 
 msgctxt "#30260"
 msgid "BoxSets"
@@ -392,7 +392,7 @@ msgstr "剧集"
 
 msgctxt "#30262"
 msgid "TV Shows - Favorites"
-msgstr "剧集 - 收藏"
+msgstr "剧集 - 收藏夹"
 
 msgctxt "#30263"
 msgid "Episodes - Recently Added"
@@ -432,11 +432,11 @@ msgstr "标记为未观看"
 
 msgctxt "#30272"
 msgid "Set Favourite"
-msgstr "设为收藏"
+msgstr "设置收藏夹"
 
 msgctxt "#30273"
 msgid "Unset Favourite"
-msgstr "取消收藏"
+msgstr "未设置收藏夹"
 
 msgctxt "#30274"
 msgid "Delete"
@@ -652,7 +652,7 @@ msgstr "屏幕保护程序激活时停止媒体播放"
 
 msgctxt "#30333"
 msgid "Cache artwork in the background"
-msgstr "在后台缓存艺术作品"
+msgstr "在后台缓存艺术图"
 
 msgctxt "#30334"
 msgid "Use EmbyCon context menu"
@@ -688,7 +688,7 @@ msgstr "新内容检查间隔 (单位：分钟，0 = 禁用)"
 
 msgctxt "#30343"
 msgid "Changes Require Kodi Restart"
-msgstr "更改需要重启Kodi"
+msgstr "更改需要重启 Kodi"
 
 msgctxt "#30344"
 msgid "Number of images removed from cache : %s"
@@ -968,11 +968,11 @@ msgstr " - 标签"
 
 msgctxt "#30414"
 msgid " - Favorites"
-msgstr " - 收藏"
+msgstr " - 收藏夹"
 
 msgctxt "#30415"
 msgid " - Favorite Collections"
-msgstr " - 收藏的合集"
+msgstr " - 收藏夹合集"
 
 msgctxt "#30416"
 msgid "HTTP timeout seconds"
