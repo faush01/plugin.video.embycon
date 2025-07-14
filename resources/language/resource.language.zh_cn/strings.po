@@ -1,0 +1,1157 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: EmbyCon\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2025-07-12 09:59+0800\n"
+"Last-Translator: wabisabi926\n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+msgctxt "#30000"
+msgid "Host"
+msgstr "主机"
+
+msgctxt "#30001"
+msgid "Port"
+msgstr "端口"
+
+msgctxt "#30003"
+msgid "Verify HTTPS certificate"
+msgstr "验证 HTTPS 证书"
+
+msgctxt "#30005"
+msgid "Username"
+msgstr "用户名"
+
+msgctxt "#30006"
+msgid "Password"
+msgstr "密码"
+
+msgctxt "#30007"
+msgid "Samba username"
+msgstr "SMB 用户名"
+
+msgctxt "#30008"
+msgid "Samba password"
+msgstr "SMB 密码"
+
+msgctxt "#30010"
+msgid "Enable performance profiling"
+msgstr "启用性能分析"
+
+msgctxt "#30011"
+msgid "[Detect local server]"
+msgstr "[检测本地服务器]"
+
+msgctxt "#30012"
+msgid "[Change user]"
+msgstr "[更改用户]"
+
+msgctxt "#30014"
+msgid "Emby"
+msgstr "EMBY"
+
+msgctxt "#30015"
+msgid "Log timing data"
+msgstr "日志计时数据"
+
+msgctxt "#30016"
+msgid "Device display name"
+msgstr "设备显示名称"
+
+msgctxt "#30017"
+msgid "Show connected clients"
+msgstr "显示连接的客户端"
+
+msgctxt "#30018"
+msgid "Number of items to show in filtered lists"
+msgstr "筛选列表中要显示的项目数"
+
+msgctxt "#30019"
+msgid "Filtered episode name format"
+msgstr "过滤剧集名称格式"
+
+msgctxt "#30020"
+msgid "Flatten TV Show seasons"
+msgstr "平铺电视节目季"
+
+msgctxt "#30021"
+msgid "Show all episodes item"
+msgstr "显示所有剧集项目"
+
+msgctxt "#30022"
+msgid "Advanced"
+msgstr "高级"
+
+msgctxt "#30023"
+msgid "Hide unwatched episode details"
+msgstr "隐藏未观看的剧集简介"
+
+msgctxt "#30024"
+msgid "Username:"
+msgstr "用户名："
+
+msgctxt "#30025"
+msgid "Password:"
+msgstr "密码："
+
+msgctxt "#30026"
+msgid "Widget item select action"
+msgstr "小部件项目选择操作"
+
+msgctxt "#30027"
+msgid "Enable debug logging"
+msgstr "启用调试日志记录"
+
+msgctxt "#30044"
+msgid "Incorrect Username/Password"
+msgstr "用户名或密码不正确"
+
+msgctxt "#30045"
+msgid "Username not found"
+msgstr "找不到用户名"
+
+msgctxt "#30052"
+msgid "Deleting"
+msgstr "删除"
+
+msgctxt "#30053"
+msgid "Waiting for server to delete"
+msgstr "等待服务器删除"
+
+msgctxt "#30063"
+msgid "N/A"
+msgstr "不可用"
+
+msgctxt "#30091"
+msgid "Confirm delete?"
+msgstr "确认是否删除？"
+
+msgctxt "#30092"
+msgid "Warning: This action will delete the media files from the server."
+msgstr "警告：此操作将从服务器中删除该媒体文件。"
+
+msgctxt "#30110"
+msgid "Interface"
+msgstr "界面"
+
+msgctxt "#30111"
+msgid "Services"
+msgstr "服务"
+
+msgctxt "#30112"
+msgid "Loading Content"
+msgstr "加载内容"
+
+msgctxt "#30113"
+msgid "Retrieving Data"
+msgstr "检索数据"
+
+msgctxt "#30114"
+msgid "Jump back seconds"
+msgstr "向后跳转（秒）"
+
+msgctxt "#30116"
+msgid "Add unwatched counts to names"
+msgstr "将未观看的剧集计数添加到“季”名称中显示"
+
+msgctxt "#30117"
+msgid "User premiered date as date added"
+msgstr "用户首播日期为添加日期"
+
+msgctxt "#30118"
+msgid "Add resume percent to names"
+msgstr "将简介百分比添加到名称"
+
+msgctxt "#30120"
+msgid "Show load progress"
+msgstr "显示加载进度"
+
+msgctxt "#30121"
+msgid "On resume"
+msgstr "自动恢复"
+
+msgctxt "#30125"
+msgid "Done"
+msgstr "完成"
+
+msgctxt "#30126"
+msgid "Processing Item : "
+msgstr "处理项目："
+
+msgctxt "#30135"
+msgid "Error"
+msgstr "错误"
+
+msgctxt "#30139"
+msgid "No Media Type Set"
+msgstr "未设置媒体类型"
+
+msgctxt "#30163"
+msgid "Add (cc) if subtitle is available"
+msgstr "如果有字幕，则添加“CC”标识"
+
+msgctxt "#30166"
+msgid "Select Server"
+msgstr "选择服务器"
+
+msgctxt "#30167"
+msgid "Selected Server Address"
+msgstr "选定的服务器地址"
+
+msgctxt "#30169"
+msgid "Address: "
+msgstr "地址："
+
+msgctxt "#30180"
+msgid "Select User"
+msgstr "选择用户"
+
+msgctxt "#30181"
+msgid "Include plot"
+msgstr "包含章节"
+
+msgctxt "#30182"
+msgid "Include media stream info"
+msgstr "包含媒体流信息"
+
+msgctxt "#30183"
+msgid "Include people"
+msgstr "包括演职人员"
+
+msgctxt "#30200"
+msgid "URL error: %s"
+msgstr "URL 错误： %s"
+
+msgctxt "#30201"
+msgid "Unable to connect to server"
+msgstr "无法连接到服务器"
+
+msgctxt "#30206"
+msgid "Playback type"
+msgstr "播放类型"
+
+msgctxt "#30207"
+msgid "Playback"
+msgstr "播放"
+
+msgctxt "#30208"
+msgid "Max stream bitrate (kbs)"
+msgstr "最大流比特率（Kbits）"
+
+msgctxt "#30209"
+msgid "File direct path"
+msgstr "文件绝对路径"
+
+msgctxt "#30210"
+msgid "HTTP direct stream"
+msgstr "HTTP 直推流媒体"
+
+msgctxt "#30211"
+msgid "Transcode options"
+msgstr "转码选项"
+
+msgctxt "#30212"
+msgid "Video max width"
+msgstr "视频最大宽度"
+
+msgctxt "#30213"
+msgid "Video force 8 bit"
+msgstr "视频强制转为 8bit"
+
+msgctxt "#30214"
+msgid "Events"
+msgstr "事件"
+
+msgctxt "#30215"
+msgid "On playback stop (100% = disabled)"
+msgstr "播放停止时（100% = 禁用）"
+
+msgctxt "#30216"
+msgid "Item Details"
+msgstr "界面详细信息"
+
+msgctxt "#30217"
+msgid "Prompt to delete episode after %"
+msgstr "在（%）之后提示删除剧集"
+
+msgctxt "#30218"
+msgid "Play next episode after %"
+msgstr "在（%）之后播放下一集"
+
+msgctxt "#30219"
+msgid " - Prompt before play"
+msgstr "播放前提示"
+
+msgctxt "#30220"
+msgid "Prompt to delete movie after %"
+msgstr "在（%）之后提示删除电影"
+
+msgctxt "#30222"
+msgid "Item Layout"
+msgstr "界面布局"
+
+msgctxt "#30223"
+msgid "Page Size and Filtering"
+msgstr "分页大小和筛选"
+
+msgctxt "#30224"
+msgid "Interaction"
+msgstr "互动"
+
+msgctxt "#30229"
+msgid "TV Shows"
+msgstr "电视节目"
+
+msgctxt "#30231"
+msgid "Movies"
+msgstr "电影"
+
+msgctxt "#30235"
+msgid "Episodes"
+msgstr "剧集"
+
+msgctxt "#30236"
+msgid "Force transcode h265 (hevc)"
+msgstr "强制 H265(HEVC) 转码"
+
+msgctxt "#30237"
+msgid "Start from beginning"
+msgstr "从头开始"
+
+msgctxt "#30238"
+msgid "Playback stream options"
+msgstr "播放流选项"
+
+msgctxt "#30239"
+msgid "Force transcode mpeg2"
+msgstr "强制 MPEG2 转码"
+
+msgctxt "#30240"
+msgid "Force transcode msmpeg4v3 (divx)"
+msgstr "强制 MSMPEG4v3(DivX) 转码"
+
+msgctxt "#30241"
+msgid "Force transcode mpeg4"
+msgstr "强制 MPEG4 转码"
+
+msgctxt "#30246"
+msgid "Search"
+msgstr "搜索"
+
+msgctxt "#30247"
+msgid "Custom Widget Content"
+msgstr "自定义小部件内容"
+
+msgctxt "#30250"
+msgid "Unknown"
+msgstr "未知"
+
+msgctxt "#30251"
+msgid "Movies - Genres"
+msgstr "电影（类型）"
+
+msgctxt "#30252"
+msgid "Movies - A-Z"
+msgstr "电影按首字幕排序（A-Z）"
+
+msgctxt "#30254"
+msgid "Show add-on settings"
+msgstr "插件设置"
+
+msgctxt "#30255"
+msgid "TV Shows - A-Z"
+msgstr "电视节目按首字母排序（A-Z）"
+
+msgctxt "#30256"
+msgid "Movies"
+msgstr "电影"
+
+msgctxt "#30257"
+msgid "Movies - Recently Added"
+msgstr "电影 - 最近添加"
+
+msgctxt "#30258"
+msgid "Movies - In Progress"
+msgstr "电影 - 正在播出"
+
+msgctxt "#30259"
+msgid "Movies - Favorites"
+msgstr "电影 - 收藏夹"
+
+msgctxt "#30260"
+msgid "BoxSets"
+msgstr "合集"
+
+msgctxt "#30261"
+msgid "TV Shows"
+msgstr "电视节目"
+
+msgctxt "#30262"
+msgid "TV Shows - Favorites"
+msgstr "电视节目 - 收藏夹"
+
+msgctxt "#30263"
+msgid "Episodes - Recently Added"
+msgstr "剧集 - 最近添加"
+
+msgctxt "#30264"
+msgid "Episodes - In Progress"
+msgstr "剧集 - 正在播出"
+
+msgctxt "#30265"
+msgid "Episodes - Next Up"
+msgstr "剧集 - 下一集"
+
+msgctxt "#30266"
+msgid "Movies - Pages"
+msgstr "电影（分页）"
+
+msgctxt "#30267"
+msgid " - In Progress"
+msgstr "- 进行中"
+
+msgctxt "#30268"
+msgid " - Recently Added"
+msgstr " - 最近添加"
+
+msgctxt "#30269"
+msgid "Movies - Random"
+msgstr "电影 - 随机播放"
+
+msgctxt "#30270"
+msgid "Mark Watched"
+msgstr "标记 已观看"
+
+msgctxt "#30271"
+msgid "Mark Unwatched"
+msgstr "标记 未观看"
+
+msgctxt "#30272"
+msgid "Set Favourite"
+msgstr "添加到喜欢的列表中"
+
+msgctxt "#30273"
+msgid "Unset Favourite"
+msgstr "从喜欢的列表中移除"
+
+msgctxt "#30274"
+msgid "Delete"
+msgstr "删除"
+
+msgctxt "#30275"
+msgid "Force Transcode"
+msgstr "强制转码"
+
+msgctxt "#30276"
+msgid "Extra Resume Prompt Detected"
+msgstr "检测到额外的简介提示"
+
+msgctxt "#30277"
+msgid "EmbyCon needs to prompt for resume on partily played items, Kodi can also prompt, this can cause a double prompt. Do you want to remove the double prompt?"
+msgstr "EmbyCon 需要对部分播放的项目进行恢复提示，Kodi 也可以进行提示，这可能会导致双重提示。是否要删除双重提示？"
+
+msgctxt "#30278"
+msgid " - Next Up"
+msgstr " - 下一集"
+
+msgctxt "#30279"
+msgid "TV Shows - Unwatched"
+msgstr "电视节目 - 未观看"
+
+msgctxt "#30280"
+msgid "Missing Title"
+msgstr "缺少标题"
+
+msgctxt "#30281"
+msgid "Refresh Cached Images"
+msgstr "刷新缓存图像"
+
+msgctxt "#30282"
+msgid ""
+"No Emby servers detected on your local network.\n"
+"Do you want to manually enter a server url?"
+msgstr ""
+"本地网络没有检测到 Emby 服务器，\n"
+"是否手动添加服务器？"
+
+msgctxt "#30283"
+msgid "Play Next Episode?"
+msgstr "播放下一集？"
+
+msgctxt "#30285"
+msgid " - Unwatched"
+msgstr " - 未观看"
+
+msgctxt "#30286"
+msgid "Movies - Unwatched"
+msgstr "电影--未观看"
+
+msgctxt "#30287"
+msgid "TV Shows - Latest"
+msgstr "电视节目 - 最新"
+
+msgctxt "#30288"
+msgid " - Latest"
+msgstr " - 最新"
+
+msgctxt "#30289"
+msgid "TV Shows - Genres"
+msgstr "电视节目（类型）"
+
+msgctxt "#30290"
+msgid "All"
+msgstr "所有剧集"
+
+msgctxt "#30291"
+msgid "Select Audio Stream"
+msgstr "选择音频流"
+
+msgctxt "#30292"
+msgid "Select Subtitle Stream"
+msgstr "选择字幕流"
+
+msgctxt "#30293"
+msgid "Cache images"
+msgstr "缓存图像"
+
+msgctxt "#30294"
+msgid "Notice"
+msgstr "通知"
+
+msgctxt "#30295"
+msgid ""
+"To use this feature you need HTTP control enabled.\n"
+"Kodi Settings->Services->Allow remote control via HTTP"
+msgstr ""
+"要使用此功能，您需要启用 HTTP 控件。\n"
+"Kodi 设置->服务->允许通过 HTTP 进行远程控制"
+
+msgctxt "#30296"
+msgid "Delete"
+msgstr "删除"
+
+msgctxt "#30297"
+msgid "Delete unused images?"
+msgstr "删除未使用的图像吗？"
+
+msgctxt "#30298"
+msgid "Deleting Kodi Images"
+msgstr "删除 Kodi 图像"
+
+msgctxt "#30299"
+msgid "Cache Images"
+msgstr "缓存图像"
+
+msgctxt "#30300"
+msgid "Cache all Emby images as local Kodi images?"
+msgstr "将所有 Emby 图像缓存为本地 Kodi 图像？"
+
+msgctxt "#30301"
+msgid "Caching Images"
+msgstr "缓存图像"
+
+msgctxt "#30302"
+msgid "Existing images : "
+msgstr "现有图片 ："
+
+msgctxt "#30303"
+msgid "Missing Emby images : "
+msgstr "缺少 Emby 图像："
+
+msgctxt "#30304"
+msgid "Cached Emby images : "
+msgstr "缓存的 Emby 图像："
+
+msgctxt "#30305"
+msgid "Not Found: %s"
+msgstr "未找到： %s"
+
+msgctxt "#30306"
+msgid "Playback starting: %s"
+msgstr "开始播放： %s"
+
+msgctxt "#30307"
+msgid "Play Trailer"
+msgstr "播放预告片"
+
+msgctxt "#30308"
+msgid "Select Trailer"
+msgstr "选择预告片"
+
+msgctxt "#30309"
+msgid "Select Media Source"
+msgstr "选择媒体源"
+
+msgctxt "#30310"
+msgid "Enable Emby remote control"
+msgstr "启用 Emby 远程控制"
+
+msgctxt "#30311"
+msgid "Library - "
+msgstr "媒体库 - "
+
+msgctxt "#30312"
+msgid "All - "
+msgstr "全部 - "
+
+msgctxt "#30313"
+msgid "Menu"
+msgstr "菜单"
+
+msgctxt "#30314"
+msgid "Play"
+msgstr "播放"
+
+msgctxt "#30315"
+msgid "Suppress notifications for connection errors"
+msgstr "禁止通知连接错误"
+
+msgctxt "#30316"
+msgid "Connection Error"
+msgstr "连接错误"
+
+msgctxt "#30317"
+msgid "Play All"
+msgstr "全部播放"
+
+msgctxt "#30318"
+msgid "Music - Albums"
+msgstr "音乐 - 专辑"
+
+msgctxt "#30320"
+msgid " - Albums"
+msgstr " - 专辑"
+
+msgctxt "#30322"
+msgid "Auto resume"
+msgstr "自动恢复"
+
+msgctxt "#30325"
+msgid " - Genres"
+msgstr " - 类型"
+
+msgctxt "#30327"
+msgid "Go To Season"
+msgstr "转到所在的“季”中"
+
+msgctxt "#30328"
+msgid "Show empty folders (shows, seasons, collections)"
+msgstr "显示空文件夹（含有：节目、季、合集）"
+
+msgctxt "#30329"
+msgid "Screensaver"
+msgstr "屏幕保护程序"
+
+msgctxt "#30330"
+msgid "Show change user dialog"
+msgstr "显示更改用户对话框"
+
+msgctxt "#30331"
+msgid "Items per page"
+msgstr "每页显示的项目数"
+
+msgctxt "#30332"
+msgid "Stop media playback on screensaver activation"
+msgstr "启动屏幕保护程序时停止媒体播放"
+
+msgctxt "#30333"
+msgid "Cache artwork in the background"
+msgstr "在后台缓存艺术图"
+
+msgctxt "#30334"
+msgid "Use EmbyCon context menu"
+msgstr "使用 EmbyCon 上下文菜单"
+
+msgctxt "#30335"
+msgid "Use EmbyCon bookmarks dialog"
+msgstr "使用 EmbyCon 书签对话框"
+
+msgctxt "#30337"
+msgid "Song"
+msgstr "歌曲"
+
+msgctxt "#30338"
+msgid "Album"
+msgstr "专辑"
+
+msgctxt "#30339"
+msgid "Person"
+msgstr "歌手"
+
+msgctxt "#30340"
+msgid "Group movies into collections"
+msgstr "在电影列表中显示合集"
+
+msgctxt "#30341"
+msgid "Background image update interval (0 = disabled)"
+msgstr "背景图像更新间隔（0 = 禁用）"
+
+msgctxt "#30342"
+msgid "New content check interval (0 = disabled)"
+msgstr "更新内容检查间隔（0 = 禁用）"
+
+msgctxt "#30343"
+msgid "Changes Require Kodi Restart"
+msgstr "更改需要重新启动 Kodi"
+
+msgctxt "#30344"
+msgid "Number of images removed from cache : %s"
+msgstr "从缓存中删除的图像数量： %s"
+
+msgctxt "#30345"
+msgid "Cache Emby server data requests"
+msgstr "缓存服务器请求"
+
+msgctxt "#30346"
+msgid "Deleteing Cached Images"
+msgstr "删除缓存的图像"
+
+msgctxt "#30347"
+msgid "Getting Existing Images"
+msgstr "获取现有图像"
+
+msgctxt "#30348"
+msgid "Add user ratings"
+msgstr "添加用户分级"
+
+msgctxt "#30349"
+msgid " - Recently Played"
+msgstr "- 最近播放"
+
+msgctxt "#30350"
+msgid "Music - Recently Added"
+msgstr "音乐 - 最近添加"
+
+msgctxt "#30351"
+msgid "Music - Recently Played"
+msgstr "音乐 - 最近播放"
+
+msgctxt "#30352"
+msgid "Music - Frequently Played"
+msgstr "音乐 - 频繁播放"
+
+msgctxt "#30319"
+msgid "Music - All Album Artists"
+msgstr "音乐 - 所有专辑艺术家"
+
+msgctxt "#30321"
+msgid " - Album Artists"
+msgstr " - 专辑艺术家"
+
+msgctxt "#30353"
+msgid " - Frequently Played"
+msgstr " - 经常播放"
+
+msgctxt "#30354"
+msgid "Go To Series"
+msgstr "转到所在的“系列”中"
+
+msgctxt "#30356"
+msgid "Loading existing image list"
+msgstr "加载现有图像列表"
+
+msgctxt "#30357"
+msgid "Processing existing image list"
+msgstr "处理现有图像列表"
+
+msgctxt "#30358"
+msgid "Retreiving remote image list"
+msgstr "检索远程图像列表"
+
+msgctxt "#30359"
+msgid "Building full image list"
+msgstr "建立完整图像列表"
+
+msgctxt "#30360"
+msgid " - Channels"
+msgstr " - 频道"
+
+msgctxt "#30361"
+msgid " - Programs"
+msgstr " - 节目"
+
+msgctxt "#30362"
+msgid " - Recordings"
+msgstr " - 录音"
+
+msgctxt "#30363"
+msgid "Save Password?"
+msgstr "保存密码？"
+
+msgctxt "#30364"
+msgid "Do you want to save the password?"
+msgstr "是否要保存密码？"
+
+msgctxt "#30365"
+msgid "Manual Login"
+msgstr "手动登录"
+
+msgctxt "#30366"
+msgid "Manually enter user details"
+msgstr "手动输入用户详细信息"
+
+msgctxt "#30367"
+msgid "Allow fast user switching password saving"
+msgstr "允许快速用户切换密码保存"
+
+msgctxt "#30368"
+msgid "Clear Password?"
+msgstr "清除密码？"
+
+msgctxt "#30369"
+msgid "Do you want to clear your saved password?"
+msgstr "是否要清除保存的密码？"
+
+msgctxt "#30371"
+msgid "Could not connect to the URL you entered, do you want to try again?"
+msgstr "无法连接到您输入的 URL，是否重试？"
+
+msgctxt "#30372"
+msgid "Server URL"
+msgstr "服务器 URL"
+
+msgctxt "#30373"
+msgid "Scanning for local servers"
+msgstr "正在扫描本地服务器"
+
+msgctxt "#30374"
+msgid "Sending request"
+msgstr "发送请求"
+
+msgctxt "#30375"
+msgid "Receiving data packet: %s"
+msgstr "接收数据包： %s"
+
+msgctxt "#30376"
+msgid "Checking server url"
+msgstr "检查服务器的 URL"
+
+msgctxt "#30377"
+msgid "Sending request"
+msgstr "发送请求"
+
+msgctxt "#30378"
+msgid "Persist user details"
+msgstr "保留用户详细信息"
+
+msgctxt "#30379"
+msgid "External subtitle prompt"
+msgstr "外挂字幕提示"
+
+msgctxt "#30380"
+msgid "Never"
+msgstr "从不"
+
+msgctxt "#30381"
+msgid "More than one"
+msgstr "多个时"
+
+msgctxt "#30382"
+msgid "Always"
+msgstr "总是"
+
+msgctxt "#30383"
+msgid "System - "
+msgstr "系统 - "
+
+msgctxt "#30384"
+msgid "Random movies interval minutes (0 = disabled)"
+msgstr "随机电影刷新间隔（0 = 禁用）"
+
+msgctxt "#30385"
+msgid "Existing images before delete : "
+msgstr "删除之前的现有图像："
+
+msgctxt "#30386"
+msgid "Unused Emby images : "
+msgstr "未使用的 Emby 图像："
+
+msgctxt "#30387"
+msgid "Unused images removed : "
+msgstr "删除未使用的图像："
+
+msgctxt "#30388"
+msgid "Server details"
+msgstr "服务器详细信息"
+
+msgctxt "#30389"
+msgid "User details"
+msgstr "用户详细信息"
+
+msgctxt "#30390"
+msgid "Protocol"
+msgstr "协议"
+
+msgctxt "#30391"
+msgid "HTTP"
+msgstr "HTTP"
+
+msgctxt "#30392"
+msgid "HTTPS"
+msgstr "HTTPS"
+
+msgctxt "#30393"
+msgid "Clear Cache Result"
+msgstr "清除缓存结果"
+
+msgctxt "#30394"
+msgid "%s cache files deleted"
+msgstr "%s 已删除缓存文件"
+
+msgctxt "#30395"
+msgid "Clear cached server data"
+msgstr "清除缓存的服务器数据"
+
+msgctxt "#30397"
+msgid " - Pages"
+msgstr " - 页数"
+
+msgctxt "#30398"
+msgid "Refresh Emby Metadata"
+msgstr "刷新 Emby 元数据"
+
+msgctxt "#30399"
+msgid "Hide"
+msgstr "隐藏"
+
+msgctxt "#30400"
+msgid "Cache images interval minutes (0 = disabled)"
+msgstr "缓存图像间隔分钟（0 = 禁用）"
+
+msgctxt "#30401"
+msgid "Info"
+msgstr "信息"
+
+msgctxt "#30402"
+msgid "Add to Kodi Playlist"
+msgstr "添加到播放列表"
+
+msgctxt "#30403"
+msgid "Movies - Recommendations"
+msgstr "电影 - 推荐"
+
+msgctxt "#30404"
+msgid " - A-Z"
+msgstr " - A-Z"
+
+msgctxt "#30405"
+msgid " - Show All"
+msgstr " - 显示全部"
+
+msgctxt "#30406"
+msgid "Emby Libraries"
+msgstr "媒体库"
+
+msgctxt "#30407"
+msgid "Global Lists"
+msgstr "全局列表"
+
+msgctxt "#30408"
+msgid "Custom Widgets"
+msgstr "自定义小部件"
+
+msgctxt "#30409"
+msgid "Add-on Actions"
+msgstr "插件操作"
+
+msgctxt "#30410"
+msgid " - Collections"
+msgstr "- 收藏"
+
+msgctxt "#30411"
+msgid " - Years"
+msgstr " - 年份"
+
+msgctxt "#30412"
+msgid " - Decades"
+msgstr "- 年代"
+
+msgctxt "#30413"
+msgid " - Tags"
+msgstr "- 标签"
+
+msgctxt "#30414"
+msgid " - Favorites"
+msgstr " - 收藏夹"
+
+msgctxt "#30415"
+msgid " - Favorite Collections"
+msgstr " - 最喜爱的收藏夹"
+
+msgctxt "#30416"
+msgid "HTTP timeout seconds"
+msgstr "HTTP 超时秒数"
+
+msgctxt "#30417"
+msgid "You do not have permision to delete this item"
+msgstr "您没有删除此项目的权限"
+
+msgctxt "#30418"
+msgid "Audio bitrate (kbs)"
+msgstr "音频比特率（Kbits）"
+
+msgctxt "#30419"
+msgid "Audio codec"
+msgstr "音频编解码器"
+
+msgctxt "#30420"
+msgid "Audio max channels"
+msgstr "音频最大声道"
+
+msgctxt "#30421"
+msgid "Views"
+msgstr "视图"
+
+msgctxt "#30422"
+msgid "Sorting"
+msgstr "排序"
+
+msgctxt "#30423"
+msgid "NotSet"
+msgstr "未设置"
+
+msgctxt "#30424"
+msgid "Default"
+msgstr "默认"
+
+msgctxt "#30425"
+msgid "Year"
+msgstr "年份"
+
+msgctxt "#30426"
+msgid "Title"
+msgstr "标题"
+
+msgctxt "#30427"
+msgid "Added"
+msgstr "加入日期"
+
+msgctxt "#30428"
+msgid "Rating"
+msgstr "评级"
+
+msgctxt "#30429"
+msgid "Genre"
+msgstr "类型"
+
+msgctxt "#30430"
+msgid "Label"
+msgstr "标签"
+
+msgctxt "#30431"
+msgid "Seasons"
+msgstr "季"
+
+msgctxt "#30432"
+msgid "Hide watched items in lists"
+msgstr "隐藏列表中的关注项"
+
+msgctxt "#30433"
+msgid "Allow direct file playback"
+msgstr "允许媒体源文件直接播放"
+
+msgctxt "#30434"
+msgid "Force transcode stream bitrate (kbs)"
+msgstr "强制转码流比特率（kbs）"
+
+msgctxt "#30435"
+msgid "Connection speed test"
+msgstr "连接速度测试"
+
+msgctxt "#30436"
+msgid "Speed test data size (MB)"
+msgstr "速度测试数据大小（MB）"
+
+msgctxt "#30437"
+msgid "Playback options"
+msgstr "播放选项"
+
+msgctxt "#30438"
+msgid "Play cinema intros"
+msgstr "播放电影简介"
+
+msgctxt "#30439"
+msgid "Show play next episode at time left"
+msgstr "在剩余时间播放下一集"
+
+msgctxt "#30440"
+msgid "Play next"
+msgstr "播放下一集"
+
+msgctxt "#30441"
+msgid "Intro Skipping"
+msgstr "跳过简介"
+
+msgctxt "#30442"
+msgid "Off"
+msgstr "关闭"
+
+msgctxt "#30443"
+msgid "Show skip button"
+msgstr "显示跳过按钮"
+
+msgctxt "#30444"
+msgid "Auto skip intro"
+msgstr "自动跳过简介"
+
+msgctxt "#30445"
+msgid "No Flattening"
+msgstr "无扁平化"
+
+msgctxt "#30446"
+msgid "Flatten Single"
+msgstr "单一扁平化"
+
+msgctxt "#30447"
+msgid "Flatten All"
+msgstr "所有扁平化"
+
+msgctxt "#30448"
+msgid "Force transcode av1"
+msgstr "强制转换 av1 编码"
+
+msgctxt "#30449"
+msgid "Max Image Width"
+msgstr "图像最大宽度"
+
+msgctxt "#30450"
+msgid "Movies view ID"
+msgstr "电影视图 ID"
+
+msgctxt "#30451"
+msgid "TV Shows view ID"
+msgstr "电视节目视图 ID"
+
+msgctxt "#30452"
+msgid "Seasons view ID"
+msgstr "季视图 ID"
+
+msgctxt "#30453"
+msgid "Episodes view ID"
+msgstr "剧集视图 ID"
+
+msgctxt "#30454"
+msgid "Collections view ID"
+msgstr "收藏视图 ID"
+
+msgctxt "#30455"
+msgid "Autoplay first version of an item"
+msgstr "自动播放项目的第一个版本"
+
+msgctxt "#30456"
+msgid "Episode"
+msgstr "集"
+
+msgctxt "#30457"
+msgid "Confirm"
+msgstr "确认"
+
+msgctxt "#30458"
+msgid "Are you sure you want to hide this item?"
+msgstr "你确定要隐藏这个项目吗?"
