@@ -32,7 +32,7 @@ msgstr "密码"
 
 msgctxt "#30007"
 msgid "Samba username"
-msgstr "SMB用户名"
+msgstr "SMB 用户名"
 
 msgctxt "#30008"
 msgid "Samba password"
