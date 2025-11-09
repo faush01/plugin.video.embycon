@@ -1,8 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 
-import urllib.request
 import urllib.parse
-import urllib.error
 import sys
 import os
 from datetime import datetime

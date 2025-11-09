@@ -6,9 +6,7 @@ import xbmcvfs
 
 import string
 import random
-import urllib.request
 import urllib.parse
-import urllib.error
 import json
 import base64
 import time

@@ -10,9 +10,7 @@ from io import BytesIO
 import gzip
 import json
 from urllib.parse import urlparse
-import urllib.request 
 import urllib.parse
-import urllib.error
 from base64 import b64encode
 from collections import defaultdict
 

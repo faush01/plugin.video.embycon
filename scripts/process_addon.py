@@ -4,17 +4,21 @@ from shutil import copy2, copytree, rmtree
 import os
 import sys
 
-package_path = "package"
 
 def ignore_files(path, item_list):
-	return [".idea", ".git", ".gitignore", "scripts", "venv", "package"]
+	return ["README.md", "ruff.toml", "skin.estuary", ".github", ".ruff_cache", ".vscode", ".idea", ".git", ".gitignore", "scripts", "venv", "package"]
 
-repo_path = "C:\\Development\\GitHub\\embycon_kodi_repo\\repo\\release\\"
+repo_path = "C:\\Development\\emby\\embycon_kodi_repo\\repo\\release\\"
 zip_path = "c:\\Program Files\\7-Zip\\7z.exe"
 
-addon_path = sys.argv[1]
+addon_path = sys.argv[1] if len(sys.argv) > 1 else None
+if not addon_path:
+	result = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+	addon_path = result.stdout.strip()
 
-tree = ET.parse(addon_path + "\\addon.xml")
+package_path = os.path.join(addon_path, "package")
+
+tree = ET.parse(os.path.join(addon_path, "addon.xml"))
 root = tree.getroot()
 id = root.attrib["id"]
 version = root.attrib["version"]
@@ -27,16 +31,16 @@ elif version.find("1.10") > -1:
 else:
 	ver_name = "v17_krypton"
 
-package_path = package_path + "\\" + ver_name
+package_path = os.path.join(package_path, ver_name)
 
 print (package_path + " (" + version + ")")
 
 try:
-	rmtree(package_path + "\\" + id)
+	rmtree(os.path.join(package_path, id))
 except FileNotFoundError as err:
 	pass
-	
-copytree(addon_path, package_path + "\\" + id, ignore=ignore_files)
+
+copytree(addon_path, os.path.join(package_path, id), ignore=ignore_files)
 
 zip_name = id + "-" + version + ".zip"
 
@@ -46,14 +50,13 @@ sp = subprocess.Popen(cmd_7zip, stderr=subprocess.STDOUT, stdout=subprocess.PIPE
 sp.wait()
 os.chdir("..\\..")
 
-copy2(package_path + "\\" + id + "\\addon.xml", package_path + "\\addon.xml")
+copy2(os.path.join(package_path, id, "addon.xml"), os.path.join(package_path, "addon.xml"))
 
-repo_path = repo_path + ver_name + "\\plugin.video.embycon\\"
-copy2(package_path + "\\addon.xml", repo_path + "addon.xml")
-copy2(package_path + "\\" + zip_name, repo_path + zip_name)
+repo_path = os.path.join(repo_path, ver_name, "plugin.video.embycon")
+copy2(os.path.join(package_path, "addon.xml"), os.path.join(repo_path, "addon.xml"))
+copy2(os.path.join(package_path, zip_name), os.path.join(repo_path, zip_name))
 
 try:
-	rmtree(package_path + "\\" + id)
+	rmtree(os.path.join(package_path, id))
 except FileNotFoundError as err:
 	pass
-

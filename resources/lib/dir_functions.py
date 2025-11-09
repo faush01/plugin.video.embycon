@@ -5,9 +5,7 @@ import xbmcplugin
 import xbmcgui
 import xbmcvfs
 
-import urllib.request
 import urllib.parse
-import urllib.error
 import sys
 import os
 import re
