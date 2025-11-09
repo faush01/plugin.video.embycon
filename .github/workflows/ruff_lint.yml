@@ -1,6 +1,7 @@
 name: Ruff Lint Check
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [ develop ] # Adjust branch name as needed
 
