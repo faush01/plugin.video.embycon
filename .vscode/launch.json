@@ -8,7 +8,15 @@
             "name": "Local Deploy",
             "type": "PowerShell",
             "request": "launch",
-            "script": "scripts/copy_embycon.bat",
+            "script": "scripts/copy_embycon.ps1",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Package Addon",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/process_addon.py",
+            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
     ]

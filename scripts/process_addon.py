@@ -6,7 +6,13 @@ import sys
 
 
 def ignore_files(path, item_list):
-	return ["README.md", "ruff.toml", "skin.estuary", ".github", ".ruff_cache", ".vscode", ".idea", ".git", ".gitignore", "scripts", "venv", "package"]
+	file_list = [
+		"README.md", "ruff.toml", "skin.estuary", ".github", 
+		".ruff_cache", ".vscode", ".idea", ".git", ".gitignore", 
+		"scripts", "venv", "package"
+		]
+	return file_list
+
 
 repo_path = "C:\\Development\\emby\\embycon_kodi_repo\\repo\\release\\"
 zip_path = "c:\\Program Files\\7-Zip\\7z.exe"
@@ -20,7 +26,7 @@ package_path = os.path.join(addon_path, "package")
 
 tree = ET.parse(os.path.join(addon_path, "addon.xml"))
 root = tree.getroot()
-id = root.attrib["id"]
+addon_id = root.attrib["id"]
 version = root.attrib["version"]
 
 ver_name = ""
@@ -36,27 +42,27 @@ package_path = os.path.join(package_path, ver_name)
 print (package_path + " (" + version + ")")
 
 try:
-	rmtree(os.path.join(package_path, id))
-except FileNotFoundError as err:
+	rmtree(os.path.join(package_path, addon_id))
+except FileNotFoundError:
 	pass
 
-copytree(addon_path, os.path.join(package_path, id), ignore=ignore_files)
+copytree(addon_path, os.path.join(package_path, addon_id), ignore=ignore_files)
 
-zip_name = id + "-" + version + ".zip"
+zip_name = addon_id + "-" + version + ".zip"
 
 os.chdir(package_path)
-cmd_7zip = [zip_path, "a", zip_name, id]
+cmd_7zip = [zip_path, "a", zip_name, addon_id]
 sp = subprocess.Popen(cmd_7zip, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 sp.wait()
 os.chdir("..\\..")
 
-copy2(os.path.join(package_path, id, "addon.xml"), os.path.join(package_path, "addon.xml"))
+copy2(os.path.join(package_path, addon_id, "addon.xml"), os.path.join(package_path, "addon.xml"))
 
 repo_path = os.path.join(repo_path, ver_name, "plugin.video.embycon")
 copy2(os.path.join(package_path, "addon.xml"), os.path.join(repo_path, "addon.xml"))
 copy2(os.path.join(package_path, zip_name), os.path.join(repo_path, zip_name))
 
 try:
-	rmtree(os.path.join(package_path, id))
-except FileNotFoundError as err:
+	rmtree(os.path.join(package_path, addon_id))
+except FileNotFoundError:
 	pass
