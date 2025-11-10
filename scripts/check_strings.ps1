@@ -1,7 +1,8 @@
 
 $string_ids = @()
+$repo_root = git rev-parse --show-toplevel
 
-Select-String -path resources\language\resource.language.en_gb\strings.po -pattern "msgctxt " | select Line | ForEach {
+Select-String -path $repo_root\plugin.video.embycon\resources\language\resource.language.en_gb\strings.po -pattern "msgctxt " | select Line | ForEach {
 	$id = [regex]::match($_.Line.ToString(), '\"#([0-9]+)\"').Groups[1].Value
 	if($string_ids -contains $id)
 	{
@@ -10,6 +11,6 @@ Select-String -path resources\language\resource.language.en_gb\strings.po -patte
 	else
 	{
 	   $string_ids += $id
-	   Get-ChildItem *.py,settings.xml,resources\language\resource.language.en_gb\strings.po -recurse | Select-String -pattern $id | group Pattern | where {$_.Count -eq 1} | select Name, Count
+	   Get-ChildItem *.py,settings.xml,$repo_root\plugin.video.embycon\resources\language\resource.language.en_gb\strings.po -recurse | Select-String -pattern $id | group Pattern | where {$_.Count -eq 1} | select Name, Count
 	}
 }

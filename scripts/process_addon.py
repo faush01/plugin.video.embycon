@@ -7,22 +7,22 @@ import sys
 
 def ignore_files(path, item_list):
 	file_list = [
-		"README.md", "ruff.toml", "skin.estuary", ".github", 
-		".ruff_cache", ".vscode", ".idea", ".git", ".gitignore", 
-		"scripts", "venv", "package"
+		"skin.estuary",
 		]
 	return file_list
 
 
-repo_path = "C:\\Development\\emby\\embycon_kodi_repo\\repo\\release\\"
+embycon_repo_path = "C:\\Development\\emby\\embycon_kodi_repo\\repo\\release\\"
 zip_path = "c:\\Program Files\\7-Zip\\7z.exe"
 
-addon_path = sys.argv[1] if len(sys.argv) > 1 else None
-if not addon_path:
-	result = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
-	addon_path = result.stdout.strip()
+git_result = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+repo_path = git_result.stdout.strip()
+addon_path = os.path.join(repo_path, "plugin.video.embycon")
 
-package_path = os.path.join(addon_path, "package")
+print("Git repo path: " + repo_path)
+print("Addon path   : " + addon_path)
+
+package_path = os.path.join(repo_path, "package")
 
 tree = ET.parse(os.path.join(addon_path, "addon.xml"))
 root = tree.getroot()
@@ -58,9 +58,9 @@ os.chdir("..\\..")
 
 copy2(os.path.join(package_path, addon_id, "addon.xml"), os.path.join(package_path, "addon.xml"))
 
-repo_path = os.path.join(repo_path, ver_name, "plugin.video.embycon")
-copy2(os.path.join(package_path, "addon.xml"), os.path.join(repo_path, "addon.xml"))
-copy2(os.path.join(package_path, zip_name), os.path.join(repo_path, zip_name))
+embycon_repo_path = os.path.join(embycon_repo_path, ver_name, "plugin.video.embycon")
+copy2(os.path.join(package_path, "addon.xml"), os.path.join(embycon_repo_path, "addon.xml"))
+copy2(os.path.join(package_path, zip_name), os.path.join(embycon_repo_path, zip_name))
 
 try:
 	rmtree(os.path.join(package_path, addon_id))
