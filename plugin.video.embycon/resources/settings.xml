@@ -463,7 +463,7 @@
 					<level>0</level>
 					<default>0</default>
 					<constraints>
-						<minimum>5</minimum>
+						<minimum>0</minimum>
 						<step>1</step>
 						<maximum>200</maximum>
 					</constraints>
