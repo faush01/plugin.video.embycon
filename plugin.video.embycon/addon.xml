@@ -14,13 +14,14 @@
   <extension point="xbmc.service" library="service.py" start="login"/>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <language>en</language>
     <license>GPL-2.0-only</license>
     <forum>https://github.com/faush01/plugin.video.embycon/issues</forum>
     <website>https://github.com/faush01/plugin.video.embycon/wiki</website>
     <source>https://github.com/faush01/plugin.video.embycon</source>
     <summary lang="en_GB">Browse and play your Emby server media library.</summary>
+    <summary lang="zh_CN">浏览并播放您的 Emby 服务器媒体库。</summary>
     <description lang="en_GB">An addon to allow you to browse and playback your Emby (www.emby.media) Movie, TV Show and Music collections.</description>
+    <description lang="zh_CN">允许您浏览和播放 Emby (www.emby.media) 电影、电视剧和音乐收藏的插件。</description>
     <assets>
         <icon>icon.png</icon>
         <fanart>fanart.jpg</fanart>
