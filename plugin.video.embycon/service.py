@@ -8,7 +8,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-from resources.lib.downloadutils import DownloadUtils, save_user_details
+from resources.lib.downloadutils import DownloadUtils
 from resources.lib.simple_logging import SimpleLogging
 from resources.lib.play_utils import Service, PlaybackService, send_progress
 from resources.lib.kodi_utils import HomeWindow
@@ -18,11 +18,9 @@ from resources.lib.menu_functions import set_library_window_values
 from resources.lib.context_monitor import ContextMonitor
 from resources.lib.server_detect import check_server
 from resources.lib.library_change_monitor import LibraryChangeMonitor
-from resources.lib.datamanager import clear_old_cache_data
 from resources.lib.tracking import set_timing_enabled
 from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
-from resources.lib.skin_cloner import check_skin_installed
 from resources.lib.chapter_dialog import ChapterDialogMonitor
 
 settings = xbmcaddon.Addon()
