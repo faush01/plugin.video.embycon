@@ -36,17 +36,12 @@ from .item_functions import extract_media_info
 from .custom_nodes import load_custom_nodes
 from .profile_utils import list_available_profiles, view_profile_details
 
-__addon__ = xbmcaddon.Addon()
-__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
-__cwd__ = __addon__.getAddonInfo('path')
-PLUGINPATH = xbmcvfs.translatePath(os.path.join(__cwd__))
+#__addon__ = xbmcaddon.Addon()
+#__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
+#__cwd__ = __addon__.getAddonInfo('path')
+#PLUGINPATH = xbmcvfs.translatePath(os.path.join(__cwd__))
 
 log = SimpleLogging(__name__)
-
-kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
-
-downloadUtils = DownloadUtils()
-dataManager = DataManager()
 
 
 @timer
@@ -57,12 +52,16 @@ def main_entry_point():
     mode = params.get("mode", None)
 
     settings = xbmcaddon.Addon()
+    addon_dir = xbmcvfs.translatePath(settings.getAddonInfo('profile'))
+
     profiling_enabled = settings.getSetting('profiling_enabled') == "true"
     pr = None
     if profiling_enabled:
         if mode in ["MOVIE_ALPHA", "TVSHOW_ALPHA", "WIDGET_CONTENT", "GET_CONTENT_BY_TV_SHOW", "GET_CONTENT", "SHOW_CONTENT"]:
             pr = cProfile.Profile()
             pr.enable()
+
+    kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().get_version())
@@ -117,7 +116,7 @@ def main_entry_point():
     elif mode == "CLONE_SKIN":
         clone_default_skin()
     elif mode == "SHOW_SETTINGS":
-        __addon__.openSettings()
+        settings.openSettings()
         window = xbmcgui.getCurrentWindowId()
         if window == 10000:
             log.debug("Currently in home - refreshing to allow new settings to be taken")
@@ -171,7 +170,7 @@ def main_entry_point():
 
     if pr:
         pr.disable()
-        profile_file_path = os.path.join(__addondir__, "profile")
+        profile_file_path = os.path.join(addon_dir, "profile")
         xbmcvfs.mkdirs(profile_file_path)
 
         # del old profiles
@@ -208,7 +207,7 @@ def __get_parent_id_from(params):
         get_show_url = "{server}/emby/Users/{userid}/Items?fields=MediaStreams&Recursive=true" \
                        "&IncludeItemTypes=series&IncludeMedia=true&ImageTypeLimit=1&Limit=16" \
                        "&AnyProviderIdEquals=" + show_provider_ids
-        content = dataManager.get_content(get_show_url)
+        content = DataManager().get_content(get_show_url)
         show = content.get("Items")
         if len(show) == 1:
             result = content.get("Items")[0].get("Id")
@@ -242,6 +241,7 @@ def toggle_watched(params):
 def mark_item_watched(item_id, refresh=True):
     log.debug("Mark Item Watched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
+    downloadUtils = DownloadUtils()
     downloadUtils.download_url(url, post_body="", method="POST")
     check_for_new_content()
     home_window = HomeWindow()
@@ -257,6 +257,7 @@ def mark_item_watched(item_id, refresh=True):
 def mark_item_unwatched(item_id, refresh=True):
     log.debug("Mark Item UnWatched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
+    downloadUtils = DownloadUtils()
     downloadUtils.download_url(url, method="DELETE")
     check_for_new_content()
     home_window = HomeWindow()
@@ -272,6 +273,7 @@ def mark_item_unwatched(item_id, refresh=True):
 def mark_item_favorite(item_id, refresh=True):
     log.debug("Add item to favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
+    downloadUtils = DownloadUtils()
     downloadUtils.download_url(url, post_body="", method="POST")
     check_for_new_content()
     home_window = HomeWindow()
@@ -286,6 +288,7 @@ def mark_item_favorite(item_id, refresh=True):
 def unmark_item_favorite(item_id, refresh=True):
     log.debug("Remove item from favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
+    downloadUtils = DownloadUtils()
     downloadUtils.download_url(url, method="DELETE")
     check_for_new_content()
     home_window = HomeWindow()
@@ -298,7 +301,7 @@ def unmark_item_favorite(item_id, refresh=True):
 
 
 def delete(item_id, refresh=True):
-
+    downloadUtils = DownloadUtils()
     json_data = downloadUtils.download_url("{server}/emby/Users/{userid}/Items/" + item_id + "?format=json")
     item = json.loads(json_data)
 
@@ -406,6 +409,8 @@ def show_menu(params):
 
     home_window = HomeWindow()
     settings = xbmcaddon.Addon()
+    plugin_path = xbmcvfs.translatePath(settings.getAddonInfo('path'))
+
     item_id = params["item_id"]
 
     url = "{server}/emby/Users/{userid}/Items/" + item_id + "?format=json"
@@ -515,6 +520,7 @@ def show_menu(params):
     current_default_view = settings.getSetting(view_key)
     view_match = container_view_id == current_default_view
     log.debug("View ID:{0} Content type:{1}", container_view_id, container_content_type)
+    downloadUtils = DownloadUtils()
 
     if container_content_type in ["movies", "tvshows", "seasons", "episodes", "sets"]:
         if view_match:
@@ -528,7 +534,7 @@ def show_menu(params):
 
     # xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
 
-    action_menu = ActionMenu("ActionMenu.xml", PLUGINPATH, "default", "720p")
+    action_menu = ActionMenu("ActionMenu.xml", plugin_path, "default", "720p")
     action_menu.setActionItems(action_items)
     action_menu.doModal()
     selected_action_item = action_menu.getActionItem()
@@ -601,7 +607,7 @@ def show_menu(params):
 
         force_max_stream_bitrate = settings.getSetting("force_max_stream_bitrate")
         initial_bitrate_value = int(force_max_stream_bitrate)
-        bitrate_dialog = BitrateDialog("BitrateDialog.xml", PLUGINPATH, "default", "720p")
+        bitrate_dialog = BitrateDialog("BitrateDialog.xml", plugin_path, "default", "720p")
         bitrate_dialog.initial_bitrate_value = initial_bitrate_value
         bitrate_dialog.doModal()
         selected_transcode_value = bitrate_dialog.selected_transcode_value
@@ -852,7 +858,7 @@ def search_results(params):
                       "&ImageTypeLimit=1" +
                       "&userId={userid}")
 
-        person_search_results = dataManager.get_content(search_url)
+        person_search_results = DataManager().get_content(search_url)
         log.debug("Person Search Result : {0}", person_search_results)
         if person_search_results is None:
             return
@@ -862,6 +868,7 @@ def search_results(params):
         settings = xbmcaddon.Addon()
         max_image_width = int(settings.getSetting('max_image_width'))
 
+        downloadUtils = DownloadUtils()
         server = downloadUtils.get_server()
         list_items = []
         for item in person_items:
@@ -962,6 +969,7 @@ def play_item_trailer(item_id):
 
     url = ("{server}/emby/Users/{userid}/Items/%s/LocalTrailers?format=json" % item_id)
 
+    downloadUtils = DownloadUtils()
     json_data = downloadUtils.download_url(url)
     result = json.loads(json_data)
 
