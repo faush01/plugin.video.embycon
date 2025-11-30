@@ -197,9 +197,16 @@ def __get_parent_id_from(params):
     show_provider_ids = params.get("show_ids")
     if show_provider_ids is not None:
         log.debug("TV show providers IDs: {}", show_provider_ids)
-        get_show_url = "{server}/emby/Users/{userid}/Items?fields=MediaStreams&Recursive=true" \
-                       "&IncludeItemTypes=series&IncludeMedia=true&ImageTypeLimit=1&Limit=16" \
-                       "&AnyProviderIdEquals=" + show_provider_ids
+        get_show_url = "".join([
+            "{server}/emby/Users/{userid}/Items",
+            "?fields=MediaStreams",
+            "&Recursive=true",
+            "&IncludeItemTypes=series",
+            "&IncludeMedia=true",
+            "&ImageTypeLimit=1",
+            "&Limit=16",
+            "&AnyProviderIdEquals=" + show_provider_ids
+        ])
         content = DataManager().get_content(get_show_url)
         show = content.get("Items")
         if len(show) == 1:
@@ -695,18 +702,20 @@ def show_content(params):
     if item_type.lower().find("movie") == -1:
         group_movies = False
 
-    content_url = ("{server}/emby/Users/{userid}/Items" +
-                   "?format=json" +
-                   "&ImageTypeLimit=1" +
-                   "&IsMissing=False" +
-                   "&Fields={field_filters}" +
-                   '&CollapseBoxSetItems=' + str(group_movies) +
-                   '&GroupItemsIntoCollections=' + str(group_movies) +
-                   "&Recursive=true" +
-                   '&SortBy=Name' +
-                   '&SortOrder=Ascending' +
-                   "&IsVirtualUnaired=false" +
-                   "&IncludeItemTypes=" + item_type)
+    content_url = "".join([
+                "{server}/emby/Users/{userid}/Items",
+                "?format=json",
+                "&ImageTypeLimit=1",
+                "&IsMissing=False",
+                "&Fields={field_filters}",
+                "&CollapseBoxSetItems=" + str(group_movies),
+                "&GroupItemsIntoCollections=" + str(group_movies),
+                "&Recursive=true",
+                "&SortBy=Name",
+                "&SortOrder=Ascending",
+                "&IsVirtualUnaired=false",
+                "&IncludeItemTypes=" + item_type
+                ])
 
     log.debug("showContent Content Url: {0}", content_url)
     return get_content(content_url, params)
@@ -717,12 +726,14 @@ def search_results_person(params):
     handle = int(sys.argv[1])
 
     person_id = params.get("person_id")
-    details_url = ('{server}/emby/Users/{userid}/items' +
-                   '?PersonIds=' + person_id +
-                   '&IncludeItemTypes=Episode,Movie,Series' +
-                   '&Recursive=true' +
-                   '&Fields={field_filters}' +
-                   '&format=json')
+    details_url = "".join([
+                "{server}/emby/Users/{userid}/items",
+                "?PersonIds=" + person_id,
+                "&IncludeItemTypes=Episode,Movie,Series",
+                "&Recursive=true",
+                "&Fields={field_filters}",
+                "&format=json"
+                ])
 
     '''
     details_result = dataManager.get_content(details_url)
@@ -837,19 +848,21 @@ def search_results(params):
 
     # what type of search
     if item_type == "person":
-        search_url = ("{server}/emby/Persons" +
-                      "?searchTerm=" + query +
-                      "&IncludePeople=true" +
-                      "&IncludeMedia=false" +
-                      "&IncludeGenres=false" +
-                      "&IncludeStudios=false" +
-                      "&IncludeArtists=false" +
-                      "&Limit=16" +
-                      "&Fields=PrimaryImageAspectRatio,BasicSyncInfo,ProductionYear" +
-                      "&Recursive=true" +
-                      "&EnableTotalRecordCount=false" +
-                      "&ImageTypeLimit=1" +
-                      "&userId={userid}")
+        search_url = "".join([
+            "{server}/emby/Persons",
+            "?searchTerm=" + query,
+            "&IncludePeople=true",
+            "&IncludeMedia=false",
+            "&IncludeGenres=false",
+            "&IncludeStudios=false",
+            "&IncludeArtists=false",
+            "&Limit=16",
+            "&Fields=PrimaryImageAspectRatio,BasicSyncInfo,ProductionYear",
+            "&Recursive=true",
+            "&EnableTotalRecordCount=false",
+            "&ImageTypeLimit=1",
+            "&userId={userid}"
+            ])
 
         person_search_results = DataManager().get_content(search_url)
         log.debug("Person Search Result : {0}", person_search_results)
@@ -891,19 +904,21 @@ def search_results(params):
         xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
 
     else:
-        search_url = ("{server}/emby/Users/{userid}/Items" +
-                      "?searchTerm=" + query +
-                      "&IncludePeople=false" +
-                      "&IncludeMedia=true" +
-                      "&IncludeGenres=false" +
-                      "&IncludeStudios=false" +
-                      "&IncludeArtists=false" +
-                      "&IncludeItemTypes=" + item_type +
-                      "&Limit=16" +
-                      "&Fields={field_filters}" +
-                      "&Recursive=true" +
-                      "&EnableTotalRecordCount=false" +
-                      "&ImageTypeLimit=1")
+        search_url = "".join([
+            "{server}/emby/Users/{userid}/Items",
+            "?searchTerm=" + query,
+            "&IncludePeople=false",
+            "&IncludeMedia=true",
+            "&IncludeGenres=false",
+            "&IncludeStudios=false",
+            "&IncludeArtists=false",
+            "&IncludeItemTypes=" + item_type,
+            "&Limit=16",
+            "&Fields={field_filters}",
+            "&Recursive=true",
+            "&EnableTotalRecordCount=false",
+            "&ImageTypeLimit=1"
+            ])
 
         # set content type
         xbmcplugin.setContent(handle, content_type)

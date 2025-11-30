@@ -386,12 +386,13 @@ def process_directory(url, progress, params, use_cache_data=False):
             item_details.art["thumb"] = item_details.art["tvshow.poster"]
 
         if item_details.item_type == "MusicArtist":
-            u = ('{server}/emby/Users/{userid}/items' +
-                 '?AlbumArtistIds=' + item_details.id +
-                 '&IncludeItemTypes=MusicAlbum' +
-                 '&CollapseBoxSetItems=false' +
-                 '&Recursive=true' +
-                 '&format=json')
+            u = "".join([
+                "{server}/emby/Users/{userid}/items",
+                "?AlbumArtistIds=" + item_details.id,
+                "&IncludeItemTypes=MusicAlbum",
+                "&CollapseBoxSetItems=false",
+                "&Recursive=true",
+                "&format=json"])
             log.debug("TARGET URL = {0}", u)
             gui_item = add_gui_item(u, item_details, display_options)
             if gui_item:
@@ -416,12 +417,13 @@ def process_directory(url, progress, params, use_cache_data=False):
                      '&format=json')
 
             else:
-                u = ('{server}/emby/Users/{userid}/items' +
-                     '?ParentId=' + item_details.id +
-                     '&IsVirtualUnAired=false' +
-                     '&IsMissing=false' +
-                     '&Fields={field_filters}' +
-                     '&format=json')
+                u = "".join([
+                    "{server}/emby/Users/{userid}/items",
+                    "?ParentId=" + item_details.id,
+                    "&IsVirtualUnAired=false",
+                    "&IsMissing=false",
+                    "&Fields={field_filters}",
+                    "&format=json"])
 
             default_sort = item_details.item_type == "Playlist"
 

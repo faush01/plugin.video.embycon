@@ -350,10 +350,12 @@ def play_file(play_info, monitor):
     # if this is a season, playlist or album then play all items in that parent
     if result.get("Type") in ["Season", "MusicAlbum", "Playlist"]:
         log.debug("PlayAllFiles for parent item id: {0}", item_id)
-        url = ('{server}/emby/Users/{userid}/items' +
-               '?ParentId=%s' +
-               '&Fields={field_filters}' +
-               '&format=json')
+        url = "".join([
+            "{server}/emby/Users/{userid}/items",
+            "?ParentId=%s",
+            "&Fields={field_filters}",
+            "&format=json"
+            ])
         url = url % (item_id,)
         result = data_manager.get_content(url)
         log.debug("PlayAllFiles items: {0}", result)
@@ -676,14 +678,16 @@ def get_next_episode(item):
         log.debug("No episode number, can not get next")
         return None
 
-    url = ('{server}/emby/Users/{userid}/Items?' +
-           '?Recursive=true' +
-           '&ParentId=' + parent_id +
-           '&IsVirtualUnaired=false' +
-           '&IsMissing=False' +
-           '&IncludeItemTypes=Episode' +
-           '&ImageTypeLimit=1' +
-           '&fields=CriticRating,OfficialRating,CommunityRating,Overview')
+    url = "".join([
+        "{server}/emby/Users/{userid}/Items?",
+        "?Recursive=true",
+        "&ParentId=" + parent_id,
+        "&IsVirtualUnaired=false",
+        "&IsMissing=False",
+        "&IncludeItemTypes=Episode",
+        "&ImageTypeLimit=1",
+        "&fields=CriticRating,OfficialRating,CommunityRating,Overview"
+        ])
 
     data_manager = DataManager()
     items_result = data_manager.get_content(url)
