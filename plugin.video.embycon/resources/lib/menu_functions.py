@@ -19,9 +19,6 @@ from .utils import get_art, get_emby_url
 from .custom_nodes import CustomNode, load_custom_nodes
 
 log = SimpleLogging(__name__)
-downloadUtils = DownloadUtils()
-
-__addon__ = xbmcaddon.Addon()
 
 
 def show_movie_tags(menu_params):
@@ -260,7 +257,8 @@ def show_movie_pages(menu_params):
 def show_genre_list(menu_params):
     log.debug("showGenreList: {0}", menu_params)
 
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
     if server is None:
         return
 
@@ -340,7 +338,8 @@ def show_movie_alpha_list(menu_params):
 
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
     if server is None:
         return
 
@@ -413,7 +412,8 @@ def show_movie_alpha_list(menu_params):
 def show_tvshow_alpha_list(menu_params):
     log.debug("== ENTER: showTvShowAlphaList() ==")
 
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
     if server is None:
         return
 
@@ -603,7 +603,7 @@ def display_menu(params):
         create_new_node(params)
 
 
-def create_new_node(params):
+def create_new_node(_params):
     log.debug("Create New Custom Node")
 
     addon = xbmcaddon.Addon()
@@ -647,7 +647,7 @@ def get_node_url(node_info):
     return path
 
 
-def show_custom_nodes(params):
+def show_custom_nodes(_params):
     log.debug("Show Custom Nodes")
     add_menu_directory_item("[Edit Nodes]",
                             "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=create_new_node")
@@ -669,7 +669,7 @@ def show_custom_nodes(params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def show_global_types(params):
+def show_global_types(_params):
     handle = int(sys.argv[1])
 
     add_menu_directory_item(string_load(30256),
@@ -680,7 +680,7 @@ def show_global_types(params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_homevideos_type(menu_params, view):
+def display_homevideos_type(_menu_params, view):
     handle = int(sys.argv[1])
     view_name = view.get("Name")
     settings = xbmcaddon.Addon()
@@ -725,7 +725,7 @@ def display_homevideos_type(menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_addon_menu(params):
+def display_addon_menu(_params):
 
     add_menu_directory_item(string_load(30246), "plugin://plugin.video.embycon/?mode=SEARCH")
     add_menu_directory_item(string_load(30017), "plugin://plugin.video.embycon/?mode=SHOW_SERVER_SESSIONS")
@@ -742,7 +742,7 @@ def display_addon_menu(params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_tvshow_type(menu_params, view):
+def display_tvshow_type(_menu_params, view):
     handle = int(sys.argv[1])
 
     view_name = string_load(30261)
@@ -854,7 +854,7 @@ def display_tvshow_type(menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_music_type(menu_params, view):
+def display_music_type(_menu_params, view):
     handle = int(sys.argv[1])
     view_name = view.get("Name")
 
@@ -941,7 +941,7 @@ def display_musicvideos_type(params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_livetv_type(menu_params, view):
+def display_livetv_type(_menu_params, view):
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, 'files')
 
@@ -982,7 +982,7 @@ def display_livetv_type(menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_movies_type(menu_params, view):
+def display_movies_type(_menu_params, view):
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, 'files')
 
@@ -1129,11 +1129,12 @@ def display_movies_type(menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_library_views(params):
+def display_library_views(_params):
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, 'files')
 
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
     if server is None:
         return
 
@@ -1154,8 +1155,8 @@ def display_library_views(params):
         item_type = view.get('Type', None)
         if collection_type in view_types or item_type == "Channel":
             view_name = view.get("Name")
-            art = get_art(item=view, server=server, maxwidth=max_image_width)
-            art['landscape'] = downloadUtils.get_artwork(view, "Primary", server=server, maxwidth=max_image_width)
+            art = get_art(item=view, server=server, maxwidth=max_image_width, download_utils=download_utils)
+            art['landscape'] = download_utils.get_artwork(view, "Primary", server=server, maxwidth=max_image_width)
 
             plugin_path = "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=library_item&view_id=" + view.get("Id")
 
@@ -1296,7 +1297,8 @@ def set_library_window_values(force=False):
         return
 
     result = result.get("Items")
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
 
     settings = xbmcaddon.Addon()
     max_image_width = int(settings.getSetting('max_image_width'))
@@ -1322,7 +1324,7 @@ def set_library_window_values(force=False):
             home_window.set_property(prop_name, collection_type)
             log.debug("set_library_window_values: plugin.video.embycon-{0}={1}", prop_name, collection_type)
 
-            thumb = downloadUtils.get_artwork(item, "Primary", server=server, maxwidth=max_image_width)
+            thumb = download_utils.get_artwork(item, "Primary", server=server, maxwidth=max_image_width)
             prop_name = "view_item.%i.thumb" % index
             home_window.set_property(prop_name, thumb)
             log.debug("set_library_window_values: plugin.video.embycon-{0}={1}", prop_name, thumb)

@@ -63,7 +63,7 @@ def show_server_sessions():
         art = {}
         if now_playing:
             server = download_utils.get_server()
-            art = get_art(now_playing, server, maxwidth=max_image_width)
+            art = get_art(now_playing, server, maxwidth=max_image_width, download_utils=download_utils)
 
             runtime = now_playing.get("RunTimeTicks", 0)
             if position_ticks > 0 and runtime > 0:

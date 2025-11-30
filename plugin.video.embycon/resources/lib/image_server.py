@@ -68,8 +68,9 @@ def get_image_links(url, maxwidth=0):
         return []
 
     art_urls = []
+    download_utils = DownloadUtils()
     for iteem in items:
-        art = get_art(iteem, server, maxwidth=maxwidth)
+        art = get_art(iteem, server, maxwidth=maxwidth, download_utils=download_utils)
         art_urls.append(art)
 
     shuffle(art_urls)
@@ -159,8 +160,8 @@ def build_image(path):
 
 class HttpImageHandler(BaseHTTPRequestHandler):
 
-    def log_message(self, format, *args):
-        log_line = format % args
+    def log_message(self, fmt, *args):
+        log_line = fmt % args
         log.debug(log_line)
         return
 

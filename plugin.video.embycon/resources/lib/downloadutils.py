@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 import urllib.parse
 from base64 import b64encode
 from collections import defaultdict
+import threading
 
 from .kodi_utils import HomeWindow
 from .clientinfo import ClientInformation
@@ -95,10 +96,25 @@ def get_details_string():
 
 
 class DownloadUtils:
+    _instance = None
+    _lock = threading.Lock()
     use_https = False
     verify_cert = False
+    host_domain = ""
 
-    def __init__(self, *args):
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        # Only initialize once
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
+        
         settings = xbmcaddon.Addon()
 
         self.use_https = False
@@ -108,6 +124,8 @@ class DownloadUtils:
 
         self.verify_cert = settings.getSetting('verify_cert') == 'true'
         log.debug("verify_cert: {0}", self.verify_cert)
+
+        self.set_host_domain()
 
     @timer
     def post_capabilities(self):
@@ -352,7 +370,8 @@ class DownloadUtils:
 
         return play_info_result
 
-    def get_server(self, add_user_id=False):
+
+    def set_host_domain(self):
         settings = xbmcaddon.Addon()
         host = settings.getSetting('ipaddress')
 
@@ -392,16 +411,21 @@ class DownloadUtils:
                 port = str(url_bits.port)
                 settings.setSetting("port", port)
 
+        self.host_domain = host + ":" + port
+
+
+    def get_server(self, add_user_id=False):
+        host = self.host_domain
         if add_user_id:
             window = HomeWindow()
             user_id = window.get_property("userid")
             if user_id:
-                host = ("%s@" % user_id) + host
+                host = ("%s@" % user_id) + self.host_domain
 
         if self.use_https:
-            server = "https://" + host + ":" + port
+            server = "https://" + host
         else:
-            server = "http://" + host + ":" + port
+            server = "http://" + host
 
         return server
 

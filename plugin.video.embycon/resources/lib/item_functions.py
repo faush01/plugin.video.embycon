@@ -1,6 +1,5 @@
 
 import sys
-import os
 import urllib.parse
 
 from datetime import datetime
@@ -8,24 +7,13 @@ from datetime import datetime
 from collections import defaultdict
 
 import xbmc
-import xbmcaddon
 import xbmcgui
-import xbmcvfs
 
 from .utils import get_art, datetime_from_string
 from .simple_logging import SimpleLogging
-from .downloadutils import DownloadUtils
-from .kodi_utils import HomeWindow
+
 
 log = SimpleLogging(__name__)
-kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
-
-addon_instance = xbmcaddon.Addon()
-addon_path = addon_instance.getAddonInfo('path')
-PLUGINPATH = xbmcvfs.translatePath(os.path.join(addon_path))
-
-download_utils = DownloadUtils()
-home_window = HomeWindow()
 
 
 class MediaStream:
@@ -252,7 +240,7 @@ def extract_media_info(item):
     return media_info
 
 
-def extract_item_info(item, gui_options):
+def extract_item_info(item, gui_options, download_utils=None):
 
     item_details = ItemDetails()
 
@@ -491,7 +479,7 @@ def extract_item_info(item, gui_options):
 
     item_details.number_episodes = item_details.total_episodes
 
-    item_details.art = get_art(item, gui_options["server"], maxwidth=gui_options["max_image_width"])
+    item_details.art = get_art(item, gui_options["server"], maxwidth=gui_options["max_image_width"], download_utils=download_utils)
     item_details.rating = item["OfficialRating"]
     item_details.mpaa = item["OfficialRating"]
 

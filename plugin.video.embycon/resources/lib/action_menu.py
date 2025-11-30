@@ -69,7 +69,7 @@ class ActionMenu(xbmcgui.WindowXMLDialog):
     listControl = None
     action_exitkeys_id = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_args, **_kwargs):
         log.debug("ActionMenu: __init__")
         xbmcgui.WindowXML.__init__(self)
         self.auto_close_thread = ActionAutoClose(self)

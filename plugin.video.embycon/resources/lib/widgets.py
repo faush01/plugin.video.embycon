@@ -1,7 +1,6 @@
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
-import xbmc
 import json
 import hashlib
 import random
@@ -14,11 +13,8 @@ from .kodi_utils import HomeWindow
 from .dir_functions import process_directory
 from .tracking import timer
 
-log = SimpleLogging(__name__)
-downloadUtils = DownloadUtils()
-dataManager = DataManager()
-kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
+log = SimpleLogging(__name__)
 background_items = []
 background_current_item = 0
 
@@ -41,7 +37,8 @@ def set_random_movies():
 
     url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
-    results = downloadUtils.download_url(url, suppress=True)
+    download_utils = DownloadUtils()
+    results = download_utils.download_url(url, suppress=True)
     results = json.loads(results)
 
     randon_movies_list = []
@@ -87,8 +84,9 @@ def set_background_image(force=False):
 
         url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
-        server = downloadUtils.get_server()
-        results = downloadUtils.download_url(url, suppress=True)
+        download_utils = DownloadUtils()
+        server = download_utils.get_server()
+        results = download_utils.download_url(url, suppress=True)
         results = json.loads(results)
 
         if results is not None:
@@ -100,7 +98,7 @@ def set_background_image(force=False):
             max_image_width = int(settings.getSetting('max_image_width'))
 
             for item in items:
-                bg_image = downloadUtils.get_artwork(item, "Backdrop", server=server, maxwidth=max_image_width)
+                bg_image = download_utils.get_artwork(item, "Backdrop", server=server, maxwidth=max_image_width)
                 if bg_image:
                     label = item.get("Name")
                     item_background = {}
@@ -144,7 +142,8 @@ def check_for_new_content():
 
     added_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
-    added_result = downloadUtils.download_url(added_url, suppress=True)
+    download_utils = DownloadUtils()
+    added_result = download_utils.download_url(added_url, suppress=True)
     result = json.loads(added_result)
     log.debug("LATEST_ADDED_ITEM: {0}", result)
 
@@ -168,7 +167,8 @@ def check_for_new_content():
 
     played_url = get_emby_url('{server}/emby/Users/{userid}/Items', url_params)
 
-    played_result = downloadUtils.download_url(played_url, suppress=True)
+    download_utils = DownloadUtils()
+    played_result = download_utils.download_url(played_url, suppress=True)
     result = json.loads(played_result)
     log.debug("LATEST_PLAYED_ITEM: {0}", result)
 
@@ -201,7 +201,8 @@ def check_for_new_content():
 @timer
 def get_widget_content_cast(handle, params):
     log.debug("getWigetContentCast Called: {0}", params)
-    server = downloadUtils.get_server()
+    download_utils = DownloadUtils()
+    server = download_utils.get_server()
 
     item_id = params["id"]
     data_manager = DataManager()
@@ -237,7 +238,7 @@ def get_widget_content_cast(handle, params):
             person_tag = person.get("PrimaryImageTag")
             person_thumbnail = None
             if person_tag:
-                person_thumbnail = downloadUtils.image_url(person_id, "Primary", 0, 400, 400, person_tag, server=server)
+                person_thumbnail = download_utils.image_url(person_id, "Primary", 0, 400, 400, person_tag, server=server)
 
             list_item = xbmcgui.ListItem(label=person_name, offscreen=True)
             list_item.setProperty("id", person_id)

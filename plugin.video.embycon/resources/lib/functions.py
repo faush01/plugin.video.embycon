@@ -27,7 +27,6 @@ from .server_sessions import show_server_sessions
 from .action_menu import ActionMenu
 from .bitrate_dialog import BitrateDialog
 from .widgets import get_widget_content, get_widget_content_cast, check_for_new_content
-from . import trakttokodi
 from .cache_images import CacheArtwork
 from .dir_functions import get_content, process_directory
 from .tracking import timer
@@ -36,10 +35,6 @@ from .item_functions import extract_media_info
 from .custom_nodes import load_custom_nodes
 from .profile_utils import list_available_profiles, view_profile_details
 
-#__addon__ = xbmcaddon.Addon()
-#__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
-#__cwd__ = __addon__.getAddonInfo('path')
-#PLUGINPATH = xbmcvfs.translatePath(os.path.join(__cwd__))
 
 log = SimpleLogging(__name__)
 
@@ -85,13 +80,13 @@ def main_entry_point():
         new_params["media_type"] = "movies"
         item_count = show_content(new_params)
     elif mode == "CHANGE_USER":
-        check_server(change_user=True, notify=False)
+        check_server(change_user=True)
     elif mode == "CACHE_ARTWORK":
         CacheArtwork().cache_artwork_interactive()
     elif mode == "DETECT_SERVER":
-        check_server(force=True, notify=True)
+        check_server(force=True)
     elif mode == "DETECT_SERVER_USER":
-        check_server(force=True, change_user=True, notify=False)
+        check_server(force=True, change_user=True)
     elif mode == "DETECT_CONNECTION_SPEED":
         check_connection_speed()
     elif mode == "playTrailer":
@@ -141,8 +136,6 @@ def main_entry_point():
         search_results_person(params)
     elif mode == "SHOW_SERVER_SESSIONS":
         show_server_sessions()
-    elif mode == "TRAKTTOKODI":
-        trakttokodi.entry_point(params)
     elif mode == "SHOW_ADDON_MENU":
         display_menu(params)
     elif mode == "LIST_AVAILABLE_PROFILES":

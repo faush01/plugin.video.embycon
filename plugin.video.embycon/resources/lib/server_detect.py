@@ -22,9 +22,6 @@ from .clientinfo import ClientInformation
 
 log = SimpleLogging(__name__)
 
-__addon__ = xbmcaddon.Addon()
-__addon_name__ = __addon__.getAddonInfo('name')
-
 
 def check_connection_speed():
     log.debug("check_connection_speed")
@@ -134,8 +131,9 @@ def get_server_details():
     log.debug("MutliGroup: {0}", multi_group)
     log.debug("Sending UDP Data: {0}", message)
 
+    addon_name = xbmcaddon.Addon().getAddonInfo('name')
     progress = xbmcgui.DialogProgress()
-    progress.create(__addon_name__ + " : " + string_load(30373))
+    progress.create(addon_name + " : " + string_load(30373))
     progress.update(0, string_load(30374))
     xbmc.sleep(1000)
     server_count = 0
@@ -163,7 +161,7 @@ def get_server_details():
     return servers
 
 
-def check_server(force=False, change_user=False, notify=False):
+def check_server(force=False, change_user=False):
     log.debug("checkServer Called")
 
     settings = xbmcaddon.Addon()
@@ -184,6 +182,7 @@ def check_server(force=False, change_user=False, notify=False):
         server_info = get_server_details()
 
         addon = xbmcaddon.Addon()
+        addon_name = addon.getAddonInfo('name')
         server_icon = addon.getAddonInfo('icon')
 
         server_list = []
@@ -197,14 +196,14 @@ def check_server(force=False, change_user=False, notify=False):
             server_list.append(server_item)
 
         if len(server_list) > 0:
-            return_index = xbmcgui.Dialog().select(__addon_name__ + " : " + string_load(30166),
+            return_index = xbmcgui.Dialog().select(addon_name + " : " + string_load(30166),
                                                    server_list,
                                                    useDetails=True)
             if return_index != -1:
                 server_url = server_info[return_index]["Address"]
 
         if not server_url:
-            return_index = xbmcgui.Dialog().yesno(__addon_name__, string_load(30282))
+            return_index = xbmcgui.Dialog().yesno(addon_name, string_load(30282))
             if not return_index:
                 xbmc.executebuiltin("ActivateWindow(Home)")
                 return
@@ -237,19 +236,19 @@ def check_server(force=False, change_user=False, notify=False):
 
                 log.debug("Testing_Url: {0}", temp_url)
                 progress = xbmcgui.DialogProgress()
-                progress.create(__addon_name__ + " : " + string_load(30376))
+                progress.create(addon_name + " : " + string_load(30376))
                 progress.update(0, string_load(30377))
                 json_data = du.download_url(temp_url, authenticate=False)
                 progress.close()
 
                 result = json.loads(json_data)
                 if result is not None:
-                    xbmcgui.Dialog().ok(__addon_name__ + " : " + string_load(30167),
+                    xbmcgui.Dialog().ok(addon_name + " : " + string_load(30167),
                                         "%s://%s:%s/" % (server_protocol, server_address, server_port))
                     break
                 else:
                     message = server_url + "\n" + string_load(30371)
-                    return_index = xbmcgui.Dialog().yesno(__addon_name__ + " : " + string_load(30135), message)
+                    return_index = xbmcgui.Dialog().yesno(addon_name + " : " + string_load(30135), message)
                     if not return_index:
                         xbmc.executebuiltin("ActivateWindow(Home)")
                         return

@@ -91,7 +91,7 @@ def process_json_data(json_raw_data: str) -> DataSet:
 
 
 class CacheItem:
-    def __init__(self, *args):
+    def __init__(self, *_args):
         self.item_list: Optional[List[Any]] = None
         self.item_list_hash: Optional[str] = None
         self.date_saved: Optional[float] = None
@@ -104,8 +104,6 @@ class CacheItem:
 
 
 class DataManager:
-
-    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
 
     def __init__(self, *args):
         # log.debug("DataManager __init__")
@@ -130,13 +128,14 @@ class DataManager:
 
     def get_cache_filename(self, url):
         download_utils = DownloadUtils()
+        addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
         user_id = download_utils.get_user_id()
         server = download_utils.get_server()
         m = hashlib.md5()
         line = user_id + "|" + str(server) + "|" + url
         m.update(line.encode("utf-8"))
         url_hash = m.hexdigest()
-        cache_path = os.path.join(self.addon_dir, "cache")
+        cache_path = os.path.join(addon_dir, "cache")
         xbmcvfs.mkdirs(cache_path)
         cache_file = os.path.join(cache_path, "cache_" + url_hash + ".pickle")
         return cache_file
@@ -203,7 +202,7 @@ class DataManager:
 
             item_list = []
             for item in results:
-                item_data = extract_item_info(item, gui_options)
+                item_data = extract_item_info(item, gui_options, download_utils=download_utils)
                 item_data.baseline_itemname = baseline_name
                 item_list.append(item_data)
 
@@ -255,6 +254,7 @@ class CacheManagerThread(threading.Thread):
         log.debug("CacheManagerThread : Started")
         # log.debug("CacheManagerThread : Cache Item : {0}", self.cached_item.__dict__)
 
+        download_utils = DownloadUtils()
         is_fresh = False
 
         if self.cached_item is None:
@@ -301,7 +301,7 @@ class CacheManagerThread(threading.Thread):
 
             loaded_items = []
             for item in results:
-                item_data = extract_item_info(item, self.gui_options)
+                item_data = extract_item_info(item, self.gui_options, download_utils=download_utils)
                 loaded_items.append(item_data)
 
             if loaded_items is None or len(loaded_items) == 0:

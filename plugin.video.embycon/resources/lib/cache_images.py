@@ -21,7 +21,7 @@ from .datamanager import DataManager
 from .utils import get_art, double_urlencode
 from .kodi_utils import HomeWindow
 
-downloadUtils = DownloadUtils()
+
 log = SimpleLogging(__name__)
 
 
@@ -250,7 +250,8 @@ class CacheArtwork(threading.Thread):
 
         # log.debug("Cache Emby Images Items: {0}", results)
 
-        server = downloadUtils.get_server()
+        download_utils = DownloadUtils()
+        server = download_utils.get_server()
         log.debug("Emby Item Count Count: {0}", len(results))
 
         if self.stop_all_activity:
@@ -262,7 +263,7 @@ class CacheArtwork(threading.Thread):
 
         image_types = {"thumb", "poster", "banner", "clearlogo", "tvshow.poster", "tvshow.banner", "tvshow.landscape"}
         for item in results:
-            art = get_art(item, server, max_image_width)
+            art = get_art(item, server, max_image_width, download_utils=download_utils)
             for art_type in art:
                 if not limit:
                     texture_urls.add(art[art_type])

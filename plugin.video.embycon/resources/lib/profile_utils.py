@@ -29,7 +29,7 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
     line_count = 0
     display_option = 0
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_args, **_kwargs):
         log.debug("ActionMenu: __init__")
         xbmcgui.WindowXML.__init__(self)
 
@@ -170,7 +170,7 @@ def view_profile_details(params):
     action_menu.doModal()
 
 
-def list_available_profiles(params):
+def list_available_profiles(_params):
 
     handle = int(sys.argv[1])
     list_items = []

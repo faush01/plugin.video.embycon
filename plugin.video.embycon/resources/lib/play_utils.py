@@ -27,11 +27,11 @@ from .playnext import PlayNextDialog
 from .skip_intro_dialog import SkipIntroMonitor
 
 log = SimpleLogging(__name__)
-download_utils = DownloadUtils()
 
 
 def play_all_files(items, auto_resume, monitor, play_items=True):
     log.debug("playAllFiles called with items: {0}", items)
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
@@ -92,7 +92,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         gui_options["name_format_type"] = ""
         gui_options["max_image_width"] = max_image_width
         gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
-        item_details = extract_item_info(item, gui_options)
+        item_details = extract_item_info(item, gui_options, download_utils=download_utils)
 
         # create ListItem
         display_options = {}
@@ -206,6 +206,7 @@ def add_to_playlist(play_info, monitor):
     log.debug("Adding item to playlist : {0}", play_info)
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
     item_id = play_info.get("item_id")
@@ -334,6 +335,7 @@ def play_file(play_info, monitor):
     play_cinema_intros = settings.getSetting('play_cinema_intros') == 'true'
     auto_play_first_version = settings.getSetting("auto_play_first_version") == 'true'
 
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
     url = "{server}/emby/Users/{userid}/Items/%s?fields=Chapters&format=json" % (item_id,)
@@ -511,7 +513,7 @@ def play_file(play_info, monitor):
     gui_options["name_format_type"] = ""
     gui_options["max_image_width"] = max_image_width
     gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
-    item_details = extract_item_info(result, gui_options)
+    item_details = extract_item_info(result, gui_options, download_utils=download_utils)
 
     # create ListItem
     display_options = {}
@@ -625,7 +627,7 @@ def play_file(play_info, monitor):
     next_episode = get_next_episode(result)
 
     if next_episode is not None:
-        next_epp_art = get_art(next_episode, server, maxwidth=max_image_width)
+        next_epp_art = get_art(next_episode, server, maxwidth=max_image_width, download_utils=download_utils)
         next_episode["art"] = next_epp_art
 
     data["next_episode"] = next_episode
@@ -710,6 +712,7 @@ def send_next_episode_details(item, next_episode):
 
     settings = xbmcaddon.Addon()
     max_image_width = int(settings.getSetting('max_image_width'))
+    download_utils = DownloadUtils()
 
     gui_options = {}
     gui_options["server"] = download_utils.get_server()
@@ -718,8 +721,8 @@ def send_next_episode_details(item, next_episode):
     gui_options["max_image_width"] = max_image_width
     gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
 
-    item_details = extract_item_info(item, gui_options)
-    next_item_details = extract_item_info(next_episode, gui_options)
+    item_details = extract_item_info(item, gui_options, download_utils=download_utils)
+    next_item_details = extract_item_info(next_episode, gui_options, download_utils=download_utils)
 
     current_item = {}
     current_item["episodeid"] = item_details.id
@@ -771,10 +774,11 @@ def send_next_episode_details(item, next_episode):
     send_event_notification("upnext_data", next_info)
 
 
-def set_list_item_props(item_id, list_item, result, server, extra_props, title, maxwidth=0):
+def set_list_item_props(_item_id, list_item, result, server, extra_props, title, maxwidth=0):
     # set up item and item info
 
-    art = get_art(result, server=server, maxwidth=maxwidth)
+    download_utils = DownloadUtils()
+    art = get_art(result, server=server, maxwidth=maxwidth, download_utils=download_utils)
     list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
     list_item.setProperty('fanart_image', art['fanart'])  # back compat
     list_item.setProperty('discart', art['discart'])  # not avail to setArt
@@ -850,6 +854,7 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
     source_id = media_source["Id"]
 
     media_streams = media_source['MediaStreams']
+    download_utils = DownloadUtils()
 
     for stream in media_streams:
         # Since Emby returns all possible tracks together, have to sort them.
@@ -953,6 +958,7 @@ def external_subs(media_source, list_item, item_id):
 
     externalsubs = []
     sub_names = []
+    download_utils = DownloadUtils()
 
     for stream in media_streams:
 
@@ -1055,6 +1061,7 @@ def send_progress(monitor):
 
     log.debug("Sending POST progress started: {0}", postdata)
     url = "{server}/emby/Sessions/Playing/Progress"
+    download_utils = DownloadUtils()
     download_utils.download_url(url, post_body=postdata, method="POST")
 
 
@@ -1156,6 +1163,7 @@ def stop_all_playback(played_information):
 
     home_screen = HomeWindow()
     home_screen.clear_property("currently_playing_id")
+    download_utils = DownloadUtils()
 
     for item_url in played_information:
         data = played_information.get(item_url)
@@ -1263,6 +1271,7 @@ class Service(xbmc.Player):
         log.debug("Sending POST play started: {0}", postdata)
 
         url = "{server}/emby/Sessions/Playing"
+        download_utils = DownloadUtils()
         download_utils.download_url(url, post_body=postdata, method="POST")
 
         home_screen = HomeWindow()
@@ -1325,7 +1334,7 @@ class Service(xbmc.Player):
             play_data['paused'] = False
             send_progress(self)
 
-    def onPlayBackSeek(self, time, seek_offset):
+    def onPlayBackSeek(self, _time, _seek_offset):
         # Will be called when kodi seeks in video
         log.info("onPlayBackSeek")
         send_progress(self)

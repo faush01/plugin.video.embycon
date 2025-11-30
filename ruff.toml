@@ -1,16 +1,17 @@
 include = [
-  "resources/**/*.py"
+  "plugin.video.embycon/resources/**/*.py",
+  "plugin.video.embycon/*.py"
 ]
 
 exclude = [
-  "resources/lib/websocket/"
+  "plugin.video.embycon/resources/lib/websocket/"
 ]
 
 target-version = "py38"
 
 [lint]
 extend-ignore = [
-  "A002",
+  #"A002",
   #"D203",   # one-blank-line-before-class
   #"D212",   # multi-line-summary-first-line
   #"D213",   # multi-line-summary-second-line
@@ -46,7 +47,7 @@ extend-select = [
   "A",     # built-ins
   "AIR",   # Airflow
   #"ANN",   # Type annotations
-  #"ARG",   # used arguments
+  "ARG",   # used arguments
   #"ASYNC", # flake8-async
   #"B",     # flake8-bugbear
   #"BLE",   # flake8-blind-except
