@@ -43,44 +43,49 @@ def get_content(url, params):
     media_type = str(media_type).lower().strip()
     if media_type.startswith("movie"):
         view_type = "Movies"
-        content_type = 'movies'
+        content_type = "movies"
     elif media_type == "musicalbums":
         view_type = "Albums"
-        content_type = 'albums'
+        content_type = "albums"
     elif media_type == "musicartists":
         view_type = "Artists"
-        content_type = 'artists'
+        content_type = "artists"
     elif media_type == "musicartist":
         view_type = "Albums"
-        content_type = 'albums'
+        content_type = "albums"
     elif media_type == "music" or media_type == "audio" or media_type == "musicalbum":
         view_type = "Music"
-        content_type = 'songs'
+        content_type = "songs"
     elif media_type.startswith("boxsets"):
         view_type = "Movies"
-        content_type = 'sets'
+        content_type = "sets"
     elif media_type.startswith("boxset"):
         view_type = "BoxSets"
-        content_type = 'movies'
+        content_type = "movies"
     elif media_type == "tvshows":
         view_type = "Series"
-        content_type = 'tvshows'
+        content_type = "tvshows"
     elif media_type == "series":
         view_type = "Seasons"
-        content_type = 'seasons'
+        content_type = "seasons"
     elif media_type == "season" or media_type == "episodes":
         view_type = "Episodes"
-        content_type = 'episodes'
+        content_type = "episodes"
     elif media_type == "playlists":
         view_type = "Playlists"
     elif media_type == "playlist":
         view_type = "Playlist"
 
-    log.debug("media_type:{0} content_type:{1} view_type:{2} ", media_type, content_type, view_type)
+    log.debug(
+        "media_type:{0} content_type:{1} view_type:{2} ",
+        media_type,
+        content_type,
+        view_type,
+    )
 
     # show a progress indicator if needed
     progress = None
-    if settings.getSetting('showLoadProgress') == "true":
+    if settings.getSetting("showLoadProgress") == "true":
         progress = xbmcgui.DialogProgress()
         progress.create(string_load(30112))
         progress.update(0, string_load(30113))
@@ -90,7 +95,7 @@ def get_content(url, params):
     limit_rex = "&limit=([0-9]{1,5})"
     limit_rex_p = "&Limit={ItemLimit}"
     start_index = 0
-    page_limit = int(settings.getSetting('itemsPerPage'))
+    page_limit = int(settings.getSetting("itemsPerPage"))
     # if the page_limit in the settings is not set but the url has a limit use the url limit number
     if page_limit == 0 and re.search(limit_rex, url, flags=re.IGNORECASE):
         url_limit_result = re.search(limit_rex, url, flags=re.IGNORECASE)
@@ -106,11 +111,17 @@ def get_content(url, params):
         if not re.search(start_index_rex, url, flags=re.IGNORECASE):
             url += "&StartIndex=0"
 
-        if not re.search(limit_rex, url, flags=re.IGNORECASE) and not re.search(limit_rex_p, url, flags=re.IGNORECASE):
+        if not re.search(limit_rex, url, flags=re.IGNORECASE) and not re.search(
+            limit_rex_p, url, flags=re.IGNORECASE
+        ):
             url += "&Limit=" + str(page_limit)
         else:
-            url = re.sub(limit_rex, '&Limit=' + str(page_limit), url, flags=re.IGNORECASE)
-            url = re.sub(limit_rex_p, '&Limit=' + str(page_limit), url, flags=re.IGNORECASE)
+            url = re.sub(
+                limit_rex, "&Limit=" + str(page_limit), url, flags=re.IGNORECASE
+            )
+            url = re.sub(
+                limit_rex_p, "&Limit=" + str(page_limit), url, flags=re.IGNORECASE
+            )
 
         # create NEXT and PREV urls
         start_index_match = re.search(start_index_rex, url, flags=re.IGNORECASE)
@@ -119,8 +130,18 @@ def get_content(url, params):
             prev_index = start_index - page_limit
             if prev_index < 0:
                 prev_index = 0
-            url_prev = re.sub(start_index_rex, 'StartIndex=' + str(prev_index), url, flags=re.IGNORECASE)
-        url_next = re.sub(start_index_rex, 'StartIndex=' + str(start_index + page_limit), url, flags=re.IGNORECASE)
+            url_prev = re.sub(
+                start_index_rex,
+                "StartIndex=" + str(prev_index),
+                url,
+                flags=re.IGNORECASE,
+            )
+        url_next = re.sub(
+            start_index_rex,
+            "StartIndex=" + str(start_index + page_limit),
+            url,
+            flags=re.IGNORECASE,
+        )
 
         log.debug("Paged URLS - url_current: {0}", url)
         log.debug("Paged URLS - url_prev: {0}", url_prev)
@@ -140,7 +161,9 @@ def get_content(url, params):
     use_cache = params.get("use_cache", "true") == "true"
     dir_items = None
     try:
-        dir_items, detected_type, total_records = process_directory(url, progress, params, use_cache)
+        dir_items, detected_type, total_records = process_directory(
+            url, progress, params, use_cache
+        )
     except Exception as e:
         log.debug("There was an error processing the URL : {0}", e)
         data_manager = DataManager()
@@ -159,10 +182,25 @@ def get_content(url, params):
     # add paging items
     if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         if url_prev:
-            list_item = xbmcgui.ListItem("Prev Page (" + str(start_index - page_limit + 1) + "-" + str(start_index) +
-                                         " of " + str(total_records) + ")")
-            u = sys.argv[0] + "?url=" + urllib.parse.quote(url_prev) + "&mode=GET_CONTENT&media_type=movies"
-            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_prev.encode("utf-8")).decode("utf-8")}
+            list_item = xbmcgui.ListItem(
+                "Prev Page ("
+                + str(start_index - page_limit + 1)
+                + "-"
+                + str(start_index)
+                + " of "
+                + str(total_records)
+                + ")"
+            )
+            u = (
+                sys.argv[0]
+                + "?url="
+                + urllib.parse.quote(url_prev)
+                + "&mode=GET_CONTENT&media_type=movies"
+            )
+            art = {
+                "thumb": "http://localhost:24276/"
+                + base64.b64encode(url_prev.encode("utf-8")).decode("utf-8")
+            }
             list_item.setArt(art)
             log.debug("ADDING PREV ListItem: {0} - {1}", u, list_item)
             dir_items.insert(0, (u, list_item, True))
@@ -171,10 +209,25 @@ def get_content(url, params):
             upper_count = start_index + (page_limit * 2)
             if upper_count > total_records:
                 upper_count = total_records
-            list_item = xbmcgui.ListItem("Next Page (" + str(start_index + page_limit + 1) + "-" +
-                                         str(upper_count) + " of " + str(total_records) + ")")
-            u = sys.argv[0] + "?url=" + urllib.parse.quote(url_next) + "&mode=GET_CONTENT&media_type=movies"
-            art = {"thumb": "http://localhost:24276/" + base64.b64encode(url_next.encode("utf-8")).decode("utf-8")}
+            list_item = xbmcgui.ListItem(
+                "Next Page ("
+                + str(start_index + page_limit + 1)
+                + "-"
+                + str(upper_count)
+                + " of "
+                + str(total_records)
+                + ")"
+            )
+            u = (
+                sys.argv[0]
+                + "?url="
+                + urllib.parse.quote(url_next)
+                + "&mode=GET_CONTENT&media_type=movies"
+            )
+            art = {
+                "thumb": "http://localhost:24276/"
+                + base64.b64encode(url_next.encode("utf-8")).decode("utf-8")
+            }
             list_item.setArt(art)
             log.debug("ADDING NEXT ListItem: {0} - {1}", u, list_item)
             dir_items.append((u, list_item, True))
@@ -187,10 +240,10 @@ def get_content(url, params):
         log.debug("Detected content type: {0}", detected_type)
         if detected_type == "Movie":
             view_type = "Movies"
-            content_type = 'movies'
+            content_type = "movies"
         if detected_type == "Episode":
             view_type = "Episodes"
-            content_type = 'episodes'
+            content_type = "episodes"
         xbmcplugin.setContent(pluginhandle, content_type)
 
     # set the sort items
@@ -238,7 +291,7 @@ def set_sort(pluginhandle, view_type, default_sort):
         "5": xbmcplugin.SORT_METHOD_GENRE,
         "6": xbmcplugin.SORT_METHOD_LABEL,
         "7": xbmcplugin.SORT_METHOD_VIDEO_RATING,
-        "8": xbmcplugin.SORT_METHOD_EPISODE
+        "8": xbmcplugin.SORT_METHOD_EPISODE,
     }
 
     settings = xbmcaddon.Addon()
@@ -249,13 +302,17 @@ def set_sort(pluginhandle, view_type, default_sort):
 
     if view_type == "BoxSets":
         xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
+        xbmcplugin.addSortMethod(
+            pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE
+        )
     elif view_type == "Episodes":
         xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_EPISODE)
     elif view_type == "Music":
         xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_TRACKNUM)
     else:
-        xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE)
+        xbmcplugin.addSortMethod(
+            pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE
+        )
         xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_VIDEO_YEAR)
 
     xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_DATEADDED)
@@ -287,64 +344,85 @@ def process_directory(url, progress, params, use_cache_data=False):
             name_format_type = None
             name_format = None
 
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
 
     gui_options = {}
     gui_options["server"] = server
     gui_options["name_format"] = name_format
     gui_options["name_format_type"] = name_format_type
     gui_options["max_image_width"] = max_image_width
-    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
+    gui_options["use_prem_date_for_added"] = (
+        settings.getSetting("use_prem_date_for_added") == "true"
+    )
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
-    cache_file, item_list, total_records, cache_thread = data_manager.get_items(url, gui_options, use_cache)
+    cache_file, item_list, total_records, cache_thread = data_manager.get_items(
+        url, gui_options, use_cache
+    )
 
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
     # build a new url, set the content media type and call get content again
     flatten_tvshow_seasons = settings.getSetting("flatten_tvshow_seasons")
-    if flatten_tvshow_seasons == "1" and len(item_list) == 1 and item_list[0].item_type == "Season":
+    if (
+        flatten_tvshow_seasons == "1"
+        and len(item_list) == 1
+        and item_list[0].item_type == "Season"
+    ):
         season_id = item_list[0].id
         series_id = item_list[0].series_id
-        season_url = ('{server}/emby/Shows/' + series_id +
-                      '/Episodes'
-                      '?userId={userid}' +
-                      '&seasonId=' + season_id +
-                      '&IsVirtualUnAired=false' +
-                      '&IsMissing=false' +
-                      '&Fields=SpecialEpisodeNumbers,{field_filters}' +
-                      '&format=json')
+        season_url = (
+            "{server}/emby/Shows/" + series_id + "/Episodes"
+            "?userId={userid}"
+            + "&seasonId="
+            + season_id
+            + "&IsVirtualUnAired=false"
+            + "&IsMissing=false"
+            + "&Fields=SpecialEpisodeNumbers,{field_filters}"
+            + "&format=json"
+        )
         if progress is not None:
             progress.close()
         params["media_type"] = "Episodes"
         get_content(season_url, params)
         return None, None, None
-    elif flatten_tvshow_seasons == "2" and len(item_list) > 0 and item_list[0].item_type == "Season":
+    elif (
+        flatten_tvshow_seasons == "2"
+        and len(item_list) > 0
+        and item_list[0].item_type == "Season"
+    ):
         season_id = item_list[0].id
         series_id = item_list[0].series_id
-        season_url = ('{server}/emby/Shows/' + series_id +
-                      '/Episodes'
-                      '?userId={userid}' +
-                      #'&seasonId=' + season_id +
-                      '&IsVirtualUnAired=false' +
-                      '&IsMissing=false' +
-                      '&Fields=SpecialEpisodeNumbers,{field_filters}' +
-                      '&format=json')
+        season_url = (
+            "{server}/emby/Shows/" + series_id + "/Episodes"
+            "?userId={userid}" +
+            #'&seasonId=' + season_id +
+            "&IsVirtualUnAired=false"
+            + "&IsMissing=false"
+            + "&Fields=SpecialEpisodeNumbers,{field_filters}"
+            + "&format=json"
+        )
         if progress is not None:
             progress.close()
         params["media_type"] = "Episodes"
         get_content(season_url, params)
         return None, None, None
 
-    hide_unwatched_details = settings.getSetting('hide_unwatched_details') == 'true'
+    hide_unwatched_details = settings.getSetting("hide_unwatched_details") == "true"
 
     display_options = {}
-    display_options["addCounts"] = settings.getSetting("addCounts") == 'true'
-    display_options["addResumePercent"] = settings.getSetting("addResumePercent") == 'true'
-    display_options["addSubtitleAvailable"] = settings.getSetting("addSubtitleAvailable") == 'true'
-    display_options["addUserRatings"] = settings.getSetting("add_user_ratings") == 'true'
+    display_options["addCounts"] = settings.getSetting("addCounts") == "true"
+    display_options["addResumePercent"] = (
+        settings.getSetting("addResumePercent") == "true"
+    )
+    display_options["addSubtitleAvailable"] = (
+        settings.getSetting("addSubtitleAvailable") == "true"
+    )
+    display_options["addUserRatings"] = (
+        settings.getSetting("add_user_ratings") == "true"
+    )
 
-    show_empty_folders = settings.getSetting("show_empty_folders") == 'true'
+    show_empty_folders = settings.getSetting("show_empty_folders") == "true"
 
     item_count = len(item_list)
     current_item = 1
@@ -357,7 +435,6 @@ def process_directory(url, progress, params, use_cache_data=False):
     dir_items = []
 
     for item_details in item_list:
-
         item_details.total_items = item_count
 
         if progress is not None:
@@ -380,19 +457,26 @@ def process_directory(url, progress, params, use_cache_data=False):
         total_watched += item_details.watched_episodes
 
         # if set, for unwatched episodes dont show some of the info
-        if hide_unwatched_details and item_details.item_type == "Episode" and item_details.play_count == 0:
+        if (
+            hide_unwatched_details
+            and item_details.item_type == "Episode"
+            and item_details.play_count == 0
+        ):
             item_details.plot = "[Spoiler Alert]"
             item_details.art["poster"] = item_details.art["tvshow.poster"]
             item_details.art["thumb"] = item_details.art["tvshow.poster"]
 
         if item_details.item_type == "MusicArtist":
-            u = "".join([
-                "{server}/emby/Users/{userid}/items",
-                "?AlbumArtistIds=" + item_details.id,
-                "&IncludeItemTypes=MusicAlbum",
-                "&CollapseBoxSetItems=false",
-                "&Recursive=true",
-                "&format=json"])
+            u = "".join(
+                [
+                    "{server}/emby/Users/{userid}/items",
+                    "?AlbumArtistIds=" + item_details.id,
+                    "&IncludeItemTypes=MusicAlbum",
+                    "&CollapseBoxSetItems=false",
+                    "&Recursive=true",
+                    "&format=json",
+                ]
+            )
             log.debug("TARGET URL = {0}", u)
             gui_item = add_gui_item(u, item_details, display_options)
             if gui_item:
@@ -400,35 +484,41 @@ def process_directory(url, progress, params, use_cache_data=False):
 
         elif item_details.is_folder is True:
             if item_details.item_type == "Series":
-                u = ('{server}/emby/Shows/' + item_details.id +
-                     '/Seasons'
-                     '?userId={userid}' +
-                     '&Fields={field_filters}' +
-                     '&format=json')
+                u = (
+                    "{server}/emby/Shows/" + item_details.id + "/Seasons"
+                    "?userId={userid}" + "&Fields={field_filters}" + "&format=json"
+                )
 
             elif item_details.item_type == "Season":
-                u = ('{server}/emby/Shows/' + item_details.series_id +
-                     '/Episodes'
-                     '?userId={userid}' +
-                     '&seasonId=' + item_details.id +
-                     '&IsVirtualUnAired=false' +
-                     '&IsMissing=false' +
-                     '&Fields=SpecialEpisodeNumbers,{field_filters}' +
-                     '&format=json')
+                u = (
+                    "{server}/emby/Shows/" + item_details.series_id + "/Episodes"
+                    "?userId={userid}"
+                    + "&seasonId="
+                    + item_details.id
+                    + "&IsVirtualUnAired=false"
+                    + "&IsMissing=false"
+                    + "&Fields=SpecialEpisodeNumbers,{field_filters}"
+                    + "&format=json"
+                )
 
             else:
-                u = "".join([
-                    "{server}/emby/Users/{userid}/items",
-                    "?ParentId=" + item_details.id,
-                    "&IsVirtualUnAired=false",
-                    "&IsMissing=false",
-                    "&Fields={field_filters}",
-                    "&format=json"])
+                u = "".join(
+                    [
+                        "{server}/emby/Users/{userid}/items",
+                        "?ParentId=" + item_details.id,
+                        "&IsVirtualUnAired=false",
+                        "&IsMissing=false",
+                        "&Fields={field_filters}",
+                        "&format=json",
+                    ]
+                )
 
             default_sort = item_details.item_type == "Playlist"
 
             if show_empty_folders or item_details.recursive_item_count != 0:
-                gui_item = add_gui_item(u, item_details, display_options, default_sort=default_sort)
+                gui_item = add_gui_item(
+                    u, item_details, display_options, default_sort=default_sort
+                )
                 if gui_item:
                     dir_items.append(gui_item)
             else:
@@ -441,19 +531,22 @@ def process_directory(url, progress, params, use_cache_data=False):
                 dir_items.append(gui_item)
 
     # add the all episodes item
-    show_all_episodes = settings.getSetting('show_all_episodes') == 'true'
-    if (show_all_episodes
-            and first_season_item is not None
-            and len(dir_items) > 1
-            and first_season_item.series_id is not None):
-        series_url = ('{server}/emby/Shows/' + first_season_item.series_id +
-                      '/Episodes'
-                      '?userId={userid}' +
-                      # '&seasonId=' + season_id +
-                      '&IsVirtualUnAired=false' +
-                      '&IsMissing=false' +
-                      '&Fields=SpecialEpisodeNumbers,{field_filters}' +
-                      '&format=json')
+    show_all_episodes = settings.getSetting("show_all_episodes") == "true"
+    if (
+        show_all_episodes
+        and first_season_item is not None
+        and len(dir_items) > 1
+        and first_season_item.series_id is not None
+    ):
+        series_url = (
+            "{server}/emby/Shows/" + first_season_item.series_id + "/Episodes"
+            "?userId={userid}" +
+            # '&seasonId=' + season_id +
+            "&IsVirtualUnAired=false"
+            + "&IsMissing=false"
+            + "&Fields=SpecialEpisodeNumbers,{field_filters}"
+            + "&format=json"
+        )
         played = 0
         overlay = "7"
         if total_unwatched == 0:

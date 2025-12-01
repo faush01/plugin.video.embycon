@@ -26,7 +26,6 @@ log = SimpleLogging(__name__)
 
 
 class CacheArtwork(threading.Thread):
-
     stop_all_activity = False
 
     def __init__(self):
@@ -43,14 +42,20 @@ class CacheArtwork(threading.Thread):
         home_window = HomeWindow()
         settings = xbmcaddon.Addon()
         latest_content_hash = "never"
-        check_interval = int(settings.getSetting('cacheImagesOnScreenSaver_interval'))
+        check_interval = int(settings.getSetting("cacheImagesOnScreenSaver_interval"))
         check_interval = check_interval * 60
         monitor = xbmc.Monitor()
         monitor.waitForAbort(5)
 
-        while not self.stop_all_activity and not monitor.abortRequested() and xbmc.getCondVisibility("System.ScreenSaverActive"):
+        while (
+            not self.stop_all_activity
+            and not monitor.abortRequested()
+            and xbmc.getCondVisibility("System.ScreenSaverActive")
+        ):
             content_hash = home_window.get_property("embycon_widget_reload")
-            if (check_interval != 0 and (time.time() - last_update) > check_interval) or (latest_content_hash != content_hash):
+            if (
+                check_interval != 0 and (time.time() - last_update) > check_interval
+            ) or (latest_content_hash != content_hash):
                 log.debug("CacheArtwork background thread - triggered")
                 if monitor.waitForAbort(10):
                     break
@@ -62,7 +67,10 @@ class CacheArtwork(threading.Thread):
 
             monitor.waitForAbort(5)
 
-        log.debug("CacheArtwork background thread exited : stop_all_activity : {0}", self.stop_all_activity)
+        log.debug(
+            "CacheArtwork background thread exited : stop_all_activity : {0}",
+            self.stop_all_activity,
+        )
 
     @staticmethod
     def delete_cached_images(item_id):
@@ -78,14 +86,14 @@ class CacheArtwork(threading.Thread):
 
         # is the web server enabled
         web_query = {"setting": "services.webserver"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_query)
-        xbmc_webserver_enabled = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_query)
+        xbmc_webserver_enabled = result["result"]["value"]
         if not xbmc_webserver_enabled:
             xbmcgui.Dialog().ok(string_load(30294), string_load(30295))
             return
 
         params = {"properties": ["url"]}
-        json_result = JsonRpc('Textures.GetTextures').execute(params)
+        json_result = JsonRpc("Textures.GetTextures").execute(params)
         textures = json_result.get("result", {}).get("textures", [])
         # log.debug("texture ids: {0}", textures)
 
@@ -99,7 +107,7 @@ class CacheArtwork(threading.Thread):
                 delete_count += 1
                 log.debug("removing texture id: {0}", texture_id)
                 params = {"textureid": int(texture_id)}
-                JsonRpc('Textures.RemoveTexture').execute(params)
+                JsonRpc("Textures.RemoveTexture").execute(params)
 
         del textures
 
@@ -112,7 +120,7 @@ class CacheArtwork(threading.Thread):
         delete_canceled = False
 
         params = {"properties": ["url"]}
-        json_result = JsonRpc('Textures.GetTextures').execute(params)
+        json_result = JsonRpc("Textures.GetTextures").execute(params)
         textures = json_result.get("result", {}).get("textures", [])
         total_textures = len(textures)
 
@@ -131,22 +139,28 @@ class CacheArtwork(threading.Thread):
                 url = urllib.parse.unquote(url)
                 url = url.replace("image://", "")
                 url = url[0:-1]
-                if url.find("/emby/") > -1 and url not in emby_texture_urls or url.find("localhost:24276") > -1:
+                if (
+                    url.find("/emby/") > -1
+                    and url not in emby_texture_urls
+                    or url.find("localhost:24276") > -1
+                ):
                     log.debug("adding unused texture url: {0}", url)
                     unused_texture_ids.add(texture["textureid"])
 
             log.debug("unused texture ids: {0}", unused_texture_ids)
 
-
             total_removed = len(unused_texture_ids)
             for texture_id in unused_texture_ids:
                 params = {"textureid": int(texture_id)}
-                JsonRpc('Textures.RemoveTexture').execute(params)
+                JsonRpc("Textures.RemoveTexture").execute(params)
                 percentage = int((float(index) / float(total_removed)) * 100)
                 message = "%s of %s" % (index, total_removed)
                 p_dialog.update(percentage, message)
                 index += 1
-                if isinstance(p_dialog, xbmcgui.DialogProgress) and p_dialog.iscanceled():
+                if (
+                    isinstance(p_dialog, xbmcgui.DialogProgress)
+                    and p_dialog.iscanceled()
+                ):
                     delete_canceled = True
                     break
                 if self.stop_all_activity:
@@ -173,18 +187,22 @@ class CacheArtwork(threading.Thread):
 
         # is the web server enabled
         web_query = {"setting": "services.webserver"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_query)
-        xbmc_webserver_enabled = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_query)
+        xbmc_webserver_enabled = result["result"]["value"]
         if not xbmc_webserver_enabled:
             xbmcgui.Dialog().ok(string_load(30294), string_load(30295))
-            xbmc.executebuiltin('ActivateWindow(servicesettings)')
+            xbmc.executebuiltin("ActivateWindow(servicesettings)")
             return
 
         result_report = []
 
         # ask questions
-        question_delete_unused = xbmcgui.Dialog().yesno(string_load(30296), string_load(30297))
-        question_cache_images = xbmcgui.Dialog().yesno(string_load(30299), string_load(30300))
+        question_delete_unused = xbmcgui.Dialog().yesno(
+            string_load(30296), string_load(30297)
+        )
+        question_cache_images = xbmcgui.Dialog().yesno(
+            string_load(30299), string_load(30300)
+        )
 
         # now do work - delete unused
         if question_delete_unused:
@@ -216,7 +234,7 @@ class CacheArtwork(threading.Thread):
         dp.create(string_load(30301), "")
         result_text = None
         try:
-            #self.remove_unused_artwork(dp)
+            # self.remove_unused_artwork(dp)
             result_text = self.cache_artwork(dp)
         except Exception as err:
             log.error("Cache Images Failed : {0}", err)
@@ -238,7 +256,7 @@ class CacheArtwork(threading.Thread):
         url += "&format=json"
 
         settings = xbmcaddon.Addon()
-        max_image_width = int(settings.getSetting('max_image_width'))
+        max_image_width = int(settings.getSetting("max_image_width"))
 
         data_manager = DataManager()
         results = data_manager.get_content(url)
@@ -261,7 +279,15 @@ class CacheArtwork(threading.Thread):
 
         texture_urls = set()
 
-        image_types = {"thumb", "poster", "banner", "clearlogo", "tvshow.poster", "tvshow.banner", "tvshow.landscape"}
+        image_types = {
+            "thumb",
+            "poster",
+            "banner",
+            "clearlogo",
+            "tvshow.poster",
+            "tvshow.banner",
+            "tvshow.landscape",
+        }
         for item in results:
             art = get_art(item, server, max_image_width, download_utils=download_utils)
             for art_type in art:
@@ -277,33 +303,33 @@ class CacheArtwork(threading.Thread):
 
         # is the web server enabled
         web_query = {"setting": "services.webserver"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_query)
-        xbmc_webserver_enabled = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_query)
+        xbmc_webserver_enabled = result["result"]["value"]
         if not xbmc_webserver_enabled:
             log.error("Kodi web server not enabled, can not cache images")
             return
 
         # get the port
         web_port = {"setting": "services.webserverport"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_port)
-        xbmc_port = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_port)
+        xbmc_port = result["result"]["value"]
         log.debug("xbmc_port: {0}", xbmc_port)
 
         # get the user
         web_user = {"setting": "services.webserverusername"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_user)
-        xbmc_username = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_user)
+        xbmc_username = result["result"]["value"]
         log.debug("xbmc_username: {0}", xbmc_username)
 
         # get the password
         web_pass = {"setting": "services.webserverpassword"}
-        result = JsonRpc('Settings.GetSettingValue').execute(web_pass)
-        xbmc_password = result['result']['value']
+        result = JsonRpc("Settings.GetSettingValue").execute(web_pass)
+        xbmc_password = result["result"]["value"]
 
         progress.update(0, string_load(30356))
 
         params = {"properties": ["url"]}
-        json_result = JsonRpc('Textures.GetTextures').execute(params)
+        json_result = JsonRpc("Textures.GetTextures").execute(params)
         textures = json_result.get("result", {}).get("textures", [])
         log.debug("Textures.GetTextures Count: {0}", len(textures))
 
@@ -337,7 +363,11 @@ class CacheArtwork(threading.Thread):
         missing_texture_urls = set()
         # image_types = ["thumb", "poster", "banner", "clearlogo", "tvshow.poster", "tvshow.banner", "tvshow.landscape"]
         for image_url in emby_texture_urls:
-            if image_url not in texture_urls and not image_url.endswith("&Tag=") and len(image_url) > 0:
+            if (
+                image_url not in texture_urls
+                and not image_url.endswith("&Tag=")
+                and len(image_url) > 0
+            ):
                 missing_texture_urls.add(image_url)
 
             if self.stop_all_activity:
@@ -353,7 +383,10 @@ class CacheArtwork(threading.Thread):
         headers = {}
         if xbmc_password:
             auth = "%s:%s" % (xbmc_username, xbmc_password)
-            headers = {'Authorization': 'Basic %s' % base64.b64encode(auth.encode("utf-8")).decode("utf-8")}
+            headers = {
+                "Authorization": "Basic %s"
+                % base64.b64encode(auth.encode("utf-8")).decode("utf-8")
+            }
         log.debug("Local Kodi Web Server Headers :  {0}", headers)
 
         total = len(missing_texture_urls)
@@ -363,7 +396,7 @@ class CacheArtwork(threading.Thread):
         for get_url in missing_texture_urls:
             log.debug("texture_url: {0}", get_url)
             url = double_urlencode(get_url)
-            kodi_texture_url = ("/image/image://%s" % url)
+            kodi_texture_url = "/image/image://%s" % url
             log.debug("kodi_texture_url: {0}", kodi_texture_url)
 
             percentage = int((float(index) / float(total)) * 100)

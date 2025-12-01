@@ -29,4 +29,5 @@ def timer(func):
                 data = sys.argv[2]
             log.info("timing_data|{0}|{1}|{2}|{3}", func.__name__, started, ended, data)
         return value
+
     return wrapper

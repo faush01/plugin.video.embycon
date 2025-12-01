@@ -69,8 +69,8 @@ extend-select = [
   #"ICN",   # import convention
   #"INP",   # implicit namespace package
   #"INT",   # flake8-gettext
-  #"ISC",   # implicit str concat
-  #"LOG",   # logging
+  "ISC",   # implicit str concat
+  "LOG",   # logging
   #"N",     # pep8-naming
   #"NPY",   # numpy-specific rules
   #"PD",    # panda-vet
@@ -91,7 +91,7 @@ extend-select = [
   #"SLF",   # self
   #"SLOT",  # flake8-slots
   #"T10",   # flake8-debugger
-  #"T20",   # print isn't used
+  "T20",   # print isn't used
   #"TCH",   # flake8-type-checking
   #"TID",   # flake8-tidy-imports
   #"TRY",   # tryceratops
@@ -109,3 +109,4 @@ convention = "google"
 [format]
 docstring-code-format = true
 docstring-code-line-length = 20
+quote-style = "double"

@@ -11,10 +11,8 @@ log = SimpleLogging(__name__)
 
 
 class ClientInformation:
-
     @staticmethod
     def get_device_id():
-
         window = HomeWindow()
         client_id = window.get_property("client_id")
 
@@ -30,7 +28,7 @@ class ClientInformation:
         if not client_id:
             client_id = uuid4().hex
             log.debug("Generating a new guid: {0}", client_id)
-            guid = xbmcvfs.File(emby_guid_path, 'w')
+            guid = xbmcvfs.File(emby_guid_path, "w")
             guid.write(client_id)
             guid.close()
             log.debug("emby_client_id (NEW): {0}", client_id)
@@ -48,4 +46,4 @@ class ClientInformation:
 
     @staticmethod
     def get_client():
-        return 'Kodi EmbyCon'
+        return "Kodi EmbyCon"

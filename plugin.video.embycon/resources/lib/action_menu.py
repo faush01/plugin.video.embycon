@@ -8,11 +8,11 @@ import xbmcgui
 
 from .simple_logging import SimpleLogging
 
+
 log = SimpleLogging(__name__)
 
 
 class ActionAutoClose(threading.Thread):
-
     last_interaction = time.time()
     parent_dialog = None
     stop_thread = False
@@ -62,7 +62,6 @@ class ActionAutoClose(threading.Thread):
 
 
 class ActionMenu(xbmcgui.WindowXMLDialog):
-
     selected_action = None
     action_items = None
     auto_close_thread = None
@@ -96,7 +95,6 @@ class ActionMenu(xbmcgui.WindowXMLDialog):
         log.debug("ActionMenu: onMessage: {0}", message)
 
     def onAction(self, action):
-
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.auto_close_thread.stop()
             self.close()

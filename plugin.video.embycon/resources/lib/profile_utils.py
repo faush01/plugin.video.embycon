@@ -22,8 +22,8 @@ ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
 ACTION_BACKSPACE = 110
 
-class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
 
+class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
     profile_details = {}
     current_position = 0
     line_count = 0
@@ -85,7 +85,6 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         self.profile_details = value
 
     def set_profile_details_text(self):
-
         if self.display_option == 0 or self.display_option == 1:
             # build profile details text
             profile_details_text = "Profile Data\n\n"
@@ -94,11 +93,19 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
             time_date = datetime(*(time.strptime(time_stamp, "%Y%m%d-%H%M%S-%f")[0:6]))
             time_stamp = time_date.strftime("%Y/%m/%d %H:%M:%S")
 
-            profile_details_text += "Params      : " + self.profile_details["addon_action"] + "\n"
+            profile_details_text += (
+                "Params      : " + self.profile_details["addon_action"] + "\n"
+            )
             profile_details_text += "Time Stamp  : " + time_stamp + "\n"
-            profile_details_text += "Total Calls : " + str(self.profile_details["total_calls"]) + "\n"
-            profile_details_text += "Total Time  : " + str(self.profile_details["total_time"]) + "\n"
-            profile_details_text += "Total Items : " + str(self.profile_details["item_count"]) + "\n"
+            profile_details_text += (
+                "Total Calls : " + str(self.profile_details["total_calls"]) + "\n"
+            )
+            profile_details_text += (
+                "Total Time  : " + str(self.profile_details["total_time"]) + "\n"
+            )
+            profile_details_text += (
+                "Total Items : " + str(self.profile_details["item_count"]) + "\n"
+            )
             profile_details_text += "\n"
 
             stats = self.profile_details["stats"]
@@ -138,7 +145,7 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
             profile_details_text = self.profile_details["source"]
 
         self.current_position = 0
-        self.line_count = profile_details_text.count('\n')
+        self.line_count = profile_details_text.count("\n")
 
         details_text_control = self.getControl(3010)
         details_text_control.setText(profile_details_text)
@@ -164,14 +171,17 @@ def view_profile_details(params):
     with open(profile_path) as json_file:
         stats_data = json.load(json_file)
 
-    plugin_path = xbmcvfs.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
-    action_menu = ProfileDetailsDialog("ProfileDetailsDialog.xml", plugin_path, "default", "720p")
+    plugin_path = xbmcvfs.translatePath(
+        os.path.join(xbmcaddon.Addon().getAddonInfo("path"))
+    )
+    action_menu = ProfileDetailsDialog(
+        "ProfileDetailsDialog.xml", plugin_path, "default", "720p"
+    )
     action_menu.set_profile_details(stats_data)
     action_menu.doModal()
 
 
 def list_available_profiles(_params):
-
     handle = int(sys.argv[1])
     list_items = []
 
@@ -194,7 +204,15 @@ def list_available_profiles(_params):
         total_time = stats_data["total_time"]
         item_count = stats_data["item_count"]
 
-        label = time_stamp + " | " + str(total_time) + " | " + str(total_calls) + " | " + str(item_count)
+        label = (
+            time_stamp
+            + " | "
+            + str(total_time)
+            + " | "
+            + str(total_calls)
+            + " | "
+            + str(item_count)
+        )
 
         list_item = xbmcgui.ListItem(label=label, offscreen=True)
         action_url = sys.argv[0] + "?mode=VIEW_PROFILE_DETAILS&file=" + file
@@ -276,7 +294,7 @@ def get_profile_data(pr):
             "calls": int(calls[0]),
             "time_local": float(s[1]),
             "time_stack": float(s[3]),
-            "func": s[5]
+            "func": s[5],
         }
         stats_data["stats"].append(item)
 

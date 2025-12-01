@@ -27,7 +27,7 @@ def check_connection_speed():
     log.debug("check_connection_speed")
 
     settings = xbmcaddon.Addon()
-    verify_cert = settings.getSetting('verify_cert') == 'true'
+    verify_cert = settings.getSetting("verify_cert") == "true"
     http_timeout = int(settings.getSetting("http_timeout"))
     speed_test_data_size = int(settings.getSetting("speed_test_data_size"))
     test_data_size = speed_test_data_size * 1000000
@@ -59,7 +59,9 @@ def check_connection_speed():
         conn = http.client.HTTPSConnection(server, timeout=http_timeout)
     elif local_use_https and not verify_cert:
         log.debug("Connection: HTTPS, Cert NOT checked")
-        conn = http.client.HTTPSConnection(server, timeout=http_timeout, context=ssl._create_unverified_context())
+        conn = http.client.HTTPSConnection(
+            server, timeout=http_timeout, context=ssl._create_unverified_context()
+        )
     else:
         log.debug("Connection: HTTP")
         conn = http.client.HTTPConnection(server, timeout=http_timeout)
@@ -70,7 +72,7 @@ def check_connection_speed():
     conn.request(method="GET", url=url_path, headers=head)
 
     progress_dialog = xbmcgui.DialogProgress()
-    message = 'Testing with {0} MB of data'.format(speed_test_data_size)
+    message = "Testing with {0} MB of data".format(speed_test_data_size)
     progress_dialog.create("EmbyCon connection speed test", message)
     total_data_read = 0
     total_time = time.time()
@@ -82,28 +84,40 @@ def check_connection_speed():
         data = response.read(10240)
         while len(data) > 0:
             total_data_read += len(data)
-            percentage_done = int(float(total_data_read) / float(test_data_size) * 100.0)
+            percentage_done = int(
+                float(total_data_read) / float(test_data_size) * 100.0
+            )
             if last_percentage_done != percentage_done:
                 progress_dialog.update(percentage_done)
                 last_percentage_done = percentage_done
             data = response.read(10240)
     else:
         log.error("HTTP response error: {0} {1}", response.status, response.reason)
-        error_message = "HTTP response error: %s\n%s" % (response.status, response.reason)
+        error_message = "HTTP response error: %s\n%s" % (
+            response.status,
+            response.reason,
+        )
         xbmcgui.Dialog().ok("Speed Test Error", error_message)
         return -1
 
     total_data_read_kbits = (total_data_read * 8) / 1000
     total_time = time.time() - total_time
     speed = int(total_data_read_kbits / total_time)
-    log.debug("Finished Connection Speed Test, speed: {0} total_data: {1}, total_time: {2}", speed, total_data_read, total_time)
+    log.debug(
+        "Finished Connection Speed Test, speed: {0} total_data: {1}, total_time: {2}",
+        speed,
+        total_data_read,
+        total_time,
+    )
 
     progress_dialog.close()
     del progress_dialog
 
     heading = "Speed Test Result : {0:,} Kbs".format(speed)
     message = "Do you want to set this speed as your max stream bitrate for playback?\n"
-    message += "{0:,} MB over {1} sec".format(int((total_data_read / 1000000)), total_time)
+    message += "{0:,} MB over {1} sec".format(
+        int((total_data_read / 1000000)), total_time
+    )
 
     response = xbmcgui.Dialog().yesno(heading, message)
     if response:
@@ -125,13 +139,13 @@ def get_server_details():
 
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 3)  # timeout
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    #sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
+    # sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
     sock.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
 
     log.debug("MutliGroup: {0}", multi_group)
     log.debug("Sending UDP Data: {0}", message)
 
-    addon_name = xbmcaddon.Addon().getAddonInfo('name')
+    addon_name = xbmcaddon.Addon().getAddonInfo("name")
     progress = xbmcgui.DialogProgress()
     progress.create(addon_name + " : " + string_load(30373))
     progress.update(0, string_load(30374))
@@ -177,13 +191,12 @@ def check_server(force=False, change_user=False):
 
     # if the server is not set then try to detect it
     if server_url == "":
-
         # scan for local server
         server_info = get_server_details()
 
         addon = xbmcaddon.Addon()
-        addon_name = addon.getAddonInfo('name')
-        server_icon = addon.getAddonInfo('icon')
+        addon_name = addon.getAddonInfo("name")
+        server_icon = addon.getAddonInfo("icon")
 
         server_list = []
         for server in server_info:
@@ -196,9 +209,9 @@ def check_server(force=False, change_user=False):
             server_list.append(server_item)
 
         if len(server_list) > 0:
-            return_index = xbmcgui.Dialog().select(addon_name + " : " + string_load(30166),
-                                                   server_list,
-                                                   useDetails=True)
+            return_index = xbmcgui.Dialog().select(
+                addon_name + " : " + string_load(30166), server_list, useDetails=True
+            )
             if return_index != -1:
                 server_url = server_info[return_index]["Address"]
 
@@ -230,9 +243,19 @@ def check_server(force=False, change_user=False):
                 user_password = url_bits.password
 
                 if user_name and user_password:
-                    temp_url = "%s://%s:%s@%s:%s/emby/Users/Public?format=json" % (server_protocol, user_name, user_password, server_address, server_port)
+                    temp_url = "%s://%s:%s@%s:%s/emby/Users/Public?format=json" % (
+                        server_protocol,
+                        user_name,
+                        user_password,
+                        server_address,
+                        server_port,
+                    )
                 else:
-                    temp_url = "%s://%s:%s/emby/Users/Public?format=json" % (server_protocol, server_address, server_port)
+                    temp_url = "%s://%s:%s/emby/Users/Public?format=json" % (
+                        server_protocol,
+                        server_address,
+                        server_port,
+                    )
 
                 log.debug("Testing_Url: {0}", temp_url)
                 progress = xbmcgui.DialogProgress()
@@ -243,12 +266,16 @@ def check_server(force=False, change_user=False):
 
                 result = json.loads(json_data)
                 if result is not None:
-                    xbmcgui.Dialog().ok(addon_name + " : " + string_load(30167),
-                                        "%s://%s:%s/" % (server_protocol, server_address, server_port))
+                    xbmcgui.Dialog().ok(
+                        addon_name + " : " + string_load(30167),
+                        "%s://%s:%s/" % (server_protocol, server_address, server_port),
+                    )
                     break
                 else:
                     message = server_url + "\n" + string_load(30371)
-                    return_index = xbmcgui.Dialog().yesno(addon_name + " : " + string_load(30135), message)
+                    return_index = xbmcgui.Dialog().yesno(
+                        addon_name + " : " + string_load(30135), message
+                    )
                     if not return_index:
                         xbmc.executebuiltin("ActivateWindow(Home)")
                         return
@@ -262,13 +289,22 @@ def check_server(force=False, change_user=False):
         server_protocol = url_bits.scheme
         user_name = url_bits.username
         user_password = url_bits.password
-        log.debug("Detected server info {0} - {1} - {2}", server_protocol, server_address, server_port)
+        log.debug(
+            "Detected server info {0} - {1} - {2}",
+            server_protocol,
+            server_address,
+            server_port,
+        )
 
         # save the server info
         settings.setSetting("port", server_port)
 
         if user_name and user_password:
-            server_address = "%s:%s@%s" % (url_bits.username, url_bits.password, server_address)
+            server_address = "%s:%s@%s" % (
+                url_bits.username,
+                url_bits.password,
+                server_address,
+            )
 
         settings.setSetting("ipaddress", server_address)
 
@@ -285,14 +321,15 @@ def check_server(force=False, change_user=False):
 
     # if asked or we have no current user then show user selection screen
     if something_changed or change_user or len(current_username) == 0:
-
         # stop playback when switching users
         xbmc.Player().stop()
         du = DownloadUtils()
 
         # get a list of users
         log.debug("Getting user list")
-        json_data = du.download_url(server_url + "/emby/Users/Public?format=json", authenticate=False)
+        json_data = du.download_url(
+            server_url + "/emby/Users/Public?format=json", authenticate=False
+        )
 
         log.debug("jsonData: {0}", json_data)
         try:
@@ -325,7 +362,12 @@ def check_server(force=False, change_user=False):
                         days = divmod(ago.seconds, 86400)
                         hours = divmod(days[1], 3600)
                         minutes = divmod(hours[1], 60)
-                        log.debug("LastActivityDate: {0} {1} {2}", days[0], hours[0], minutes[0])
+                        log.debug(
+                            "LastActivityDate: {0} {1} {2}",
+                            days[0],
+                            hours[0],
+                            minutes[0],
+                        )
                         if days[0]:
                             time_ago += " %sd" % days[0]
                         if hours[0]:
@@ -340,7 +382,7 @@ def check_server(force=False, change_user=False):
                         log.debug("LastActivityDate: {0}", time_ago)
 
                     user_item = xbmcgui.ListItem(name)
-                    user_image = du.get_user_artwork(user, 'Primary')
+                    user_image = du.get_user_artwork(user, "Primary")
                     if not user_image:
                         user_image = "DefaultUser.png"
                     art = {"Thumb": user_image}
@@ -356,7 +398,9 @@ def check_server(force=False, change_user=False):
                         m = hashlib.md5()
                         m.update(name.encode("utf-8"))
                         hashed_username = m.hexdigest()
-                        saved_password = settings.getSetting("saved_user_password_" + hashed_username)
+                        saved_password = settings.getSetting(
+                            "saved_user_password_" + hashed_username
+                        )
                         if saved_password:
                             sub_line += ": Saved"
 
@@ -384,21 +428,24 @@ def check_server(force=False, change_user=False):
             user_item.setProperty("manual", "true")
             users.append(user_item)
 
-            return_value = xbmcgui.Dialog().select(selection_title,
-                                                   users,
-                                                   preselect=selected_id,
-                                                   autoclose=20000,
-                                                   useDetails=True)
+            return_value = xbmcgui.Dialog().select(
+                selection_title,
+                users,
+                preselect=selected_id,
+                autoclose=20000,
+                useDetails=True,
+            )
 
             if return_value > -1 and return_value != selected_id:
-
                 something_changed = True
                 selected_user = users[return_value]
                 secured = selected_user.getProperty("secure") == "true"
                 manual = selected_user.getProperty("manual") == "true"
                 selected_user_name = selected_user.getLabel()
 
-                log.debug("Selected User Name: {0} : {1}", return_value, selected_user_name)
+                log.debug(
+                    "Selected User Name: {0} : {1}", return_value, selected_user_name
+                )
 
                 if manual:
                     kb = xbmc.Keyboard()
@@ -417,18 +464,30 @@ def check_server(force=False, change_user=False):
                     m = hashlib.md5()
                     m.update(selected_user_name.encode("utf-8"))
                     hashed_username = m.hexdigest()
-                    saved_password = settings.getSetting("saved_user_password_" + hashed_username)
-                    allow_password_saving = settings.getSetting("allow_password_saving") == "true"
+                    saved_password = settings.getSetting(
+                        "saved_user_password_" + hashed_username
+                    )
+                    allow_password_saving = (
+                        settings.getSetting("allow_password_saving") == "true"
+                    )
 
                     # if not saving passwords but have a saved ask to clear it
                     if not allow_password_saving and saved_password:
-                        clear_password = xbmcgui.Dialog().yesno(string_load(30368), string_load(30369))
+                        clear_password = xbmcgui.Dialog().yesno(
+                            string_load(30368), string_load(30369)
+                        )
                         if clear_password:
-                            settings.setSetting("saved_user_password_" + hashed_username, "")
+                            settings.setSetting(
+                                "saved_user_password_" + hashed_username, ""
+                            )
 
                     if saved_password:
-                        log.debug("Saving username and password: {0}", selected_user_name)
-                        log.debug("Using stored password for user: {0}", hashed_username)
+                        log.debug(
+                            "Saving username and password: {0}", selected_user_name
+                        )
+                        log.debug(
+                            "Using stored password for user: {0}", hashed_username
+                        )
                         save_user_details(settings, selected_user_name, saved_password)
 
                     else:
@@ -437,17 +496,31 @@ def check_server(force=False, change_user=False):
                         kb.setHiddenInput(True)
                         kb.doModal()
                         if kb.isConfirmed():
-                            log.debug("Saving username and password: {0}", selected_user_name)
-                            save_user_details(settings, selected_user_name, kb.getText())
+                            log.debug(
+                                "Saving username and password: {0}", selected_user_name
+                            )
+                            save_user_details(
+                                settings, selected_user_name, kb.getText()
+                            )
 
                             # should we save the password
                             if allow_password_saving:
-                                save_password = xbmcgui.Dialog().yesno(string_load(30363), string_load(30364))
+                                save_password = xbmcgui.Dialog().yesno(
+                                    string_load(30363), string_load(30364)
+                                )
                                 if save_password:
-                                    log.debug("Saving password for fast user switching: {0}", hashed_username)
-                                    settings.setSetting("saved_user_password_" + hashed_username, kb.getText())
+                                    log.debug(
+                                        "Saving password for fast user switching: {0}",
+                                        hashed_username,
+                                    )
+                                    settings.setSetting(
+                                        "saved_user_password_" + hashed_username,
+                                        kb.getText(),
+                                    )
                 else:
-                    log.debug("Saving username with no password: {0}", selected_user_name)
+                    log.debug(
+                        "Saving username with no password: {0}", selected_user_name
+                    )
                     save_user_details(settings, selected_user_name, "")
 
         log.debug("Changed user - checking change : {0}", something_changed)

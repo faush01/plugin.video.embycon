@@ -6,7 +6,6 @@ log = SimpleLogging(__name__)
 
 
 class BitrateDialog(xbmcgui.WindowXMLDialog):
-
     slider_control = None
     bitrate_label = None
     initial_bitrate_value = 0
@@ -37,7 +36,6 @@ class BitrateDialog(xbmcgui.WindowXMLDialog):
         log.debug("ActionMenu: onMessage: {0}", message)
 
     def onAction(self, action):
-
         # log.debug("onAction: onAction: {0} {1}", action.getId(), self.slider_control.getInt())
 
         bitrate_label_string = str(self.slider_control.getInt()) + " Kbs"
@@ -54,4 +52,4 @@ class BitrateDialog(xbmcgui.WindowXMLDialog):
     def onClick(self, control_id):
         if control_id == 3000:
             log.debug("ActionMenu: Selected Item: {0}", control_id)
-            #self.close()
+            # self.close()

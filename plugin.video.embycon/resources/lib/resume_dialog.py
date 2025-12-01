@@ -29,7 +29,6 @@ class ResumeDialog(xbmcgui.WindowXMLDialog):
         pass
 
     def onClick(self, controlID):
-
         if controlID == 3010:
             self.resumePlay = 0
             self.close()

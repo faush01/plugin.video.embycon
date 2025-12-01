@@ -21,7 +21,6 @@ log = SimpleLogging(__name__)
 
 
 class WebSocketClient(threading.Thread):
-
     _shared_state = {}
 
     _client = None
@@ -29,7 +28,6 @@ class WebSocketClient(threading.Thread):
     _library_monitor = None
 
     def __init__(self, library_change_monitor):
-
         self.__dict__ = self._shared_state
         self.monitor = xbmc.Monitor()
 
@@ -41,28 +39,27 @@ class WebSocketClient(threading.Thread):
         threading.Thread.__init__(self)
 
     def on_message(ws, message):
-
         result = json.loads(message)
-        message_type = result['MessageType']
+        message_type = result["MessageType"]
 
-        if message_type == 'Play':
-            data = result['Data']
+        if message_type == "Play":
+            data = result["Data"]
             ws._play(data)
 
-        elif message_type == 'Playstate':
-            data = result['Data']
+        elif message_type == "Playstate":
+            data = result["Data"]
             ws._playstate(data)
 
         elif message_type == "UserDataChanged":
-            data = result['Data']
+            data = result["Data"]
             ws._library_changed(data)
 
         elif message_type == "LibraryChanged":
-            data = result['Data']
+            data = result["Data"]
             ws._library_changed(data)
 
         elif message_type == "GeneralCommand":
-            data = result['Data']
+            data = result["Data"]
             ws._general_commands(data)
 
         else:
@@ -73,15 +70,14 @@ class WebSocketClient(threading.Thread):
         self._library_monitor.check_for_updates()
 
     def _play(self, data):
+        item_ids = data["ItemIds"]
+        command = data["PlayCommand"]
 
-        item_ids = data['ItemIds']
-        command = data['PlayCommand']
-
-        if command == 'PlayNow':
+        if command == "PlayNow":
             home_screen = HomeWindow()
             home_screen.set_property("skip_select_user", "true")
 
-            startat = data.get('StartPositionTicks', -1)
+            startat = data.get("StartPositionTicks", -1)
             log.debug("WebSocket Message PlayNow: {0}", data)
 
             media_source_id = data.get("MediaSourceId", "")
@@ -105,123 +101,112 @@ class WebSocketClient(threading.Thread):
             play_action(params)
 
     def _playstate(self, data):
-
-        command = data['Command']
+        command = data["Command"]
         player = xbmc.Player()
 
         actions = {
-
-            'Stop': player.stop,
-            'Unpause': player.pause,
-            'Pause': player.pause,
-            'PlayPause': player.pause,
-            'NextTrack': player.playnext,
-            'PreviousTrack': player.playprevious
+            "Stop": player.stop,
+            "Unpause": player.pause,
+            "Pause": player.pause,
+            "PlayPause": player.pause,
+            "NextTrack": player.playnext,
+            "PreviousTrack": player.playprevious,
         }
-        if command == 'Seek':
-
+        if command == "Seek":
             if player.isPlaying():
-                seek_to = data['SeekPositionTicks']
+                seek_to = data["SeekPositionTicks"]
                 seek_time = seek_to / 10000000.0
                 player.seekTime(seek_time)
                 log.debug("Seek to {0}", seek_time)
 
         elif command in actions:
             actions[command]()
-            log.debug("Command: {0} completed",  command)
+            log.debug("Command: {0} completed", command)
 
         else:
             log.debug("Unknown command: {0}", command)
             return
 
     def _general_commands(self, data):
+        command = data["Name"]
+        arguments = data["Arguments"]
 
-        command = data['Name']
-        arguments = data['Arguments']
-
-        if command in ('Mute',
-                       'Unmute',
-                       'SetVolume',
-                       'SetSubtitleStreamIndex',
-                       'SetAudioStreamIndex',
-                       'SetRepeatMode'):
-
+        if command in (
+            "Mute",
+            "Unmute",
+            "SetVolume",
+            "SetSubtitleStreamIndex",
+            "SetAudioStreamIndex",
+            "SetRepeatMode",
+        ):
             player = xbmc.Player()
             # These commands need to be reported back
-            if command == 'Mute':
-                xbmc.executebuiltin('Mute')
+            if command == "Mute":
+                xbmc.executebuiltin("Mute")
 
-            elif command == 'Unmute':
-                xbmc.executebuiltin('Mute')
+            elif command == "Unmute":
+                xbmc.executebuiltin("Mute")
 
-            elif command == 'SetVolume':
-                volume = arguments['Volume']
-                xbmc.executebuiltin('SetVolume(%s[,showvolumebar])' % volume)
+            elif command == "SetVolume":
+                volume = arguments["Volume"]
+                xbmc.executebuiltin("SetVolume(%s[,showvolumebar])" % volume)
 
-            elif command == 'SetAudioStreamIndex':
-                index = int(arguments['Index'])
+            elif command == "SetAudioStreamIndex":
+                index = int(arguments["Index"])
                 player.setAudioStream(index - 1)
 
-            elif command == 'SetSubtitleStreamIndex':
-                index = int(arguments['Index'])
+            elif command == "SetSubtitleStreamIndex":
+                index = int(arguments["Index"])
                 player.setSubtitleStream(index - 1)
 
-            elif command == 'SetRepeatMode':
-                mode = arguments['RepeatMode']
-                xbmc.executebuiltin('PlayerControl(%s)' % mode)
+            elif command == "SetRepeatMode":
+                mode = arguments["RepeatMode"]
+                xbmc.executebuiltin("PlayerControl(%s)" % mode)
 
-        elif command == 'DisplayMessage':
-
+        elif command == "DisplayMessage":
             # header = arguments['Header']
-            text = arguments['Text']
+            text = arguments["Text"]
             # show notification here
             log.debug("WebSocket DisplayMessage: {0}", text)
             xbmcgui.Dialog().notification("EmbyCon", text)
 
-        elif command == 'SendString':
+        elif command == "SendString":
+            params = {"text": arguments["String"], "done": False}
+            JsonRpc("Input.SendText").execute(params)
 
-            params = {
-
-                'text': arguments['String'],
-                'done': False
-            }
-            JsonRpc('Input.SendText').execute(params)
-
-        elif command in ('MoveUp', 'MoveDown', 'MoveRight', 'MoveLeft'):
+        elif command in ("MoveUp", "MoveDown", "MoveRight", "MoveLeft"):
             # Commands that should wake up display
             actions = {
-
-                'MoveUp': "Input.Up",
-                'MoveDown': "Input.Down",
-                'MoveRight': "Input.Right",
-                'MoveLeft': "Input.Left"
+                "MoveUp": "Input.Up",
+                "MoveDown": "Input.Down",
+                "MoveRight": "Input.Right",
+                "MoveLeft": "Input.Left",
             }
             JsonRpc(actions[command]).execute()
 
-        elif command == 'GoHome':
-            JsonRpc('GUI.ActivateWindow').execute({'window': "home"})
+        elif command == "GoHome":
+            JsonRpc("GUI.ActivateWindow").execute({"window": "home"})
 
         elif command == "Guide":
-            JsonRpc('GUI.ActivateWindow').execute({'window': "tvguide"})
+            JsonRpc("GUI.ActivateWindow").execute({"window": "tvguide"})
 
         else:
             builtin = {
-
-                'ToggleFullscreen': 'Action(FullScreen)',
-                'ToggleOsdMenu': 'Action(OSD)',
-                'ToggleContextMenu': 'Action(ContextMenu)',
-                'Select': 'Action(Select)',
-                'Back': 'Action(back)',
-                'PageUp': 'Action(PageUp)',
-                'NextLetter': 'Action(NextLetter)',
-                'GoToSearch': 'VideoLibrary.Search',
-                'GoToSettings': 'ActivateWindow(Settings)',
-                'PageDown': 'Action(PageDown)',
-                'PreviousLetter': 'Action(PrevLetter)',
-                'TakeScreenshot': 'TakeScreenshot',
-                'ToggleMute': 'Mute',
-                'VolumeUp': 'Action(VolumeUp)',
-                'VolumeDown': 'Action(VolumeDown)',
+                "ToggleFullscreen": "Action(FullScreen)",
+                "ToggleOsdMenu": "Action(OSD)",
+                "ToggleContextMenu": "Action(ContextMenu)",
+                "Select": "Action(Select)",
+                "Back": "Action(back)",
+                "PageUp": "Action(PageUp)",
+                "NextLetter": "Action(NextLetter)",
+                "GoToSearch": "VideoLibrary.Search",
+                "GoToSettings": "ActivateWindow(Settings)",
+                "PageDown": "Action(PageDown)",
+                "PreviousLetter": "Action(PrevLetter)",
+                "TakeScreenshot": "TakeScreenshot",
+                "ToggleMute": "Mute",
+                "VolumeUp": "Action(VolumeUp)",
+                "VolumeDown": "Action(VolumeDown)",
             }
             if command in builtin:
                 xbmc.executebuiltin(builtin[command])
@@ -237,7 +222,6 @@ class WebSocketClient(threading.Thread):
         log.error("Error: {0}", error)
 
     def run(self):
-
         # websocket.enableTrace(True)
         download_utils = downloadutils.DownloadUtils()
 
@@ -250,24 +234,29 @@ class WebSocketClient(threading.Thread):
         # Get the appropriate prefix for the websocket
         server = download_utils.get_server()
         if "https" in server:
-            server = server.replace('https', "wss")
+            server = server.replace("https", "wss")
         else:
-            server = server.replace('http', "ws")
+            server = server.replace("http", "ws")
 
-        websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (server, token, self.device_id)
+        websocket_url = "%s/embywebsocket?api_key=%s&deviceId=%s" % (
+            server,
+            token,
+            self.device_id,
+        )
         log.debug("websocket url: {0}", websocket_url)
 
         enableTrace(True)
 
-        self._client = WebSocketApp(websocket_url,
-                                              on_open=self.on_open,
-                                              on_message=self.on_message,
-                                              on_error=self.on_error,
-                                              on_close=self.on_close)
+        self._client = WebSocketApp(
+            websocket_url,
+            on_open=self.on_open,
+            on_message=self.on_message,
+            on_error=self.on_error,
+            on_close=self.on_close,
+        )
         log.debug("Starting WebSocketClient")
 
         while not self.monitor.abortRequested():
-
             self._client.run_forever(ping_interval=10)
 
             if self._stop_websocket:
@@ -282,13 +271,11 @@ class WebSocketClient(threading.Thread):
         log.debug("WebSocketClient Stopped")
 
     def stop_client(self):
-
         self._stop_websocket = True
         if self._client is not None:
             self._client.close()
         log.debug("Stopping WebSocket (stop_client called)")
 
     def post_capabilities(self):
-
         download_utils = downloadutils.DownloadUtils()
         download_utils.post_capabilities()

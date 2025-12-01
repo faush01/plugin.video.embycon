@@ -11,7 +11,6 @@ log = SimpleLogging(__name__)
 
 
 class LibraryChangeMonitor(threading.Thread):
-
     last_library_change_check = 0
     library_check_triggered = False
     exit_now = False
@@ -32,7 +31,6 @@ class LibraryChangeMonitor(threading.Thread):
         log.debug("Library Monitor Started")
         monitor = xbmc.Monitor()
         while not self.exit_now and not monitor.abortRequested():
-
             if self.library_check_triggered and not xbmc.Player().isPlaying():
                 log.debug("Doing new content check")
                 check_for_new_content()

@@ -41,7 +41,6 @@ def get_chapter_items():
 
     chapters = []
     for chap in item_chapters:
-
         name = chap.get("Name", None)
         chap_type = chap.get("MarkerType", None)
         chap_resume = chap.get("StartPositionTicks", -1)
@@ -79,7 +78,11 @@ def get_current_chapter(chapters):
         for x in range(1, len(chapters)):
             chap = chapters[x]
             resume = int(chap.getProperty("resume"))
-            log.debug("ChapterDialogMonitor: get_current_chapter : {0} - {1}", resume, current_position)
+            log.debug(
+                "ChapterDialogMonitor: get_current_chapter : {0} - {1}",
+                resume,
+                current_position,
+            )
             if current_position < resume:
                 break
             index += 1
@@ -87,7 +90,6 @@ def get_current_chapter(chapters):
 
 
 class ChapterDialogMonitor(threading.Thread):
-
     stop_thread = False
 
     def run(self):
@@ -96,16 +98,23 @@ class ChapterDialogMonitor(threading.Thread):
         home_screen = HomeWindow()
         kodi_monitor = xbmc.Monitor()
         while not kodi_monitor.abortRequested() and not self.stop_thread:
-
-            if xbmc.getCondVisibility("Window.IsActive(videoosd)"):  # videoosd | fullscreenvideo
-
+            if xbmc.getCondVisibility(
+                "Window.IsActive(videoosd)"
+            ):  # videoosd | fullscreenvideo
                 item_id = home_screen.get_property("currently_playing_id")
-                if xbmc.getCondVisibility("Window.IsVisible(VideoBookmarks)") and item_id:
+                if (
+                    xbmc.getCondVisibility("Window.IsVisible(VideoBookmarks)")
+                    and item_id
+                ):
                     xbmc.executebuiltin("Dialog.Close(VideoBookmarks,true)")
 
                     try:
-                        plugin_path = xbmcvfs.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
-                        action_menu = ChapterDialog("ChapterDialog.xml", plugin_path, "default", "720p")
+                        plugin_path = xbmcvfs.translatePath(
+                            os.path.join(xbmcaddon.Addon().getAddonInfo("path"))
+                        )
+                        action_menu = ChapterDialog(
+                            "ChapterDialog.xml", plugin_path, "default", "720p"
+                        )
                         action_menu.doModal()
                     except Exception as e:
                         raise e
@@ -122,7 +131,6 @@ class ChapterDialogMonitor(threading.Thread):
 
 
 class ChapterDialog(xbmcgui.WindowXMLDialog):
-
     chapter_list = None
 
     def __init__(self, *args, **kwargs):
@@ -158,7 +166,9 @@ class ChapterDialog(xbmcgui.WindowXMLDialog):
             if selected:
                 chap_name = selected.getLabel()
                 resume = selected.getProperty("resume")
-                log.debug("ChapterDialog: Chapter Selected : {0} - {1}", chap_name, resume)
+                log.debug(
+                    "ChapterDialog: Chapter Selected : {0} - {1}", chap_name, resume
+                )
 
                 seek_to = int(resume)
                 player = xbmc.Player()

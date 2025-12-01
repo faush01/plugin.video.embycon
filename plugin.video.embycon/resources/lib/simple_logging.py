@@ -22,13 +22,13 @@ class SimpleLogging:
 
     def __init__(self, name):
         # Only initialize once
-        if hasattr(self, '_initialized') and self._initialized:
+        if hasattr(self, "_initialized") and self._initialized:
             return
-        
+
         settings = xbmcaddon.Addon()
-        prefix = settings.getAddonInfo('name')
-        self.name = prefix + '.' + name
-        self.enable_logging = settings.getSetting('log_debug') == "true"
+        prefix = settings.getAddonInfo("name")
+        self.name = prefix + "." + name
+        self.enable_logging = settings.getSetting("log_debug") == "true"
         self._initialized = True
 
         # params = {"setting": "debug.showloginfo"}
@@ -60,9 +60,9 @@ class SimpleLogging:
         # convert any unicode to utf-8 strings
         for arg in args:
             new_args.append(arg)
-            #if isinstance(arg, unicode):
+            # if isinstance(arg, unicode):
             #    new_args.append(arg.encode("utf-8"))
-            #else:
+            # else:
             #    new_args.append(arg)
         log_line = fmt.format(*new_args)
         return log_line

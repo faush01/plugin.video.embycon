@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 
@@ -49,6 +48,7 @@ class MediaStream:
     ColorSpace: Optional[str] = None
     CodecTag: Optional[str] = None
 
+
 @dataclass
 class MediaSource:
     Protocol: str
@@ -78,15 +78,18 @@ class MediaSource:
     DefaultAudioStreamIndex: Optional[int] = None
     ItemId: Optional[str] = None
 
+
 @dataclass
 class Studio:
     Name: str
     Id: int
 
+
 @dataclass
 class GenreItem:
     Name: str
     Id: int
+
 
 @dataclass
 class UserData:
@@ -97,10 +100,12 @@ class UserData:
     IsFavorite: bool = False
     Played: bool = False
 
+
 @dataclass
 class TagItem:
     Name: str
     Id: int
+
 
 @dataclass
 class ImageTags:
@@ -111,13 +116,15 @@ class ImageTags:
     Art: Optional[str] = None
     Disc: Optional[str] = None
 
+
 @dataclass
 class ProviderIds:
     Imdb: Optional[str] = None
     Tmdb: Optional[str] = None
     Tvdb: Optional[str] = None
     TvRage: Optional[str] = None
-    
+
+
 @dataclass
 class Item:
     Name: str
@@ -147,9 +154,9 @@ class Item:
     Studios: List[Studio] = field(default_factory=list)
     GenreItems: List[GenreItem] = field(default_factory=list)
     TagItems: List[TagItem] = field(default_factory=list)
-    UserData: Optional[UserData] = None # type: ignore
+    UserData: Optional[UserData] = None  # type: ignore
     MediaStreams: List[MediaStream] = field(default_factory=list)
-    ImageTags: Optional[ImageTags] = None # type: ignore
+    ImageTags: Optional[ImageTags] = None  # type: ignore
     BackdropImageTags: List[str] = field(default_factory=list)
     MediaType: Optional[str] = None
     CanDelete: Optional[bool] = None
