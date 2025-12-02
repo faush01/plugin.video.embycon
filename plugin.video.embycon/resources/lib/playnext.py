@@ -11,11 +11,12 @@ import xbmcvfs
 from .simple_logging import SimpleLogging
 from .play_utils import send_event_notification
 from .action_menu import ActionAutoClose
+
+
 log = SimpleLogging(__name__)
 
 
 class PlayNextService(threading.Thread):
-
     stop_thread = False
     monitor = None
 
@@ -24,33 +25,41 @@ class PlayNextService(threading.Thread):
         self.monitor = play_monitor
 
     def run(self):
-
         from .play_utils import get_playing_data
+
         settings = xbmcaddon.Addon()
-        play_next_trigger_time = int(settings.getSetting('play_next_trigger_time'))
+        play_next_trigger_time = int(settings.getSetting("play_next_trigger_time"))
 
         play_next_dialog = None
         play_next_triggered = False
         is_playing = False
 
         while not xbmc.Monitor().abortRequested() and not self.stop_thread:
-
             player = xbmc.Player()
             if player.isPlaying():
-
                 if not is_playing:
                     settings = xbmcaddon.Addon()
-                    play_next_trigger_time = int(settings.getSetting('play_next_trigger_time'))
-                    log.debug("New play_next_trigger_time value: {0}", play_next_trigger_time)
+                    play_next_trigger_time = int(
+                        settings.getSetting("play_next_trigger_time")
+                    )
+                    log.debug(
+                        "New play_next_trigger_time value: {0}", play_next_trigger_time
+                    )
 
                 duration = player.getTotalTime()
                 position = player.getTime()
                 trigger_time = play_next_trigger_time  # 300
-                time_to_end = (duration - position)
+                time_to_end = duration - position
 
-                if not play_next_triggered and (trigger_time > time_to_end) and play_next_dialog is None:
+                if (
+                    not play_next_triggered
+                    and (trigger_time > time_to_end)
+                    and play_next_dialog is None
+                ):
                     play_next_triggered = True
-                    log.debug("play_next_triggered hit at {0} seconds from end", time_to_end)
+                    log.debug(
+                        "play_next_triggered hit at {0} seconds from end", time_to_end
+                    )
 
                     play_data = get_playing_data(self.monitor.played_information)
                     log.debug("play_next_triggered play_data : {0}", play_data)
@@ -60,10 +69,17 @@ class PlayNextService(threading.Thread):
                         item_type = play_data.get("item_type")
                         if next_episode is not None and item_type == "Episode":
                             settings = xbmcaddon.Addon()
-                            plugin_path = settings.getAddonInfo('path')
-                            plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
+                            plugin_path = settings.getAddonInfo("path")
+                            plugin_path_real = xbmcvfs.translatePath(
+                                os.path.join(plugin_path)
+                            )
 
-                            play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
+                            play_next_dialog = PlayNextDialog(
+                                "PlayNextDialog.xml",
+                                plugin_path_real,
+                                "default",
+                                "720p",
+                            )
                             play_next_dialog.set_episode_info(next_episode)
                             if play_next_dialog is not None:
                                 play_next_dialog.show()
@@ -89,7 +105,6 @@ class PlayNextService(threading.Thread):
 
 
 class PlayNextDialog(xbmcgui.WindowXMLDialog):
-
     action_exitkeys_id = None
     episode_info = None
     play_called = False
@@ -141,7 +156,7 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         epp_image.setImage(self.episode_info["art"]["thumb"])
 
         runtime_ticks = self.episode_info.get("RunTimeTicks", 0)
-        duration = (runtime_ticks / 10000000.0) / 60.0 # convert ticks to minutes
+        duration = (runtime_ticks / 10000000.0) / 60.0  # convert ticks to minutes
         duration = int(round(duration, 0))
         duration_string = "%s m" % (duration,)
         duration_label = self.getControl(3019)
@@ -163,7 +178,6 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         log.debug("PlayNextDialog: onMessage: {0}", message)
 
     def onAction(self, action):
-
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.auto_close_thread.stop()
             self.close()

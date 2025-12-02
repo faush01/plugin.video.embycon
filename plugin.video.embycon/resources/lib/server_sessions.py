@@ -1,4 +1,3 @@
-
 import sys
 import xbmcgui
 import xbmcplugin
@@ -35,7 +34,7 @@ def show_server_sessions():
         return
 
     settings = xbmcaddon.Addon()
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
 
     list_items = []
     for session in results:
@@ -63,15 +62,32 @@ def show_server_sessions():
         art = {}
         if now_playing:
             server = download_utils.get_server()
-            art = get_art(now_playing, server, maxwidth=max_image_width)
+            art = get_art(
+                now_playing,
+                server,
+                maxwidth=max_image_width,
+                download_utils=download_utils,
+            )
 
             runtime = now_playing.get("RunTimeTicks", 0)
             if position_ticks > 0 and runtime > 0:
                 percenatge_played = (position_ticks / float(runtime)) * 100.0
                 percenatge_played = int(percenatge_played)
 
-            session_info += " (" + now_playing.get("Name", "na") + " " + str(percenatge_played) + "%)"
-            user_session_details += now_playing.get("Name", "na") + " " + str(percenatge_played) + "%" + "\n"
+            session_info += (
+                " ("
+                + now_playing.get("Name", "na")
+                + " "
+                + str(percenatge_played)
+                + "%)"
+            )
+            user_session_details += (
+                now_playing.get("Name", "na")
+                + " "
+                + str(percenatge_played)
+                + "%"
+                + "\n"
+            )
 
         else:
             session_info += " (idle)"
@@ -80,16 +96,32 @@ def show_server_sessions():
         transcoding_details = ""
         if transcoding_info:
             if not transcoding_info.get("IsVideoDirect", None):
-                transcoding_details += "Video:" + transcoding_info.get("VideoCodec", "") + ":" + str(transcoding_info.get("Width", 0)) + "x" + str(transcoding_info.get("Height", 0)) + "\n"
+                transcoding_details += (
+                    "Video:"
+                    + transcoding_info.get("VideoCodec", "")
+                    + ":"
+                    + str(transcoding_info.get("Width", 0))
+                    + "x"
+                    + str(transcoding_info.get("Height", 0))
+                    + "\n"
+                )
             else:
                 transcoding_details += "Video:direct\n"
 
             if not transcoding_info.get("IsAudioDirect", None):
-                transcoding_details += "Audio:" + transcoding_info.get("AudioCodec", "") + ":" + str(transcoding_info.get("AudioChannels", 0)) + "\n"
+                transcoding_details += (
+                    "Audio:"
+                    + transcoding_info.get("AudioCodec", "")
+                    + ":"
+                    + str(transcoding_info.get("AudioChannels", 0))
+                    + "\n"
+                )
             else:
                 transcoding_details += "Audio:direct\n"
 
-            transcoding_details += "Bitrate:" + str(transcoding_info.get("Bitrate", 0)) + "\n"
+            transcoding_details += (
+                "Bitrate:" + str(transcoding_info.get("Bitrate", 0)) + "\n"
+            )
 
         list_item = xbmcgui.ListItem(label=session_info)
         list_item.setArt(art)
@@ -101,13 +133,15 @@ def show_server_sessions():
 
         info_tag_video = list_item.getVideoInfoTag()
         info_tag_video.setMediaType("movie")
-        #info_tag_video.setDuration(int(runtime / 10000000))
-        info_tag_video.setResumePoint(int(position_ticks / 10000000), int(runtime / 10000000))
+        # info_tag_video.setDuration(int(runtime / 10000000))
+        info_tag_video.setResumePoint(
+            int(position_ticks / 10000000), int(runtime / 10000000)
+        )
         info_tag_video.setPlot(user_session_details)
 
-        #list_item.setProperty('TotalTime', str(runtime / 10000000))
-        #list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
-        #list_item.setProperty("complete_percentage", str(percenatge_played))
+        # list_item.setProperty('TotalTime', str(runtime / 10000000))
+        # list_item.setProperty('ResumeTime', str(position_ticks / 10000000))
+        # list_item.setProperty("complete_percentage", str(percenatge_played))
 
         item_tuple = ("", list_item, False)
         list_items.append(item_tuple)

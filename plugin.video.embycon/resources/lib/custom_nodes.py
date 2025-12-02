@@ -11,7 +11,7 @@ from .simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
 
-'''
+"""
 &reload=$INFO[Window(Home).Property(plugin.video.embycon-embycon_widget_reload)]
 
 Node types : 
@@ -51,11 +51,10 @@ Items ({server}/emby/Users/{userid}/Items)
 - media_type (movies, tvshows, homevideos, Episodes, MusicAlbums, MusicArtists, musicvideos, boxsets)
 - sort
 - use cache
-'''
+"""
 
 
 def get_view_list():
-
     data_manager = DataManager()
     views_url = "{server}/emby/Users/{userid}/Views?format=json"
     views = data_manager.get_content(views_url)
@@ -79,7 +78,7 @@ def get_view_list():
 
 def load_custom_nodes():
     log.debug("load_custom_nodes")
-    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     node_info_path = os.path.join(addon_dir, "custom_nodes.json")
     if xbmcvfs.exists(node_info_path):
         log.debug("custom_nodes.json : Exists")
@@ -102,14 +101,13 @@ def add_custom_node(existing_name, new_name, node_info):
     if new_name is not None and node_info is not None:
         custom_nodes[new_name] = node_info
 
-    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile'))
+    addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     node_info_path = os.path.join(addon_dir, "custom_nodes.json")
-    with open(node_info_path, 'w') as outfile:
+    with open(node_info_path, "w") as outfile:
         json.dump(custom_nodes, outfile)
 
 
 class CustomNode(xbmcgui.WindowXMLDialog):
-
     view_list_lookup = None
 
     def __init__(self, *args, **kwargs):
@@ -133,7 +131,6 @@ class CustomNode(xbmcgui.WindowXMLDialog):
         log.debug("CustomNode: onMessage: {0}", message)
 
     def onAction(self, action):
-
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.close()
         elif action.getId() == 92:  # ACTION_NAV_BACK
@@ -145,7 +142,9 @@ class CustomNode(xbmcgui.WindowXMLDialog):
         selected_id = 0
         if current_value in option_list:
             selected_id = option_list.index(current_value)
-        return_index = xbmcgui.Dialog().select("Select Value", option_list, preselect=selected_id)
+        return_index = xbmcgui.Dialog().select(
+            "Select Value", option_list, preselect=selected_id
+        )
         if return_index > -1:
             new_setting = option_list[return_index]
             control.setLabel(new_setting)
@@ -159,7 +158,9 @@ class CustomNode(xbmcgui.WindowXMLDialog):
         for index in range(0, len(option_list)):
             if option_list[index] in types:
                 selected.append(index)
-        return_indexes = xbmcgui.Dialog().multiselect("Select Value", option_list, preselect=selected)
+        return_indexes = xbmcgui.Dialog().multiselect(
+            "Select Value", option_list, preselect=selected
+        )
         if return_indexes is not None:
             type_list = []
             for selected_index in return_indexes:
@@ -182,18 +183,40 @@ class CustomNode(xbmcgui.WindowXMLDialog):
             resp = self.show_setting_for_select(3153, option_list)
             if resp > 0:
                 self.getControl(3154).setLabel(option_list[resp])
-                self.getControl(3155).setLabel(current_nodes[option_list[resp]].get("item_type", ""))
-                self.getControl(3156).setLabel(current_nodes[option_list[resp]].get("item_limit", ""))
-                self.getControl(3158).setLabel(current_nodes[option_list[resp]].get("recursive", ""))
-                self.getControl(3159).setLabel(current_nodes[option_list[resp]].get("group", ""))
-                self.getControl(3160).setLabel(current_nodes[option_list[resp]].get("watched", ""))
-                self.getControl(3161).setLabel(current_nodes[option_list[resp]].get("inprogress", ""))
-                self.getControl(3162).setLabel(current_nodes[option_list[resp]].get("sortby", ""))
-                self.getControl(3163).setLabel(current_nodes[option_list[resp]].get("sortorder", ""))
+                self.getControl(3155).setLabel(
+                    current_nodes[option_list[resp]].get("item_type", "")
+                )
+                self.getControl(3156).setLabel(
+                    current_nodes[option_list[resp]].get("item_limit", "")
+                )
+                self.getControl(3158).setLabel(
+                    current_nodes[option_list[resp]].get("recursive", "")
+                )
+                self.getControl(3159).setLabel(
+                    current_nodes[option_list[resp]].get("group", "")
+                )
+                self.getControl(3160).setLabel(
+                    current_nodes[option_list[resp]].get("watched", "")
+                )
+                self.getControl(3161).setLabel(
+                    current_nodes[option_list[resp]].get("inprogress", "")
+                )
+                self.getControl(3162).setLabel(
+                    current_nodes[option_list[resp]].get("sortby", "")
+                )
+                self.getControl(3163).setLabel(
+                    current_nodes[option_list[resp]].get("sortorder", "")
+                )
 
-                self.getControl(3164).setLabel(current_nodes[option_list[resp]].get("kodi_media_type", ""))
-                self.getControl(3165).setLabel(current_nodes[option_list[resp]].get("kodi_sort", ""))
-                self.getControl(3166).setLabel(current_nodes[option_list[resp]].get("use_cache", ""))
+                self.getControl(3164).setLabel(
+                    current_nodes[option_list[resp]].get("kodi_media_type", "")
+                )
+                self.getControl(3165).setLabel(
+                    current_nodes[option_list[resp]].get("kodi_sort", "")
+                )
+                self.getControl(3166).setLabel(
+                    current_nodes[option_list[resp]].get("use_cache", "")
+                )
 
                 parent_id = current_nodes[option_list[resp]].get("item_parent", "")
                 if parent_id:
@@ -212,7 +235,14 @@ class CustomNode(xbmcgui.WindowXMLDialog):
                 control.setLabel(new_node_name)
 
         elif control_id == 3155:
-            option_list = ["Movie", "Boxset", "Series", "Episode", "MusicAlbum", "Audio"]
+            option_list = [
+                "Movie",
+                "Boxset",
+                "Series",
+                "Episode",
+                "MusicAlbum",
+                "Audio",
+            ]
             self.show_setting_for_select_multi(3155, option_list)
 
         elif control_id == 3156:
@@ -265,7 +295,14 @@ class CustomNode(xbmcgui.WindowXMLDialog):
         elif control_id == 3162:
             # Album, AlbumArtist, Artist, Budget, CommunityRating, CriticRating, DateCreated, DatePlayed,
             # PlayCount, PremiereDate, ProductionYear, SortName, Random, Revenue, Runtime
-            option_list = ["None", "DatePlayed", "DateCreated", "PlayCount", "ProductionYear", "PremiereDate"]
+            option_list = [
+                "None",
+                "DatePlayed",
+                "DateCreated",
+                "PlayCount",
+                "ProductionYear",
+                "PremiereDate",
+            ]
             self.show_setting_for_select(3162, option_list)
 
         elif control_id == 3163:
@@ -273,7 +310,16 @@ class CustomNode(xbmcgui.WindowXMLDialog):
             self.show_setting_for_select(3163, option_list)
 
         elif control_id == 3164:
-            option_list = ["movies", "tvshows", "homevideos", "episodes", "musicalbums", "musicartists", "musicvideos", "boxsets"]
+            option_list = [
+                "movies",
+                "tvshows",
+                "homevideos",
+                "episodes",
+                "musicalbums",
+                "musicartists",
+                "musicvideos",
+                "boxsets",
+            ]
             self.show_setting_for_select(3164, option_list)
 
         elif control_id == 3165:
@@ -325,7 +371,7 @@ class CustomNode(xbmcgui.WindowXMLDialog):
                     "sortorder": sortorder,
                     "kodi_media_type": kodi_media_type,
                     "kodi_sort": kodi_sort,
-                    "use_cache": use_cache
+                    "use_cache": use_cache,
                 }
                 add_custom_node(existing_name, new_name, new_node)
             self.close()

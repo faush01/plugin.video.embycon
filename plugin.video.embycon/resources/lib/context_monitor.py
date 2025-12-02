@@ -9,18 +9,17 @@ log = SimpleLogging(__name__)
 
 
 class ContextMonitor(threading.Thread):
-
     stop_thread = False
 
     def run(self):
-
         item_id = None
         log.debug("ContextMonitor Thread Started")
 
         kodi_monitor = xbmc.Monitor()
         while not kodi_monitor.abortRequested() and not self.stop_thread:
-
-            if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"):
+            if xbmc.getCondVisibility(
+                "Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"
+            ):
                 kodi_monitor.waitForAbort(1)
             else:
                 if xbmc.getCondVisibility("Window.IsVisible(contextmenu)"):
@@ -35,11 +34,13 @@ class ContextMonitor(threading.Thread):
                             log.error("Context Menu Error : {0}\n{1}", err, tb)
 
                 container_id = xbmc.getInfoLabel("System.CurrentControlID")
-                item_id = xbmc.getInfoLabel("Container(" + str(container_id) + ").ListItem.Property(id)")
+                item_id = xbmc.getInfoLabel(
+                    "Container(" + str(container_id) + ").ListItem.Property(id)"
+                )
 
                 kodi_monitor.waitForAbort(0.2)
 
-        '''
+        """
         context_up = False
         is_embycon_item = False
         
@@ -72,7 +73,7 @@ class ContextMonitor(threading.Thread):
 
                 xbmc.sleep(200)
                 
-        '''
+        """
 
         log.debug("ContextMonitor Thread Exited")
 

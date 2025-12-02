@@ -8,7 +8,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-from resources.lib.downloadutils import DownloadUtils, save_user_details
+from resources.lib.downloadutils import DownloadUtils
 from resources.lib.simple_logging import SimpleLogging
 from resources.lib.play_utils import Service, PlaybackService, send_progress
 from resources.lib.kodi_utils import HomeWindow
@@ -18,16 +18,14 @@ from resources.lib.menu_functions import set_library_window_values
 from resources.lib.context_monitor import ContextMonitor
 from resources.lib.server_detect import check_server
 from resources.lib.library_change_monitor import LibraryChangeMonitor
-from resources.lib.datamanager import clear_old_cache_data
 from resources.lib.tracking import set_timing_enabled
 from resources.lib.image_server import HttpImageServerThread
 from resources.lib.playnext import PlayNextService
-from resources.lib.skin_cloner import check_skin_installed
 from resources.lib.chapter_dialog import ChapterDialogMonitor
 
 settings = xbmcaddon.Addon()
 
-log_timing_data = settings.getSetting('log_timing') == "true"
+log_timing_data = settings.getSetting("log_timing") == "true"
 if log_timing_data:
     set_timing_enabled(True)
 
@@ -37,7 +35,7 @@ home_window.clear_property("userid")
 home_window.clear_property("AccessToken")
 home_window.clear_property("Params")
 
-log = SimpleLogging('service')
+log = SimpleLogging("service")
 monitor = xbmc.Monitor()
 kodi_monitor = xbmc.Monitor()
 
@@ -50,12 +48,14 @@ while not monitor.abortRequested():
     xbmc.sleep(100)
 
 # notify of debug logging
-enable_logging = settings.getSetting('log_debug') == "true"
+enable_logging = settings.getSetting("log_debug") == "true"
 if enable_logging:
-    xbmcgui.Dialog().notification(settings.getAddonInfo('name'),
-                                  "Debug logging enabled!",
-                                  time=3000,
-                                  icon=xbmcgui.NOTIFICATION_WARNING)
+    xbmcgui.Dialog().notification(
+        settings.getAddonInfo("name"),
+        "Debug logging enabled!",
+        time=3000,
+        icon=xbmcgui.NOTIFICATION_WARNING,
+    )
 
 # make sure we have a server before starting the service
 du = DownloadUtils()
@@ -103,40 +103,39 @@ library_change_monitor = LibraryChangeMonitor()
 library_change_monitor.start()
 
 # start the WebSocket Client running
-remote_control = settings.getSetting('websocket_enabled') == "true"
+remote_control = settings.getSetting("websocket_enabled") == "true"
 websocket_client = WebSocketClient(library_change_monitor)
 if remote_control:
     websocket_client.start()
 
 play_next_service = None
-play_next_trigger_time = int(settings.getSetting('play_next_trigger_time'))
+play_next_trigger_time = int(settings.getSetting("play_next_trigger_time"))
 if play_next_trigger_time > 0:
     play_next_service = PlayNextService(monitor)
     play_next_service.start()
 
 # Start the context menu monitor
 context_monitor = None
-context_menu = settings.getSetting('override_contextmenu') == "true"
+context_menu = settings.getSetting("override_contextmenu") == "true"
 if context_menu:
     context_monitor = ContextMonitor()
     context_monitor.start()
 
 # Start the bookmark/chapter monitor
 chapter_dialog_monitor = None
-emby_bookmarks = settings.getSetting('override_bookmarks') == "true"
+emby_bookmarks = settings.getSetting("override_bookmarks") == "true"
 if emby_bookmarks:
     chapter_dialog_monitor = ChapterDialogMonitor()
     chapter_dialog_monitor.start()
 
-background_interval = int(settings.getSetting('background_interval'))
-newcontent_interval = int(settings.getSetting('new_content_check_interval'))
-random_movie_list_interval = int(settings.getSetting('random_movie_refresh_interval'))
+background_interval = int(settings.getSetting("background_interval"))
+newcontent_interval = int(settings.getSetting("new_content_check_interval"))
+random_movie_list_interval = int(settings.getSetting("random_movie_refresh_interval"))
 random_movie_list_interval = random_movie_list_interval * 60
 
 prev_user_id = home_window.get_property("userid")
 
 while not kodi_monitor.abortRequested():
-
     try:
         if xbmc.Player().isPlaying():
             last_random_movie_update = time.time() - (random_movie_list_interval - 15)
@@ -156,15 +155,25 @@ while not kodi_monitor.abortRequested():
                     user_changed = True
                     user_last_changed = time.time()
 
-                if user_changed or (random_movie_list_interval != 0 and (time.time() - last_random_movie_update) > random_movie_list_interval):
+                if user_changed or (
+                    random_movie_list_interval != 0
+                    and (time.time() - last_random_movie_update)
+                    > random_movie_list_interval
+                ):
                     last_random_movie_update = time.time()
                     set_random_movies()
 
-                if user_changed or (newcontent_interval != 0 and (time.time() - last_content_check) > newcontent_interval):
+                if user_changed or (
+                    newcontent_interval != 0
+                    and (time.time() - last_content_check) > newcontent_interval
+                ):
                     last_content_check = time.time()
                     library_change_monitor.check_for_updates()
 
-                if user_changed or (background_interval != 0 and (time.time() - last_background_update) > background_interval):
+                if user_changed or (
+                    background_interval != 0
+                    and (time.time() - last_background_update) > background_interval
+                ):
                     last_background_update = time.time()
                     set_library_window_values(user_changed)
                     set_background_image(user_changed)
@@ -174,13 +183,21 @@ while not kodi_monitor.abortRequested():
                     websocket_client = WebSocketClient(library_change_monitor)
                     websocket_client.start()
 
-                if skin_checked is False and (time.time() - user_last_changed) > skin_check_delay and home_window.get_property("userid"):
+                if (
+                    skin_checked is False
+                    and (time.time() - user_last_changed) > skin_check_delay
+                    and home_window.get_property("userid")
+                ):
                     skin_checked = True
                     # check_skin_installed()
 
             elif screen_saver_active:
-                last_random_movie_update = time.time() - (random_movie_list_interval - 15)
-                if background_interval != 0 and ((time.time() - last_background_update) > background_interval):
+                last_random_movie_update = time.time() - (
+                    random_movie_list_interval - 15
+                )
+                if background_interval != 0 and (
+                    (time.time() - last_background_update) > background_interval
+                ):
                     last_background_update = time.time()
                     set_background_image(False)
 

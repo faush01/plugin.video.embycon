@@ -6,10 +6,10 @@ from resources.lib.simple_logging import SimpleLogging
 from resources.lib.functions import main_entry_point
 from resources.lib.tracking import set_timing_enabled
 
-log = SimpleLogging('default')
+log = SimpleLogging("default")
 
 settings = xbmcaddon.Addon()
-log_timing_data = settings.getSetting('log_timing') == "true"
+log_timing_data = settings.getSetting("log_timing") == "true"
 if log_timing_data:
     set_timing_enabled(True)
 

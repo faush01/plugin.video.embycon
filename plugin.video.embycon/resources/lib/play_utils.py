@@ -27,46 +27,56 @@ from .playnext import PlayNextDialog
 from .skip_intro_dialog import SkipIntroMonitor
 
 log = SimpleLogging(__name__)
-download_utils = DownloadUtils()
 
 
 def play_all_files(items, auto_resume, monitor, play_items=True):
     log.debug("playAllFiles called with items: {0}", items)
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
 
     settings = xbmcaddon.Addon()
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
 
     for item in items:
-
         item_id = item.get("Id")
 
         # get playback info
         playback_info = download_utils.get_item_playback_info(item_id, False)
         if playback_info is None:
-            log.debug("playback_info was None, could not get MediaSources so can not play!")
+            log.debug(
+                "playback_info was None, could not get MediaSources so can not play!"
+            )
             return
         if playback_info.get("ErrorCode") is not None:
             error_string = playback_info.get("ErrorCode")
-            xbmcgui.Dialog().notification(string_load(30316),
-                                          error_string,
-                                          icon="special://home/addons/plugin.video.embycon/icon.png")
+            xbmcgui.Dialog().notification(
+                string_load(30316),
+                error_string,
+                icon="special://home/addons/plugin.video.embycon/icon.png",
+            )
             return
 
         play_session_id = playback_info.get("PlaySessionId", "")
         live_stream_id = playback_info.get("LiveStreamId", "")
 
         # select the media source to use
-        sources = playback_info.get('MediaSources')
+        sources = playback_info.get("MediaSources")
 
         selected_media_source = sources[0]
         source_id = selected_media_source.get("Id")
 
-        playurl, playback_type, listitem_props = PlayUtils().get_play_url(selected_media_source)
-        log.info("Play URL: {0} PlaybackType: {1} ListItem Properties: {2}", playurl, playback_type, listitem_props)
+        playurl, playback_type, listitem_props = PlayUtils().get_play_url(
+            selected_media_source
+        )
+        log.info(
+            "Play URL: {0} PlaybackType: {1} ListItem Properties: {2}",
+            playurl,
+            playback_type,
+            listitem_props,
+        )
 
         if playurl is None:
             return
@@ -91,8 +101,12 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         gui_options["name_format"] = None
         gui_options["name_format_type"] = ""
         gui_options["max_image_width"] = max_image_width
-        gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
-        item_details = extract_item_info(item, gui_options)
+        gui_options["use_prem_date_for_added"] = (
+            settings.getSetting("use_prem_date_for_added") == "true"
+        )
+        item_details = extract_item_info(
+            item, gui_options, download_utils=download_utils
+        )
 
         # create ListItem
         display_options = {}
@@ -103,7 +117,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
 
         gui_item = add_gui_item("", item_details, display_options, False)
         list_item = gui_item[1]
-        #list_item = xbmcgui.ListItem(label=item_title)
+        # list_item = xbmcgui.ListItem(label=item_title)
 
         # add playurl and data to the monitor
         data = {}
@@ -117,7 +131,15 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         log.debug("Add to played_information: {0}", monitor.played_information)
 
         list_item.setPath(playurl)
-        list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title, max_image_width)
+        list_item = set_list_item_props(
+            item_id,
+            list_item,
+            item,
+            server,
+            listitem_props,
+            item_title,
+            max_image_width,
+        )
 
         playlist.add(playurl, list_item)
 
@@ -129,7 +151,9 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         if auto_resume != -1:
             seek_time = (auto_resume / 1000) / 10000
 
-        log.debug("play_all_files auto_resume : {0} seekto : {1}", auto_resume, seek_time)
+        log.debug(
+            "play_all_files auto_resume : {0} seekto : {1}", auto_resume, seek_time
+        )
 
         player = xbmc.Player()
         player.play(playlist)
@@ -138,34 +162,48 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
             player.pause()
             monitor = xbmc.Monitor()
             count = 0
-            while not player.isPlaying() and not monitor.abortRequested() and count != 100:
+            while (
+                not player.isPlaying() and not monitor.abortRequested() and count != 100
+            ):
                 count = count + 1
                 xbmc.sleep(100)
 
             if count == 100 or not player.isPlaying() or monitor.abortRequested():
-                log.info("PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting")
+                log.info(
+                    "PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting"
+                )
                 player.stop()
                 return
 
             log.info("PlaybackResumeAction : Playback is Running")
 
             seek_to_time = seek_time
-            target_seek = (seek_to_time - 10)
+            target_seek = seek_to_time - 10
 
             count = 0
             max_loops = 2 * 120
-            while not monitor.abortRequested() and player.isPlaying() and count < max_loops:
+            while (
+                not monitor.abortRequested()
+                and player.isPlaying()
+                and count < max_loops
+            ):
                 log.info("PlaybackResumeAction : Seeking to : {0}", seek_to_time)
                 player.seekTime(seek_to_time)
                 current_position = player.getTime()
                 if current_position >= target_seek:
                     break
-                log.info("PlaybackResumeAction : target:{0} current:{1}", target_seek, current_position)
+                log.info(
+                    "PlaybackResumeAction : target:{0} current:{1}",
+                    target_seek,
+                    current_position,
+                )
                 count = count + 1
                 xbmc.sleep(500)
 
             if count == max_loops:
-                log.info("PlaybackResumeAction : Playback could not seek to required position")
+                log.info(
+                    "PlaybackResumeAction : Playback could not seek to required position"
+                )
                 player.stop()
             else:
                 count = 0
@@ -206,6 +244,7 @@ def add_to_playlist(play_info, monitor):
     log.debug("Adding item to playlist : {0}", play_info)
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
     item_id = play_info.get("item_id")
@@ -225,9 +264,11 @@ def add_to_playlist(play_info, monitor):
         return
     if playback_info.get("ErrorCode") is not None:
         error_string = playback_info.get("ErrorCode")
-        xbmcgui.Dialog().notification(string_load(30316),
-                                      error_string,
-                                      icon="special://home/addons/plugin.video.embycon/icon.png")
+        xbmcgui.Dialog().notification(
+            string_load(30316),
+            error_string,
+            icon="special://home/addons/plugin.video.embycon/icon.png",
+        )
         return
 
     # play_session_id = id_generator()
@@ -236,13 +277,20 @@ def add_to_playlist(play_info, monitor):
 
     # select the media source to use
     # sources = item.get("MediaSources")
-    sources = playback_info.get('MediaSources')
+    sources = playback_info.get("MediaSources")
 
     selected_media_source = sources[0]
     source_id = selected_media_source.get("Id")
 
-    playurl, playback_type, listitem_props = PlayUtils().get_play_url(selected_media_source)
-    log.info("Play URL: {0} PlaybackType: {1} ListItem Properties: {2}", playurl, playback_type, listitem_props)
+    playurl, playback_type, listitem_props = PlayUtils().get_play_url(
+        selected_media_source
+    )
+    log.info(
+        "Play URL: {0} PlaybackType: {1} ListItem Properties: {2}",
+        playurl,
+        playback_type,
+        listitem_props,
+    )
 
     if playurl is None:
         return
@@ -264,7 +312,7 @@ def add_to_playlist(play_info, monitor):
     list_item = xbmcgui.ListItem(label=item_title)
 
     settings = xbmcaddon.Addon()
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
 
     # add playurl and data to the monitor
     data = {}
@@ -278,7 +326,15 @@ def add_to_playlist(play_info, monitor):
     log.debug("Add to played_information: {0}", monitor.played_information)
 
     list_item.setPath(playurl)
-    list_item = set_list_item_props(item_id, list_item, item, server, listitem_props, item_title, maxwidth=max_image_width)
+    list_item = set_list_item_props(
+        item_id,
+        list_item,
+        item,
+        server,
+        listitem_props,
+        item_title,
+        maxwidth=max_image_width,
+    )
 
     playlist.add(playurl, list_item)
 
@@ -325,18 +381,26 @@ def play_file(play_info, monitor):
     subtitle_stream_index = play_info.get("subtitle_stream_index", None)
     audio_stream_index = play_info.get("audio_stream_index", None)
 
-    log.debug("playFile id({0}) resume({1}) force_transcode({2})", item_id, auto_resume, force_transcode)
+    log.debug(
+        "playFile id({0}) resume({1}) force_transcode({2})",
+        item_id,
+        auto_resume,
+        force_transcode,
+    )
 
     settings = xbmcaddon.Addon()
-    addon_path = settings.getAddonInfo('path')
-    force_auto_resume = settings.getSetting('forceAutoResume') == 'true'
+    addon_path = settings.getAddonInfo("path")
+    force_auto_resume = settings.getSetting("forceAutoResume") == "true"
     jump_back_amount = int(settings.getSetting("jump_back_amount"))
-    play_cinema_intros = settings.getSetting('play_cinema_intros') == 'true'
-    auto_play_first_version = settings.getSetting("auto_play_first_version") == 'true'
+    play_cinema_intros = settings.getSetting("play_cinema_intros") == "true"
+    auto_play_first_version = settings.getSetting("auto_play_first_version") == "true"
 
+    download_utils = DownloadUtils()
     server = download_utils.get_server()
 
-    url = "{server}/emby/Users/{userid}/Items/%s?fields=Chapters&format=json" % (item_id,)
+    url = "{server}/emby/Users/{userid}/Items/%s?fields=Chapters&format=json" % (
+        item_id,
+    )
     data_manager = DataManager()
     result = data_manager.get_content(url)
     log.debug("Playfile item: {0}", dict(result))
@@ -348,10 +412,14 @@ def play_file(play_info, monitor):
     # if this is a season, playlist or album then play all items in that parent
     if result.get("Type") in ["Season", "MusicAlbum", "Playlist"]:
         log.debug("PlayAllFiles for parent item id: {0}", item_id)
-        url = ('{server}/emby/Users/{userid}/items' +
-               '?ParentId=%s' +
-               '&Fields={field_filters}' +
-               '&format=json')
+        url = "".join(
+            [
+                "{server}/emby/Users/{userid}/items",
+                "?ParentId=%s",
+                "&Fields={field_filters}",
+                "&format=json",
+            ]
+        )
         url = url % (item_id,)
         result = data_manager.get_content(url)
         log.debug("PlayAllFiles items: {0}", result)
@@ -373,7 +441,9 @@ def play_file(play_info, monitor):
         play_url = "%s/emby/Items/%s/Images/Primary"
         play_url = play_url % (server, item_id)
 
-        plugin_path = xbmcvfs.translatePath(os.path.join(xbmcaddon.Addon().getAddonInfo('path')))
+        plugin_path = xbmcvfs.translatePath(
+            os.path.join(xbmcaddon.Addon().getAddonInfo("path"))
+        )
         action_menu = PictureViewer("PictureViewer.xml", plugin_path, "default", "720p")
         action_menu.setPicture(play_url)
         action_menu.doModal()
@@ -386,15 +456,17 @@ def play_file(play_info, monitor):
         return
     if playback_info.get("ErrorCode") is not None:
         error_string = playback_info.get("ErrorCode")
-        xbmcgui.Dialog().notification(string_load(30316),
-                                      error_string,
-                                      icon="special://home/addons/plugin.video.embycon/icon.png")
+        xbmcgui.Dialog().notification(
+            string_load(30316),
+            error_string,
+            icon="special://home/addons/plugin.video.embycon/icon.png",
+        )
         return
 
     play_session_id = playback_info.get("PlaySessionId", "")
 
     # select the media source to use
-    media_sources = playback_info.get('MediaSources')
+    media_sources = playback_info.get("MediaSources")
     selected_media_source = None
 
     if media_sources is None or len(media_sources) == 0:
@@ -445,12 +517,13 @@ def play_file(play_info, monitor):
     else:
         user_data = result.get("UserData")
         if user_data.get("PlaybackPositionTicks") != 0:
-
             reasonable_ticks = int(user_data.get("PlaybackPositionTicks")) / 1000
             seek_time = reasonable_ticks / 10000
             display_time = str(timedelta(seconds=seek_time))
 
-            resume_dialog = ResumeDialog("ResumeDialog.xml", addon_path, "default", "720p")
+            resume_dialog = ResumeDialog(
+                "ResumeDialog.xml", addon_path, "default", "720p"
+            )
             resume_dialog.setResumeTime("Resume from " + display_time)
             resume_dialog.doModal()
             resume_result = resume_dialog.getResumeAction()
@@ -480,8 +553,15 @@ def play_file(play_info, monitor):
 
     log.debug("play_session_id: {0}", play_session_id)
     log.debug("live_stream_id: {0}", live_stream_id)
-    playurl, playback_type, listitem_props = PlayUtils().get_play_url(selected_media_source)
-    log.info("Play URL: {0} Playback Type: {1} ListItem Properties: {2}", playurl, playback_type, listitem_props)
+    playurl, playback_type, listitem_props = PlayUtils().get_play_url(
+        selected_media_source
+    )
+    log.info(
+        "Play URL: {0} Playback Type: {1} ListItem Properties: {2}",
+        playurl,
+        playback_type,
+        listitem_props,
+    )
 
     if playurl is None:
         return
@@ -503,15 +583,17 @@ def play_file(play_info, monitor):
 
     # extract item info from result
     settings = xbmcaddon.Addon()
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
 
     gui_options = {}
     gui_options["server"] = server
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
     gui_options["max_image_width"] = max_image_width
-    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
-    item_details = extract_item_info(result, gui_options)
+    gui_options["use_prem_date_for_added"] = (
+        settings.getSetting("use_prem_date_for_added") == "true"
+    )
+    item_details = extract_item_info(result, gui_options, download_utils=download_utils)
 
     # create ListItem
     display_options = {}
@@ -524,8 +606,14 @@ def play_file(play_info, monitor):
     list_item = gui_item[1]
 
     if playback_type == "2":  # if transcoding then prompt for audio and subtitle
-        playurl = audio_subs_pref(playurl, list_item, selected_media_source, item_id, audio_stream_index,
-                                  subtitle_stream_index)
+        playurl = audio_subs_pref(
+            playurl,
+            list_item,
+            selected_media_source,
+            item_id,
+            audio_stream_index,
+            subtitle_stream_index,
+        )
         log.debug("New playurl for transcoding: {0}", playurl)
 
     elif playback_type == "1":  # for direct stream add any streamable subtitles
@@ -536,7 +624,12 @@ def play_file(play_info, monitor):
     intro_start = 0
     intro_end = 0
     for chapter in chapters:
-        log.debug("Play Item Chapter : {0} - {1} - {2}", chapter["MarkerType"], chapter["Name"], chapter["StartPositionTicks"])
+        log.debug(
+            "Play Item Chapter : {0} - {1} - {2}",
+            chapter["MarkerType"],
+            chapter["Name"],
+            chapter["StartPositionTicks"],
+        )
         if intro_start == 0 and chapter["MarkerType"] == "IntroStart":
             intro_start = chapter["StartPositionTicks"]
         elif intro_end == 0 and chapter["MarkerType"] == "IntroEnd":
@@ -558,7 +651,15 @@ def play_file(play_info, monitor):
     log.debug("Add to played_information: {0}", monitor.played_information)
 
     list_item.setPath(playurl)
-    list_item = set_list_item_props(item_id, list_item, result, server, listitem_props, item_title, maxwidth=max_image_width)
+    list_item = set_list_item_props(
+        item_id,
+        list_item,
+        result,
+        server,
+        listitem_props,
+        item_title,
+        maxwidth=max_image_width,
+    )
 
     player = xbmc.Player()
 
@@ -585,14 +686,16 @@ def play_file(play_info, monitor):
             xbmc.sleep(100)
 
         if count == 100 or not player.isPlaying() or monitor.abortRequested():
-            log.info("PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting")
+            log.info(
+                "PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting"
+            )
             player.stop()
             return
 
         log.info("PlaybackResumeAction : Playback is Running")
 
         seek_to_time = seek_time - jump_back_amount
-        target_seek = (seek_to_time - 10)
+        target_seek = seek_to_time - 10
 
         count = 0
         max_loops = 2 * 120
@@ -602,12 +705,18 @@ def play_file(play_info, monitor):
             current_position = player.getTime()
             if current_position >= target_seek:
                 break
-            log.info("PlaybackResumeAction : target:{0} current:{1}", target_seek, current_position)
+            log.info(
+                "PlaybackResumeAction : target:{0} current:{1}",
+                target_seek,
+                current_position,
+            )
             count = count + 1
             xbmc.sleep(500)
 
         if count == max_loops:
-            log.info("PlaybackResumeAction : Playback could not seek to required position")
+            log.info(
+                "PlaybackResumeAction : Playback could not seek to required position"
+            )
             player.stop()
         else:
             count = 0
@@ -625,7 +734,12 @@ def play_file(play_info, monitor):
     next_episode = get_next_episode(result)
 
     if next_episode is not None:
-        next_epp_art = get_art(next_episode, server, maxwidth=max_image_width)
+        next_epp_art = get_art(
+            next_episode,
+            server,
+            maxwidth=max_image_width,
+            download_utils=download_utils,
+        )
         next_episode["art"] = next_epp_art
 
     data["next_episode"] = next_episode
@@ -633,29 +747,45 @@ def play_file(play_info, monitor):
 
 
 def __build_label2_from(source):
-    videos = [item for item in source.get('MediaStreams', {}) if item.get('Type') == "Video"]
-    audios = [item for item in source.get('MediaStreams', {}) if item.get('Type') == "Audio"]
-    subtitles = [item for item in source.get('MediaStreams', {}) if item.get('Type') == "Subtitle"]
+    videos = [
+        item for item in source.get("MediaStreams", {}) if item.get("Type") == "Video"
+    ]
+    audios = [
+        item for item in source.get("MediaStreams", {}) if item.get("Type") == "Audio"
+    ]
+    subtitles = [
+        item
+        for item in source.get("MediaStreams", {})
+        if item.get("Type") == "Subtitle"
+    ]
 
-    details = [str(convert_size(source.get('Size', 0)))]
+    details = [str(convert_size(source.get("Size", 0)))]
     # details.append(source.get('Container', ''))
     for video in videos:
-        details.append('{} {} {}bit'.format(video.get('DisplayTitle', ''),
-                                            video.get('VideoRange', ''),
-                                            video.get('BitDepth', '')))
+        details.append(
+            "{} {} {}bit".format(
+                video.get("DisplayTitle", ""),
+                video.get("VideoRange", ""),
+                video.get("BitDepth", ""),
+            )
+        )
     aud = []
     for audio in audios:
-        aud.append('{} {} {}'.format(audio.get('Language', ''),
-                                     audio.get('Codec', ''),
-                                     audio.get('Channels', '')))
+        aud.append(
+            "{} {} {}".format(
+                audio.get("Language", ""),
+                audio.get("Codec", ""),
+                audio.get("Channels", ""),
+            )
+        )
     if len(aud) > 0:
-        details.append(', '.join(aud).upper())
+        details.append(", ".join(aud).upper())
     subs = []
     for subtitle in subtitles:
-        subs.append(subtitle.get('Language', ''))
+        subs.append(subtitle.get("Language", ""))
     if len(subs) > 0:
-        details.append('S: {}'.format(', '.join(subs)).upper())
-    return ' | '.join(details)
+        details.append("S: {}".format(", ".join(subs)).upper())
+    return " | ".join(details)
 
 
 def get_next_episode(item):
@@ -674,14 +804,18 @@ def get_next_episode(item):
         log.debug("No episode number, can not get next")
         return None
 
-    url = ('{server}/emby/Users/{userid}/Items?' +
-           '?Recursive=true' +
-           '&ParentId=' + parent_id +
-           '&IsVirtualUnaired=false' +
-           '&IsMissing=False' +
-           '&IncludeItemTypes=Episode' +
-           '&ImageTypeLimit=1' +
-           '&fields=CriticRating,OfficialRating,CommunityRating,Overview')
+    url = "".join(
+        [
+            "{server}/emby/Users/{userid}/Items?",
+            "?Recursive=true",
+            "&ParentId=" + parent_id,
+            "&IsVirtualUnaired=false",
+            "&IsMissing=False",
+            "&IncludeItemTypes=Episode",
+            "&ImageTypeLimit=1",
+            "&fields=CriticRating,OfficialRating,CommunityRating,Overview",
+        ]
+    )
 
     data_manager = DataManager()
     items_result = data_manager.get_content(url)
@@ -709,29 +843,38 @@ def send_next_episode_details(item, next_episode):
         return
 
     settings = xbmcaddon.Addon()
-    max_image_width = int(settings.getSetting('max_image_width'))
+    max_image_width = int(settings.getSetting("max_image_width"))
+    download_utils = DownloadUtils()
 
     gui_options = {}
     gui_options["server"] = download_utils.get_server()
     gui_options["name_format"] = None
     gui_options["name_format_type"] = ""
     gui_options["max_image_width"] = max_image_width
-    gui_options["use_prem_date_for_added"] = settings.getSetting("use_prem_date_for_added") == "true"
+    gui_options["use_prem_date_for_added"] = (
+        settings.getSetting("use_prem_date_for_added") == "true"
+    )
 
-    item_details = extract_item_info(item, gui_options)
-    next_item_details = extract_item_info(next_episode, gui_options)
+    item_details = extract_item_info(item, gui_options, download_utils=download_utils)
+    next_item_details = extract_item_info(
+        next_episode, gui_options, download_utils=download_utils
+    )
 
     current_item = {}
     current_item["episodeid"] = item_details.id
     current_item["tvshowid"] = item_details.series_name
     current_item["title"] = item_details.name
     current_item["art"] = {}
-    current_item["art"]["tvshow.poster"] = item_details.art.get('tvshow.poster', '')
-    current_item["art"]["thumb"] = item_details.art.get('thumb', '')
-    current_item["art"]["tvshow.fanart"] = item_details.art.get('tvshow.fanart', '')
-    current_item["art"]["tvshow.landscape"] = item_details.art.get('tvshow.landscape', '')
-    current_item["art"]["tvshow.clearart"] = item_details.art.get('tvshow.clearart', '')
-    current_item["art"]["tvshow.clearlogo"] = item_details.art.get('tvshow.clearlogo', '')
+    current_item["art"]["tvshow.poster"] = item_details.art.get("tvshow.poster", "")
+    current_item["art"]["thumb"] = item_details.art.get("thumb", "")
+    current_item["art"]["tvshow.fanart"] = item_details.art.get("tvshow.fanart", "")
+    current_item["art"]["tvshow.landscape"] = item_details.art.get(
+        "tvshow.landscape", ""
+    )
+    current_item["art"]["tvshow.clearart"] = item_details.art.get("tvshow.clearart", "")
+    current_item["art"]["tvshow.clearlogo"] = item_details.art.get(
+        "tvshow.clearlogo", ""
+    )
     current_item["plot"] = item_details.plot
     current_item["showtitle"] = item_details.series_name
     current_item["playcount"] = item_details.play_count
@@ -745,12 +888,18 @@ def send_next_episode_details(item, next_episode):
     next_item["tvshowid"] = next_item_details.series_name
     next_item["title"] = next_item_details.name
     next_item["art"] = {}
-    next_item["art"]["tvshow.poster"] = next_item_details.art.get('tvshow.poster', '')
-    next_item["art"]["thumb"] = next_item_details.art.get('thumb', '')
-    next_item["art"]["tvshow.fanart"] = next_item_details.art.get('tvshow.fanart', '')
-    next_item["art"]["tvshow.landscape"] = next_item_details.art.get('tvshow.landscape', '')
-    next_item["art"]["tvshow.clearart"] = next_item_details.art.get('tvshow.clearart', '')
-    next_item["art"]["tvshow.clearlogo"] = next_item_details.art.get('tvshow.clearlogo', '')
+    next_item["art"]["tvshow.poster"] = next_item_details.art.get("tvshow.poster", "")
+    next_item["art"]["thumb"] = next_item_details.art.get("thumb", "")
+    next_item["art"]["tvshow.fanart"] = next_item_details.art.get("tvshow.fanart", "")
+    next_item["art"]["tvshow.landscape"] = next_item_details.art.get(
+        "tvshow.landscape", ""
+    )
+    next_item["art"]["tvshow.clearart"] = next_item_details.art.get(
+        "tvshow.clearart", ""
+    )
+    next_item["art"]["tvshow.clearlogo"] = next_item_details.art.get(
+        "tvshow.clearlogo", ""
+    )
     next_item["plot"] = next_item_details.plot
     next_item["showtitle"] = next_item_details.series_name
     next_item["playcount"] = next_item_details.play_count
@@ -765,41 +914,48 @@ def send_next_episode_details(item, next_episode):
         "play_info": {
             "item_id": next_item_details.id,
             "auto_resume": False,
-            "force_transcode": False
-        }
+            "force_transcode": False,
+        },
     }
     send_event_notification("upnext_data", next_info)
 
 
-def set_list_item_props(item_id, list_item, result, server, extra_props, title, maxwidth=0):
+def set_list_item_props(
+    _item_id, list_item, result, server, extra_props, title, maxwidth=0
+):
     # set up item and item info
 
-    art = get_art(result, server=server, maxwidth=maxwidth)
-    list_item.setArt({'icon': art['thumb']})  # changed to setArt due to setIconImage removed from v19
-    list_item.setProperty('fanart_image', art['fanart'])  # back compat
-    list_item.setProperty('discart', art['discart'])  # not avail to setArt
+    download_utils = DownloadUtils()
+    art = get_art(
+        result, server=server, maxwidth=maxwidth, download_utils=download_utils
+    )
+    list_item.setArt(
+        {"icon": art["thumb"]}
+    )  # changed to setArt due to setIconImage removed from v19
+    list_item.setProperty("fanart_image", art["fanart"])  # back compat
+    list_item.setProperty("discart", art["discart"])  # not avail to setArt
     list_item.setArt(art)
 
-    list_item.setProperty('IsPlayable', 'false')
-    list_item.setProperty('IsFolder', 'false')
-    list_item.setProperty('id', result.get("Id"))
+    list_item.setProperty("IsPlayable", "false")
+    list_item.setProperty("IsFolder", "false")
+    list_item.setProperty("id", result.get("Id"))
 
     for prop in extra_props:
         list_item.setProperty(prop[0], prop[1])
 
     item_type = result.get("Type", "").lower()
-    mediatype = 'video'
+    mediatype = "video"
 
-    if item_type == 'movie' or item_type == 'boxset':
-        mediatype = 'movie'
-    elif item_type == 'series':
-        mediatype = 'tvshow'
-    elif item_type == 'season':
-        mediatype = 'season'
-    elif item_type == 'episode':
-        mediatype = 'episode'
-    elif item_type == 'audio':
-        mediatype = 'song'
+    if item_type == "movie" or item_type == "boxset":
+        mediatype = "movie"
+    elif item_type == "series":
+        mediatype = "tvshow"
+    elif item_type == "season":
+        mediatype = "season"
+    elif item_type == "episode":
+        mediatype = "episode"
+    elif item_type == "audio":
+        mediatype = "song"
 
     if item_type == "audio":
         info_tag_music = list_item.getMusicInfoTag()
@@ -835,47 +991,59 @@ def set_list_item_props(item_id, list_item, result, server, extra_props, title, 
 # Present the list of audio and subtitles to select from
 # for external streamable subtitles add the URL to the Kodi item and let Kodi handle it
 # else ask for the subtitles to be burnt in when transcoding
-def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, subtitle_stream_index):
+def audio_subs_pref(
+    url, list_item, media_source, item_id, audio_stream_index, subtitle_stream_index
+):
     dialog = xbmcgui.Dialog()
     audio_streams_list = {}
     audio_streams = []
     subtitle_streams_list = {}
-    subtitle_streams = ['No subtitles']
+    subtitle_streams = ["No subtitles"]
     downloadable_streams = []
     select_audio_index = audio_stream_index
     select_subs_index = subtitle_stream_index
     playurlprefs = ""
-    default_audio = media_source.get('DefaultAudioStreamIndex', 1)
-    default_sub = media_source.get('DefaultSubtitleStreamIndex', "")
+    default_audio = media_source.get("DefaultAudioStreamIndex", 1)
+    default_sub = media_source.get("DefaultSubtitleStreamIndex", "")
     source_id = media_source["Id"]
 
-    media_streams = media_source['MediaStreams']
+    media_streams = media_source["MediaStreams"]
+    download_utils = DownloadUtils()
 
     for stream in media_streams:
         # Since Emby returns all possible tracks together, have to sort them.
-        index = stream['Index']
+        index = stream["Index"]
 
-        if 'Audio' in stream['Type']:
-            codec = stream['Codec']
-            channel_layout = stream.get('ChannelLayout', "")
+        if "Audio" in stream["Type"]:
+            codec = stream["Codec"]
+            channel_layout = stream.get("ChannelLayout", "")
 
             try:
-                track = "%s - %s - %s %s" % (index, stream['Language'], codec, channel_layout)
+                track = "%s - %s - %s %s" % (
+                    index,
+                    stream["Language"],
+                    codec,
+                    channel_layout,
+                )
             except Exception:
                 track = "%s - %s %s" % (index, codec, channel_layout)
 
             audio_streams_list[track] = index
             audio_streams.append(track)
 
-        elif 'Subtitle' in stream['Type']:
+        elif "Subtitle" in stream["Type"]:
             try:
-                track = "%s - %s" % (index, stream['Language'])
+                track = "%s - %s" % (index, stream["Language"])
             except Exception:
-                track = "%s - %s" % (index, stream['Codec'])
+                track = "%s - %s" % (index, stream["Codec"])
 
-            default = stream['IsDefault']
-            forced = stream['IsForced']
-            downloadable = stream['IsTextSubtitleStream'] and stream['IsExternal'] and stream['SupportsExternalStream']
+            default = stream["IsDefault"]
+            forced = stream["IsForced"]
+            downloadable = (
+                stream["IsTextSubtitleStream"]
+                and stream["IsExternal"]
+                and stream["SupportsExternalStream"]
+            )
 
             if default:
                 track = "%s - Default" % track
@@ -906,8 +1074,15 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
         # Load subtitles in the listitem if downloadable
         if select_subs_index in downloadable_streams:
             subtitle_url = "%s/emby/Videos/%s/%s/Subtitles/%s/Stream.srt"
-            subtitle_url = subtitle_url % (download_utils.get_server(), item_id, source_id, select_subs_index)
-            log.debug("Streaming subtitles url: {0} {1}", select_subs_index, subtitle_url)
+            subtitle_url = subtitle_url % (
+                download_utils.get_server(),
+                item_id,
+                source_id,
+                select_subs_index,
+            )
+            log.debug(
+                "Streaming subtitles url: {0} {1}", select_subs_index, subtitle_url
+            )
             list_item.setSubtitles([subtitle_url])
         else:
             # Burn subtitles
@@ -926,8 +1101,15 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
             # Load subtitles in the listitem if downloadable
             if select_subs_index in downloadable_streams:
                 subtitle_url = "%s/emby/Videos/%s/%s/Subtitles/%s/Stream.srt"
-                subtitle_url = subtitle_url % (download_utils.get_server(), item_id, source_id, select_subs_index)
-                log.debug("Streaming subtitles url: {0} {1}", select_subs_index, subtitle_url)
+                subtitle_url = subtitle_url % (
+                    download_utils.get_server(),
+                    item_id,
+                    source_id,
+                    select_subs_index,
+                )
+                log.debug(
+                    "Streaming subtitles url: {0} {1}", select_subs_index, subtitle_url
+                )
                 list_item.setSubtitles([subtitle_url])
             else:
                 # Burn subtitles
@@ -946,40 +1128,55 @@ def audio_subs_pref(url, list_item, media_source, item_id, audio_stream_index, s
 
 # direct stream, set any available subtitle streams
 def external_subs(media_source, list_item, item_id):
-    media_streams = media_source.get('MediaStreams')
+    media_streams = media_source.get("MediaStreams")
 
     if media_streams is None:
         return
 
     externalsubs = []
     sub_names = []
+    download_utils = DownloadUtils()
 
     for stream in media_streams:
-
-        if (stream['Type'] == "Subtitle"
-                and stream['IsExternal']
-                and stream['IsTextSubtitleStream']
-                and stream['SupportsExternalStream']):
-
-            index = stream['Index']
-            source_id = media_source['Id']
+        if (
+            stream["Type"] == "Subtitle"
+            and stream["IsExternal"]
+            and stream["IsTextSubtitleStream"]
+            and stream["SupportsExternalStream"]
+        ):
+            index = stream["Index"]
+            source_id = media_source["Id"]
             server = download_utils.get_server()
             token = download_utils.authenticate()
 
-            if stream.get('DeliveryUrl', '').lower().startswith('/videos'):
-                url = "%s/emby%s" % (server, stream.get('DeliveryUrl'))
+            if stream.get("DeliveryUrl", "").lower().startswith("/videos"):
+                url = "%s/emby%s" % (server, stream.get("DeliveryUrl"))
             else:
-                url = ("%s/emby/Videos/%s/%s/Subtitles/%s/Stream.%s?api_key=%s"
-                       % (server, item_id, source_id, index, stream['Codec'], token))
+                url = "%s/emby/Videos/%s/%s/Subtitles/%s/Stream.%s?api_key=%s" % (
+                    server,
+                    item_id,
+                    source_id,
+                    index,
+                    stream["Codec"],
+                    token,
+                )
 
             default = ""
-            if stream['IsDefault']:
+            if stream["IsDefault"]:
                 default = "default"
             forced = ""
-            if stream['IsForced']:
+            if stream["IsForced"]:
                 forced = "forced"
 
-            sub_name = stream.get('Language', "n/a") + " (" + stream.get('Codec', "n/a") + ") " + default + " " + forced
+            sub_name = (
+                stream.get("Language", "n/a")
+                + " ("
+                + stream.get("Codec", "n/a")
+                + ") "
+                + default
+                + " "
+                + forced
+            )
 
             sub_names.append(sub_name)
             externalsubs.append(url)
@@ -990,7 +1187,9 @@ def external_subs(media_source, list_item, item_id):
     settings = xbmcaddon.Addon()
     direct_stream_sub_select = settings.getSetting("direct_stream_sub_select")
 
-    if direct_stream_sub_select == "0" or (len(externalsubs) == 1 and not direct_stream_sub_select == "2"):
+    if direct_stream_sub_select == "0" or (
+        len(externalsubs) == 1 and not direct_stream_sub_select == "2"
+    ):
         list_item.setSubtitles(externalsubs)
     else:
         resp = xbmcgui.Dialog().select(string_load(30292), sub_names)
@@ -1035,18 +1234,18 @@ def send_progress(monitor):
     volume, muted = get_volume()
 
     postdata = {
-        'QueueableMediaTypes': "Video",
-        'CanSeek': True,
-        'ItemId': item_id,
-        'MediaSourceId': source_id,
-        'IsPaused': paused,
-        'IsMuted': muted,
-        'PlayMethod': playback_type,
-        'PlaySessionId': play_session_id,
-        'LiveStreamId': live_stream_id,
-        'PlaylistIndex': playlist_position,
-        'PlaylistLength': playlist_size,
-        'VolumeLevel': volume
+        "QueueableMediaTypes": "Video",
+        "CanSeek": True,
+        "ItemId": item_id,
+        "MediaSourceId": source_id,
+        "IsPaused": paused,
+        "IsMuted": muted,
+        "PlayMethod": playback_type,
+        "PlaySessionId": play_session_id,
+        "LiveStreamId": live_stream_id,
+        "PlaylistIndex": playlist_position,
+        "PlaylistLength": playlist_size,
+        "VolumeLevel": volume,
     }
 
     if duration is not None and duration > 0:
@@ -1055,16 +1254,18 @@ def send_progress(monitor):
 
     log.debug("Sending POST progress started: {0}", postdata)
     url = "{server}/emby/Sessions/Playing/Progress"
+    download_utils = DownloadUtils()
     download_utils.download_url(url, post_body=postdata, method="POST")
 
 
 def get_volume():
     json_data = xbmc.executeJSONRPC(
-        '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume", "muted"]}, "id": 1 }')
+        '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume", "muted"]}, "id": 1 }'
+    )
     result = json.loads(json_data)
-    result = result.get('result', {})
-    volume = result.get('volume')
-    muted = result.get('muted')
+    result = result.get("result", {})
+    volume = result.get("volume")
+    muted = result.get("muted")
 
     return volume, muted
 
@@ -1080,15 +1281,23 @@ def prompt_for_stop_actions(item_id, data):
     item_type = data.get("item_type")
     can_delete = data.get("can_delete", False)
 
-    prompt_next_percentage = int(settings.getSetting('promptPlayNextEpisodePercentage'))
-    play_prompt = settings.getSetting('promptPlayNextEpisodePercentage_prompt') == "true"
-    prompt_delete_episode_percentage = int(settings.getSetting('promptDeleteEpisodePercentage'))
-    prompt_delete_movie_percentage = int(settings.getSetting('promptDeleteMoviePercentage'))
+    prompt_next_percentage = int(settings.getSetting("promptPlayNextEpisodePercentage"))
+    play_prompt = (
+        settings.getSetting("promptPlayNextEpisodePercentage_prompt") == "true"
+    )
+    prompt_delete_episode_percentage = int(
+        settings.getSetting("promptDeleteEpisodePercentage")
+    )
+    prompt_delete_movie_percentage = int(
+        settings.getSetting("promptDeleteMoviePercentage")
+    )
 
     # everything is off so return
-    if (prompt_next_percentage == 100 and
-            prompt_delete_episode_percentage == 100 and
-            prompt_delete_movie_percentage == 100):
+    if (
+        prompt_next_percentage == 100
+        and prompt_delete_episode_percentage == 100
+        and prompt_delete_movie_percentage == 100
+    ):
         return
 
     prompt_to_delete = False
@@ -1103,16 +1312,20 @@ def prompt_for_stop_actions(item_id, data):
     percenatge_complete = int((current_position / duration) * 100)
     log.debug("Episode Percentage Complete: {0}", percenatge_complete)
 
-    if (can_delete and
-            prompt_delete_episode_percentage < 100 and
-            item_type == "Episode" and
-            percenatge_complete > prompt_delete_episode_percentage):
+    if (
+        can_delete
+        and prompt_delete_episode_percentage < 100
+        and item_type == "Episode"
+        and percenatge_complete > prompt_delete_episode_percentage
+    ):
         prompt_to_delete = True
 
-    if (can_delete and
-            prompt_delete_movie_percentage < 100 and
-            item_type == "Movie" and
-            percenatge_complete > prompt_delete_movie_percentage):
+    if (
+        can_delete
+        and prompt_delete_movie_percentage < 100
+        and item_type == "Movie"
+        and percenatge_complete > prompt_delete_movie_percentage
+    ):
         prompt_to_delete = True
 
     if prompt_to_delete:
@@ -1120,16 +1333,19 @@ def prompt_for_stop_actions(item_id, data):
         delete(item_id)
 
     # prompt for next episode
-    if (next_episode is not None and
-            prompt_next_percentage < 100 and
-            item_type == "Episode" and
-            percenatge_complete > prompt_next_percentage):
-
+    if (
+        next_episode is not None
+        and prompt_next_percentage < 100
+        and item_type == "Episode"
+        and percenatge_complete > prompt_next_percentage
+    ):
         if play_prompt:
-            plugin_path = settings.getAddonInfo('path')
+            plugin_path = settings.getAddonInfo("path")
             plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 
-            play_next_dialog = PlayNextDialog("PlayNextDialog.xml", plugin_path_real, "default", "720p")
+            play_next_dialog = PlayNextDialog(
+                "PlayNextDialog.xml", plugin_path_real, "default", "720p"
+            )
             play_next_dialog.set_episode_info(next_episode)
             play_next_dialog.doModal()
 
@@ -1156,6 +1372,7 @@ def stop_all_playback(played_information):
 
     home_screen = HomeWindow()
     home_screen.clear_property("currently_playing_id")
+    download_utils = DownloadUtils()
 
     for item_url in played_information:
         data = played_information.get(item_url)
@@ -1175,12 +1392,12 @@ def stop_all_playback(played_information):
 
                 url = "{server}/emby/Sessions/Playing/Stopped"
                 postdata = {
-                    'ItemId': emby_item_id,
-                    'MediaSourceId': emby_source_id,
-                    'PositionTicks': int(current_position * 10000000),
-                    'RunTimeTicks': int(duration * 10000000),
-                    'PlaySessionId': play_session_id,
-                    'LiveStreamId': live_stream_id
+                    "ItemId": emby_item_id,
+                    "MediaSourceId": emby_source_id,
+                    "PositionTicks": int(current_position * 10000000),
+                    "RunTimeTicks": int(duration * 10000000),
+                    "PlaySessionId": play_session_id,
+                    "LiveStreamId": live_stream_id,
                 }
                 download_utils.download_url(url, post_body=postdata, method="POST")
                 data["currently_playing"] = False
@@ -1213,7 +1430,6 @@ def get_playing_data(play_data_map):
 
 
 class Service(xbmc.Player):
-
     def __init__(self, *args):
         log.debug("Starting monitor service: {0}", args)
         self.played_information = {}
@@ -1251,18 +1467,19 @@ class Service(xbmc.Player):
 
         log.debug("Sending Playback Started")
         postdata = {
-            'QueueableMediaTypes': "Video",
-            'CanSeek': True,
-            'ItemId': emby_item_id,
-            'MediaSourceId': emby_source_id,
-            'PlayMethod': playback_type,
-            'PlaySessionId': play_session_id,
-            'LiveStreamId': live_stream_id
+            "QueueableMediaTypes": "Video",
+            "CanSeek": True,
+            "ItemId": emby_item_id,
+            "MediaSourceId": emby_source_id,
+            "PlayMethod": playback_type,
+            "PlaySessionId": play_session_id,
+            "LiveStreamId": live_stream_id,
         }
 
         log.debug("Sending POST play started: {0}", postdata)
 
         url = "{server}/emby/Sessions/Playing"
+        download_utils = DownloadUtils()
         download_utils.download_url(url, post_body=postdata, method="POST")
 
         home_screen = HomeWindow()
@@ -1312,7 +1529,7 @@ class Service(xbmc.Player):
         play_data = get_playing_data(self.played_information)
 
         if play_data is not None:
-            play_data['paused'] = True
+            play_data["paused"] = True
             send_progress(self)
 
     def onPlayBackResumed(self):
@@ -1322,10 +1539,10 @@ class Service(xbmc.Player):
         play_data = get_playing_data(self.played_information)
 
         if play_data is not None:
-            play_data['paused'] = False
+            play_data["paused"] = False
             send_progress(self)
 
-    def onPlayBackSeek(self, time, seek_offset):
+    def onPlayBackSeek(self, _time, _seek_offset):
         # Will be called when kodi seeks in video
         log.info("onPlayBackSeek")
         send_progress(self)
@@ -1340,19 +1557,23 @@ class PlaybackService(xbmc.Monitor):
     def onNotification(self, sender, method, data):
         log.debug("PlaybackService:onNotification:{0}:{1}:{2}", sender, method, data)
 
-        if method == 'GUI.OnScreensaverActivated':
+        if method == "GUI.OnScreensaverActivated":
             self.screensaver_activated()
             return
 
-        if method == 'GUI.OnScreensaverDeactivated':
+        if method == "GUI.OnScreensaverDeactivated":
             self.screensaver_deactivated()
             return
 
-        if sender[-7:] != '.SIGNAL':
+        if sender[-7:] != ".SIGNAL":
             return
 
-        signal = method.split('.', 1)[-1]
-        if signal not in ("embycon_play_action", "embycon_play_youtube_trailer_action", "set_view"):
+        signal = method.split(".", 1)[-1]
+        if signal not in (
+            "embycon_play_action",
+            "embycon_play_youtube_trailer_action",
+            "set_view",
+        ):
             return
 
         data_json = json.loads(data)
@@ -1380,7 +1601,7 @@ class PlaybackService(xbmc.Monitor):
         home_screen.clear_property("skip_select_user")
 
         settings = xbmcaddon.Addon()
-        stop_playback = settings.getSetting("stopPlaybackOnScreensaver") == 'true'
+        stop_playback = settings.getSetting("stopPlaybackOnScreensaver") == "true"
 
         if stop_playback:
             player = xbmc.Player()
@@ -1388,14 +1609,16 @@ class PlaybackService(xbmc.Monitor):
                 log.debug("Screen Saver Activated : isPlayingVideo() = true")
                 play_data = get_playing_data(self.monitor.played_information)
                 if play_data:
-                    log.debug("Screen Saver Activated : this is an EmbyCon item so stop it")
+                    log.debug(
+                        "Screen Saver Activated : this is an EmbyCon item so stop it"
+                    )
                     player.stop()
 
         # xbmc.executebuiltin("Dialog.Close(selectdialog, true)")
 
         clear_old_cache_data()
 
-        cache_images = settings.getSetting('cacheImagesOnScreenSaver') == 'true'
+        cache_images = settings.getSetting("cacheImagesOnScreenSaver") == "true"
         if cache_images:
             self.background_image_cache_thread = CacheArtwork()
             self.background_image_cache_thread.start()
@@ -1408,7 +1631,7 @@ class PlaybackService(xbmc.Monitor):
             self.background_image_cache_thread = None
 
         settings = xbmcaddon.Addon()
-        show_change_user = settings.getSetting('changeUserOnScreenSaver') == 'true'
+        show_change_user = settings.getSetting("changeUserOnScreenSaver") == "true"
         if show_change_user:
             home_screen = HomeWindow()
             skip_select_user = home_screen.get_property("skip_select_user")
