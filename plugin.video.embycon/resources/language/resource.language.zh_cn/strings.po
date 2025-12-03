@@ -3,16 +3,17 @@ msgstr ""
 "Project-Id-Version: EmbyCon\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: wabisabi926\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 msgctxt "#30000"
 msgid "Host"
-msgstr "主机/IP地址"
+msgstr "主机"
 
 msgctxt "#30001"
 msgid "Port"
@@ -32,11 +33,11 @@ msgstr "密码"
 
 msgctxt "#30007"
 msgid "Samba username"
-msgstr "SMB用户名"
+msgstr "SMB 用户名"
 
 msgctxt "#30008"
 msgid "Samba password"
-msgstr "SMB密码"
+msgstr "SMB 密码"
 
 msgctxt "#30010"
 msgid "Enable performance profiling"
@@ -44,7 +45,7 @@ msgstr "启用性能分析"
 
 msgctxt "#30011"
 msgid "[Detect local server]"
-msgstr "[发现本地 Emby 服务器]"
+msgstr "[检测本地服务器]"
 
 msgctxt "#30012"
 msgid "[Change user]"
@@ -172,7 +173,7 @@ msgstr "显示加载进度"
 
 msgctxt "#30121"
 msgid "On resume"
-msgstr "重播时"
+msgstr "恢复播放时"
 
 msgctxt "#30125"
 msgid "Done"
@@ -220,7 +221,7 @@ msgstr "包含媒体流信息"
 
 msgctxt "#30183"
 msgid "Include people"
-msgstr "包含演职人员（记得清理旧缓存）"
+msgstr "包含演职人员"
 
 msgctxt "#30200"
 msgid "URL error: %s"
@@ -240,7 +241,7 @@ msgstr "播放"
 
 msgctxt "#30208"
 msgid "Max stream bitrate (kbs)"
-msgstr "最大流比特率 (kbps)"
+msgstr "最大流比特率 (kbs)"
 
 msgctxt "#30209"
 msgid "File direct path"
@@ -276,11 +277,11 @@ msgstr "项目详情"
 
 msgctxt "#30217"
 msgid "Prompt to delete episode after %"
-msgstr "播放至何时提示删除剧集 (单位：百分比)"
+msgstr "在（%）之后提示删除剧集"
 
 msgctxt "#30218"
 msgid "Play next episode after %"
-msgstr "播放至何时播放下集 (单位：百分比)"
+msgstr "在（%）之后播放下一集"
 
 msgctxt "#30219"
 msgid " - Prompt before play"
@@ -288,7 +289,7 @@ msgstr " - 播放下集前提示"
 
 msgctxt "#30220"
 msgid "Prompt to delete movie after %"
-msgstr "播放至何时提示删除电影 (单位：百分比)"
+msgstr "在（%）之后提示删除电影"
 
 msgctxt "#30222"
 msgid "Item Layout"
@@ -304,7 +305,7 @@ msgstr "交互"
 
 msgctxt "#30229"
 msgid "TV Shows"
-msgstr "剧集"
+msgstr "电视节目"
 
 msgctxt "#30231"
 msgid "Movies"
@@ -380,11 +381,11 @@ msgstr "电影 - 正在播放"
 
 msgctxt "#30259"
 msgid "Movies - Favorites"
-msgstr "电影 - 收藏"
+msgstr "电影 - 收藏夹"
 
 msgctxt "#30260"
 msgid "BoxSets"
-msgstr "影视合集"
+msgstr "合集"
 
 msgctxt "#30261"
 msgid "TV Shows"
@@ -392,7 +393,7 @@ msgstr "剧集"
 
 msgctxt "#30262"
 msgid "TV Shows - Favorites"
-msgstr "剧集 - 收藏"
+msgstr "剧集 - 收藏夹"
 
 msgctxt "#30263"
 msgid "Episodes - Recently Added"
@@ -432,11 +433,11 @@ msgstr "标记为未观看"
 
 msgctxt "#30272"
 msgid "Set Favourite"
-msgstr "设为收藏"
+msgstr "设置收藏夹"
 
 msgctxt "#30273"
 msgid "Unset Favourite"
-msgstr "取消收藏"
+msgstr "未设置收藏夹"
 
 msgctxt "#30274"
 msgid "Delete"
@@ -652,7 +653,7 @@ msgstr "屏幕保护程序激活时停止媒体播放"
 
 msgctxt "#30333"
 msgid "Cache artwork in the background"
-msgstr "在后台缓存艺术作品"
+msgstr "在后台缓存艺术图"
 
 msgctxt "#30334"
 msgid "Use EmbyCon context menu"
@@ -672,7 +673,7 @@ msgstr "专辑"
 
 msgctxt "#30339"
 msgid "Person"
-msgstr "人物"
+msgstr "歌手"
 
 msgctxt "#30340"
 msgid "Group movies into collections"
@@ -688,7 +689,7 @@ msgstr "新内容检查间隔 (单位：分钟，0 = 禁用)"
 
 msgctxt "#30343"
 msgid "Changes Require Kodi Restart"
-msgstr "更改需要重启Kodi"
+msgstr "更改需要重启 Kodi"
 
 msgctxt "#30344"
 msgid "Number of images removed from cache : %s"
@@ -968,11 +969,11 @@ msgstr " - 标签"
 
 msgctxt "#30414"
 msgid " - Favorites"
-msgstr " - 收藏"
+msgstr " - 收藏夹"
 
 msgctxt "#30415"
 msgid " - Favorite Collections"
-msgstr " - 收藏的合集"
+msgstr " - 收藏夹合集"
 
 msgctxt "#30416"
 msgid "HTTP timeout seconds"
@@ -984,7 +985,7 @@ msgstr "您没有删除此项目的权限"
 
 msgctxt "#30418"
 msgid "Audio bitrate (kbs)"
-msgstr "音频比特率 (kbps)"
+msgstr "音频比特率 (kbs)"
 
 msgctxt "#30419"
 msgid "Audio codec"
