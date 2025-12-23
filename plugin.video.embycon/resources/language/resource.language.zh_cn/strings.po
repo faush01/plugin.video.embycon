@@ -101,7 +101,7 @@ msgstr "密码:"
 
 msgctxt "#30026"
 msgid "Widget item select action"
-msgstr "小部件项目选择动作"
+msgstr "小组件项目选择动作"
 
 msgctxt "#30027"
 msgid "Enable debug logging"
@@ -345,7 +345,7 @@ msgstr "搜索"
 
 msgctxt "#30247"
 msgid "Custom Widget Content"
-msgstr "自定义小部件内容"
+msgstr "自定义小组件内容"
 
 msgctxt "#30250"
 msgid "Unknown"
@@ -945,11 +945,11 @@ msgstr "全局列表"
 
 msgctxt "#30408"
 msgid "Custom Widgets"
-msgstr "自定义小部件"
+msgstr "自定义小组件"
 
 msgctxt "#30409"
 msgid "Add-on Actions"
-msgstr "附加动作"
+msgstr "插件操作"
 
 msgctxt "#30410"
 msgid " - Collections"
