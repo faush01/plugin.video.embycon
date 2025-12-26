@@ -114,16 +114,6 @@ class DownloadUtils:
             return
         self._initialized = True
 
-        settings = xbmcaddon.Addon()
-
-        self.use_https = False
-        if settings.getSetting("protocol") == "1":
-            self.use_https = True
-        log.debug("use_https: {0}", self.use_https)
-
-        self.verify_cert = settings.getSetting("verify_cert") == "true"
-        log.debug("verify_cert: {0}", self.verify_cert)
-
         self.set_host_domain()
 
     @timer
@@ -316,9 +306,19 @@ class DownloadUtils:
 
     def set_host_domain(self):
         settings = xbmcaddon.Addon()
+
+        self.use_https = False
+        if settings.getSetting("protocol") == "1":
+            self.use_https = True
+        log.debug("use_https: {0}", self.use_https)
+
+        self.verify_cert = settings.getSetting("verify_cert") == "true"
+        log.debug("verify_cert: {0}", self.verify_cert)
+
         host = settings.getSetting("ipaddress")
 
         if len(host) == 0 or host == "<none>":
+            log.debug("No host set in settings")
             return None
 
         port = settings.getSetting("port")
@@ -360,6 +360,8 @@ class DownloadUtils:
 
     def get_server(self, add_user_id=False):
         host = self.host_domain
+        if host is None or len(host) == 0:
+            return None
         if add_user_id:
             window = HomeWindow()
             user_id = window.get_property("userid")
@@ -767,6 +769,7 @@ class DownloadUtils:
         http_timeout = int(settings.getSetting("http_timeout"))
 
         if authenticate and username == "":
+            log.debug("No username set, cannot authenticate")
             return return_data
 
         if settings.getSetting("suppressErrors") == "true":
@@ -776,6 +779,7 @@ class DownloadUtils:
 
         if url.find("{server}") != -1:
             server = self.get_server()
+            log.debug("Server: ({0})", server)
             if server is None:
                 return return_data
             url = url.replace("{server}", server)
@@ -899,7 +903,7 @@ class DownloadUtils:
                         hashed_username,
                     )
                     settings.setSetting("saved_user_password_" + hashed_username, "")
-                    save_user_details(settings, "", "")
+                    # save_user_details(settings, "", "")
 
                 log.error("HTTP response error: {0} {1}", data.status, data.reason)
                 if suppress is False:

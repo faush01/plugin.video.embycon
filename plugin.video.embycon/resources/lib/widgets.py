@@ -38,6 +38,7 @@ def set_random_movies():
     url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
     download_utils = DownloadUtils()
+    download_utils.set_host_domain()
     results = download_utils.download_url(url, suppress=True)
     results = json.loads(results)
 
@@ -88,6 +89,8 @@ def set_background_image(force=False):
         url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
         download_utils = DownloadUtils()
+        download_utils.set_host_domain()
+
         server = download_utils.get_server()
         results = download_utils.download_url(url, suppress=True)
         results = json.loads(results)
@@ -155,6 +158,7 @@ def check_for_new_content():
     added_url = get_emby_url("{server}/emby/Users/{userid}/Items", url_params)
 
     download_utils = DownloadUtils()
+    download_utils.set_host_domain()
     added_result = download_utils.download_url(added_url, suppress=True)
     result = json.loads(added_result)
     log.debug("LATEST_ADDED_ITEM: {0}", result)

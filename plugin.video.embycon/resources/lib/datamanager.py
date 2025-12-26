@@ -123,7 +123,9 @@ class DataManager:
 
     @timer
     def get_content(self, url):
-        json_data = DownloadUtils().download_url(url)
+        du = DownloadUtils()
+        du.set_host_domain()
+        json_data = du.download_url(url)
         result = self.load_json_data(json_data)
         # process_json_data(json_data)
         return result
