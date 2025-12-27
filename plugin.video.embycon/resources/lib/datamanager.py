@@ -12,7 +12,7 @@ import time
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
-from .item_functions import extract_item_info
+from .item_functions import GuiOptions, extract_item_info
 from .kodi_utils import HomeWindow
 from .translation import string_load
 from .tracking import timer
@@ -96,15 +96,15 @@ def process_json_data(json_raw_data: str) -> DataSet:
 
 class CacheItem:
     def __init__(self) -> None:
-        self.item_list: Optional[List[Any]] = None
-        self.item_list_hash: Optional[str] = None
-        self.date_saved: Optional[float] = None
-        self.date_last_used: Optional[float] = None
-        self.last_action: Optional[str] = None
-        self.items_url: Optional[str] = None
-        self.file_path: Optional[str] = None
-        self.user_id: Optional[str] = None
-        self.total_records: Optional[int] = None
+        self.item_list: List[Any] | None = None
+        self.item_list_hash: str | None = None
+        self.date_saved: float | None = None
+        self.date_last_used: float | None = None
+        self.last_action: str | None = None
+        self.items_url: str | None = None
+        self.file_path: str
+        self.user_id: str | None = None
+        self.total_records: int | None = None
 
 
 class DataManager:
@@ -149,7 +149,7 @@ class DataManager:
 
     @timer
     def get_items(
-        self, url: str, gui_options: dict, use_cache: bool = False
+        self, url: str, gui_options: GuiOptions, use_cache: bool = False
     ) -> tuple[str, List[Any], int, Optional[CacheManagerThread]]:
         home_window = HomeWindow()
         log.debug("last_content_url : use_cache={0} url={1}", use_cache, url)
@@ -243,7 +243,7 @@ class CacheManagerThread(threading.Thread):
     def __init__(self) -> None:
         threading.Thread.__init__(self)
         self.cached_item: Optional[CacheItem] = None
-        self.gui_options: Optional[dict] = None
+        self.gui_options: GuiOptions
 
     @staticmethod
     def get_data_hash(items: list) -> str:

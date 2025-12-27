@@ -694,8 +694,8 @@ class DownloadUtils:
             log.debug("User Authenticated: {0}", access_token)
             log.debug("User Id: {0}", userid)
             window.set_property("AccessToken", access_token)
-            window.set_property("userid", userid)
-            window.set_property("userimage", user_image)
+            window.set_property("userid", userid or "")
+            window.set_property("userimage", user_image or "")
 
             self.post_capabilities()
 

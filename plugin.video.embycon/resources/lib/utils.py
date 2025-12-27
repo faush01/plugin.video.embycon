@@ -26,7 +26,7 @@ log = SimpleLogging(__name__)
 throwaway = time.strptime("20110101", "%Y%m%d")
 
 
-def get_emby_url(base_url: str, params: dict[str, str]) -> str:
+def get_emby_url(base_url: str, params: dict[str, object]) -> str:
     params["format"] = "json"
     param_list = []
     for key in params:

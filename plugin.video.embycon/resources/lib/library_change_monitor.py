@@ -11,23 +11,23 @@ log = SimpleLogging(__name__)
 
 
 class LibraryChangeMonitor(threading.Thread):
-    last_library_change_check = 0
-    library_check_triggered = False
-    exit_now = False
-    time_between_checks = 3
+    last_library_change_check: float = 0.0
+    library_check_triggered: bool = False
+    exit_now: bool = False
+    time_between_checks: int = 3
 
-    def __init__(self):
+    def __init__(self) -> None:
         threading.Thread.__init__(self)
 
-    def stop(self):
+    def stop(self) -> None:
         self.exit_now = True
 
     @timer
-    def check_for_updates(self):
+    def check_for_updates(self) -> None:
         log.debug("Trigger check for updates")
         self.library_check_triggered = True
 
-    def run(self):
+    def run(self) -> None:
         log.debug("Library Monitor Started")
         monitor = xbmc.Monitor()
         while not self.exit_now and not monitor.abortRequested():

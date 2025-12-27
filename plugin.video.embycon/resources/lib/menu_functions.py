@@ -1,5 +1,6 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import os
 import sys
@@ -25,7 +26,7 @@ from .custom_nodes import CustomNode, load_custom_nodes
 log = SimpleLogging(__name__)
 
 
-def do_user_change(menu_params):
+def do_user_change(menu_params: dict[str, str]) -> None:
     log.info("do_user_change: {0}", menu_params)
 
     settings = xbmcaddon.Addon()
@@ -40,11 +41,14 @@ def do_user_change(menu_params):
 
         # looking up new user details
         du = DownloadUtils()
+        server = du.get_server()
+        if server is None or len(server) == 0:
+            return
 
         # get a list of users
         log.debug("Getting user list")
         json_data = du.download_url(
-            du.get_server() + "/emby/Users/Public?format=json", authenticate=False
+            server + "/emby/Users/Public?format=json", authenticate=False
         )
 
         log.debug("jsonData: {0}", json_data)
@@ -138,7 +142,7 @@ def do_user_change(menu_params):
         xbmc.executebuiltin("ReloadSkin()")
 
 
-def show_user_lists(menu_params):
+def show_user_lists(menu_params: dict[str, str]) -> None:
     log.info("show_user_lists: {0}", menu_params)
     du = DownloadUtils()
 
@@ -149,7 +153,7 @@ def show_user_lists(menu_params):
     # get a list of users
     log.info("Getting user list")
     json_data = du.download_url(
-        du.get_server() + "/emby/Users/Public?format=json", authenticate=False
+        server + "/emby/Users/Public?format=json", authenticate=False
     )
 
     log.debug("jsonData: {0}", json_data)
@@ -193,11 +197,11 @@ def show_user_lists(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_movie_tags(menu_params):
+def show_movie_tags(menu_params: dict[str, str]) -> None:
     log.debug("show_movie_tags: {0}", menu_params)
     parent_id = menu_params.get("parent_id")
 
-    url_params = {}
+    url_params: dict[str, object] = {}
     url_params["UserId"] = "{userid}"
     url_params["SortBy"] = "SortName"
     url_params["SortOrder"] = "Ascending"
@@ -219,7 +223,7 @@ def show_movie_tags(menu_params):
     if not result:
         return
 
-    tags = result.get("Items")
+    tags = result.get("Items", [])
 
     log.debug("Tags : {0}", result)
 
@@ -227,7 +231,7 @@ def show_movie_tags(menu_params):
         name = tag["Name"]
         tag_id = tag["Id"]
 
-        url_params = {}
+        url_params: dict[str, object] = {}
         url_params["IncludeItemTypes"] = "Movie"
         url_params["CollapseBoxSetItems"] = False
         url_params["GroupItemsIntoCollections"] = False
@@ -259,12 +263,12 @@ def show_movie_tags(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_movie_years(menu_params):
+def show_movie_years(menu_params: dict[str, str]) -> None:
     log.debug("show_movie_years: {0}", menu_params)
     parent_id = menu_params.get("parent_id")
     group_into_decades = menu_params.get("group") == "true"
 
-    url_params = {}
+    url_params: dict[str, object] = {}
     url_params["UserId"] = "{userid}"
     url_params["SortBy"] = "SortName"
     url_params["SortOrder"] = "Ascending"
@@ -287,7 +291,7 @@ def show_movie_years(menu_params):
     if not result:
         return
 
-    years_list = result.get("Items")
+    years_list = result.get("Items", [])
     result_names = {}
     for year in years_list:
         name = year.get("Name")
@@ -315,7 +319,7 @@ def show_movie_years(menu_params):
         name = year
         value = ",".join(result_names[year])
 
-        params = {}
+        params: dict[str, object] = {}
         params["IncludeItemTypes"] = "Movie"
         params["CollapseBoxSetItems"] = False
         params["GroupItemsIntoCollections"] = False
@@ -347,13 +351,13 @@ def show_movie_years(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_movie_pages(menu_params):
+def show_movie_pages(menu_params: dict[str, str]) -> None:
     log.debug("showMoviePages: {0}", menu_params)
 
     parent_id = menu_params.get("parent_id")
     settings = xbmcaddon.Addon()
 
-    params = {}
+    params: dict[str, object] = {}
     params["IncludeItemTypes"] = "Movie"
     params["CollapseBoxSetItems"] = False
     params["GroupItemsIntoCollections"] = False
@@ -386,7 +390,7 @@ def show_movie_pages(menu_params):
     collections = []
 
     while start_index < total_results:
-        params = {}
+        params: dict[str, object] = {}
         params["IncludeItemTypes"] = "Movie"
         params["CollapseBoxSetItems"] = False
         params["GroupItemsIntoCollections"] = False
@@ -445,7 +449,7 @@ def show_movie_pages(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_genre_list(menu_params):
+def show_genre_list(menu_params: dict[str, str]) -> None:
     log.debug("showGenreList: {0}", menu_params)
 
     download_utils = DownloadUtils()
@@ -462,7 +466,7 @@ def show_genre_list(menu_params):
         emby_type = "Series"
         kodi_type = "tvshows"
 
-    params = {}
+    params: dict[str, object] = {}
     params["IncludeItemTypes"] = emby_type
     params["UserId"] = "{userid}"
     params["Recursive"] = True
@@ -479,7 +483,7 @@ def show_genre_list(menu_params):
     result = data_manager.get_content(url)
 
     if result is not None:
-        result = result.get("Items")
+        result = result.get("Items", [])
     else:
         result = []
 
@@ -494,7 +498,7 @@ def show_genre_list(menu_params):
         # art = getArt(item=genre, server=server)
         # item_data['art'] = art
 
-        params = {}
+        params: dict[str, object] = {}
         params["Recursive"] = True
         params["CollapseBoxSetItems"] = False
         params["GroupItemsIntoCollections"] = False
@@ -538,7 +542,7 @@ def show_genre_list(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_movie_alpha_list(menu_params):
+def show_movie_alpha_list(menu_params: dict[str, str]) -> None:
     log.debug("== ENTER: showMovieAlphaList() ==")
 
     xbmcplugin.setContent(int(sys.argv[1]), "movies")
@@ -550,7 +554,7 @@ def show_movie_alpha_list(menu_params):
 
     parent_id = menu_params.get("parent_id")
 
-    url_params = {}
+    url_params: dict[str, object] = {}
     url_params["IncludeItemTypes"] = "Movie"
     url_params["Recursive"] = True
     url_params["CollapseBoxSetItems"] = False
@@ -579,7 +583,7 @@ def show_movie_alpha_list(menu_params):
         item_data["title"] = alphaName
         item_data["media_type"] = "Movies"
 
-        params = {}
+        params: dict[str, object] = {}
         params["Fields"] = "{field_filters}"
         params["CollapseBoxSetItems"] = False
         params["GroupItemsIntoCollections"] = False
@@ -624,7 +628,7 @@ def show_movie_alpha_list(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_tvshow_alpha_list(menu_params):
+def show_tvshow_alpha_list(menu_params: dict[str, str]) -> None:
     log.debug("== ENTER: showTvShowAlphaList() ==")
 
     download_utils = DownloadUtils()
@@ -634,7 +638,7 @@ def show_tvshow_alpha_list(menu_params):
 
     parent_id = menu_params.get("parent_id")
 
-    url_params = {}
+    url_params: dict[str, object] = {}
     url_params["IncludeItemTypes"] = "Series"
     url_params["Recursive"] = True
     url_params["UserId"] = "{userid}"
@@ -660,7 +664,7 @@ def show_tvshow_alpha_list(menu_params):
         item_data["title"] = alpha_name
         item_data["media_type"] = "tvshows"
 
-        params = {}
+        params: dict[str, object] = {}
         params["Fields"] = "{field_filters}"
         params["ImageTypeLimit"] = 1
         params["IncludeItemTypes"] = "Series"
@@ -705,13 +709,13 @@ def show_tvshow_alpha_list(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_tvshow_pages(menu_params):
+def show_tvshow_pages(menu_params: dict[str, str]) -> None:
     log.debug("showTvShowPages: {0}", menu_params)
 
     parent_id = menu_params.get("parent_id")
     settings = xbmcaddon.Addon()
 
-    params = {}
+    params: dict[str, object] = {}
     params["IncludeItemTypes"] = "Series"
     params["IsMissing"] = False
     params["Recursive"] = True
@@ -742,7 +746,7 @@ def show_tvshow_pages(menu_params):
     collections = []
 
     while start_index < total_results:
-        params = {}
+        params: dict[str, object] = {}
         params["IncludeItemTypes"] = "Series"
         params["IsMissing"] = False
         params["Recursive"] = True
@@ -799,7 +803,7 @@ def show_tvshow_pages(menu_params):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def display_main_menu():
+def display_main_menu() -> None:
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, "files")
 
@@ -827,7 +831,7 @@ def display_main_menu():
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_menu(params):
+def display_menu(params: dict[str, str]) -> None:
     menu_type = params.get("type")
     if menu_type == "library":
         display_library_views(params)
@@ -836,9 +840,9 @@ def display_menu(params):
     elif menu_type == "show_global_types":
         show_global_types(params)
     elif menu_type == "global_list_movies":
-        display_movies_type(params, None)
+        display_movies_type(params, {})
     elif menu_type == "global_list_tvshows":
-        display_tvshow_type(params, None)
+        display_tvshow_type(params, {})
     elif menu_type == "show_custom_widgets":
         show_widgets()
     elif menu_type == "addon_items":
@@ -853,7 +857,7 @@ def display_menu(params):
         create_new_node(params)
 
 
-def create_new_node(_params):
+def create_new_node(_params: dict[str, str]) -> None:
     log.debug("Create New Custom Node")
 
     addon = xbmcaddon.Addon()
@@ -865,10 +869,10 @@ def create_new_node(_params):
     custom_node.doModal()
 
 
-def get_node_url(node_info):
+def get_node_url(node_info: dict[str, str]) -> str:
     log.debug("get_node_url : {0}", node_info)
 
-    base_params = {}
+    base_params: dict[str, object] = {}
     base_params["Fields"] = "{field_filters}"
     base_params["ImageTypeLimit"] = 1
     base_params["IsMissing"] = False
@@ -897,7 +901,7 @@ def get_node_url(node_info):
     return path
 
 
-def show_custom_nodes(_params):
+def show_custom_nodes(_params: dict[str, str]) -> None:
     log.debug("Show Custom Nodes")
     add_menu_directory_item(
         "[Edit Nodes]",
@@ -924,7 +928,7 @@ def show_custom_nodes(_params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def show_global_types(_params):
+def show_global_types(_params: dict[str, str]) -> None:
     handle = int(sys.argv[1])
 
     add_menu_directory_item(
@@ -939,15 +943,15 @@ def show_global_types(_params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_homevideos_type(_menu_params, view):
+def display_homevideos_type(_menu_params: dict[str, str], view: dict[str, str]) -> None:
     handle = int(sys.argv[1])
-    view_name = view.get("Name")
+    view_name = view.get("Name", "Unknown")
     settings = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
     hide_watched = settings.getSetting("hide_watched") == "true"
 
     # All Home Movies
-    base_params = {}
+    base_params: dict[str, object] = {}
     base_params["ParentId"] = view.get("Id")
     base_params["Recursive"] = False
     base_params["IsMissing"] = False
@@ -963,7 +967,7 @@ def display_homevideos_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # In progress home movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Filters"] = "IsResumable"
     params["Recursive"] = True
@@ -980,7 +984,7 @@ def display_homevideos_type(_menu_params, view):
     )
 
     # Recently added
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Recursive"] = True
     params["SortBy"] = "DateCreated"
@@ -1003,7 +1007,7 @@ def display_homevideos_type(_menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_addon_menu(_params):
+def display_addon_menu(_params: dict[str, str]) -> None:
     add_menu_directory_item(
         string_load(30246), "plugin://plugin.video.embycon/?mode=SEARCH"
     )
@@ -1044,18 +1048,18 @@ def display_addon_menu(_params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_tvshow_type(_menu_params, view):
+def display_tvshow_type(_menu_params: dict[str, str], view: dict[str, str]) -> None:
     handle = int(sys.argv[1])
 
     view_name = string_load(30261)
     if view is not None:
-        view_name = view.get("Name")
+        view_name = view.get("Name", view_name)
 
     settings = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     # All TV Shows
-    base_params = {}
+    base_params: dict[str, object] = {}
     if view is not None:
         base_params["ParentId"] = view.get("Id")
     base_params["Fields"] = "{field_filters}"
@@ -1073,7 +1077,7 @@ def display_tvshow_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # Favorite TV Shows
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Filters"] = "IsFavorite"
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
@@ -1086,7 +1090,7 @@ def display_tvshow_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30414), url)
 
     # Tv Shows with unplayed
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["IsPlayed"] = False
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
@@ -1099,7 +1103,7 @@ def display_tvshow_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30285), url)
 
     # In progress episodes
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Limit"] = "{ItemLimit}"
     params["SortBy"] = "DatePlayed"
@@ -1119,7 +1123,7 @@ def display_tvshow_type(_menu_params, view):
     )
 
     # Latest Episodes
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Limit"] = "{ItemLimit}"
     params["SortBy"] = "DateCreated"
@@ -1137,7 +1141,7 @@ def display_tvshow_type(_menu_params, view):
     )
 
     # Recently Added
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Limit"] = "{ItemLimit}"
     params["SortBy"] = "DateCreated"
@@ -1157,7 +1161,7 @@ def display_tvshow_type(_menu_params, view):
     )
 
     # Next Up Episodes
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Limit"] = "{ItemLimit}"
     params["Userid"] = "{userid}"
@@ -1181,33 +1185,33 @@ def display_tvshow_type(_menu_params, view):
     # TV Show Genres
     path = "plugin://plugin.video.embycon/?mode=GENRES&item_type=tvshow"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30325), path)
 
     # TV Show Alpha picker
     path = "plugin://plugin.video.embycon/?mode=TVSHOW_ALPHA"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30404), path)
 
     # Tv Show Pages
     path = "plugin://plugin.video.embycon/?mode=TVSHOW_PAGES"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30397), path)
 
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_music_type(_menu_params, view):
+def display_music_type(_menu_params: dict[str, str], view: dict[str, str]) -> None:
     handle = int(sys.argv[1])
-    view_name = view.get("Name")
+    view_name = view.get("Name", "Unknown")
 
     settings = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     # all albums
-    params = {}
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["Recursive"] = True
     params["ImageTypeLimit"] = 1
@@ -1222,7 +1226,7 @@ def display_music_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30320), url)
 
     # recently added
-    params = {}
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["ImageTypeLimit"] = 1
     params["IncludeItemTypes"] = "Audio"
@@ -1239,7 +1243,7 @@ def display_music_type(_menu_params, view):
     )
 
     # recently played
-    params = {}
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["Recursive"] = True
     params["ImageTypeLimit"] = 1
@@ -1260,7 +1264,7 @@ def display_music_type(_menu_params, view):
     )
 
     # most played
-    params = {}
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["Recursive"] = True
     params["ImageTypeLimit"] = 1
@@ -1281,7 +1285,7 @@ def display_music_type(_menu_params, view):
     )
 
     # artists
-    params = {}
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["Recursive"] = True
     params["ImageTypeLimit"] = 1
@@ -1297,20 +1301,21 @@ def display_music_type(_menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_musicvideos_type(params, view):
+def display_musicvideos_type(
+    _menu_params: dict[str, str], view: dict[str, str]
+) -> None:
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, "files")
 
-    view_name = view.get("Name")
-
+    view_name = view.get("Name", "Unknown")
     # artists
-    params = {}
-    params["ParentId"] = view.get("Id")
-    params["Recursive"] = False
-    params["ImageTypeLimit"] = 1
-    params["IsMissing"] = False
-    params["Fields"] = "{field_filters}"
-    path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
+    base_params: dict[str, object] = {}
+    base_params["ParentId"] = view.get("Id", "none")
+    base_params["Recursive"] = False
+    base_params["ImageTypeLimit"] = 1
+    base_params["IsMissing"] = False
+    base_params["Fields"] = "{field_filters}"
+    path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
     url = (
         sys.argv[0]
         + "?url="
@@ -1322,14 +1327,14 @@ def display_musicvideos_type(params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_livetv_type(_menu_params, view):
+def display_livetv_type(_menu_params: dict[str, str], view: dict[str, str]) -> None:
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, "files")
 
-    view_name = view.get("Name")
+    view_name = view.get("Name", "Unknown")
 
     # channels
-    params = {}
+    params: dict[str, object] = {}
     params["UserId"] = "{userid}"
     params["Recursive"] = False
     params["ImageTypeLimit"] = 1
@@ -1378,20 +1383,20 @@ def display_livetv_type(_menu_params, view):
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_movies_type(_menu_params, view):
+def display_movies_type(_menu_params: dict[str, str], view: dict[str, str]) -> None:
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, "files")
 
     view_name = string_load(30256)
     if view is not None:
-        view_name = view.get("Name")
+        view_name = view.get("Name", view_name)
 
     settings = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
     group_movies = settings.getSetting("group_movies") == "true"
     hide_watched = settings.getSetting("hide_watched") == "true"
 
-    base_params = {}
+    base_params: dict[str, object] = {}
     if view is not None:
         base_params["ParentId"] = view.get("Id")
     base_params["IncludeItemTypes"] = "Movie"
@@ -1413,7 +1418,7 @@ def display_movies_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30405), url)
 
     # Favorite Movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["CollapseBoxSetItems"] = False
     params["GroupItemsIntoCollections"] = False
@@ -1428,7 +1433,7 @@ def display_movies_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30414), url)
 
     # Unwatched Movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["CollapseBoxSetItems"] = False
     params["GroupItemsIntoCollections"] = False
@@ -1443,7 +1448,7 @@ def display_movies_type(_menu_params, view):
     add_menu_directory_item(view_name + string_load(30285), url)
 
     # Recently Watched Movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["IsPlayed"] = True
     params["SortBy"] = "DatePlayed"
@@ -1463,7 +1468,7 @@ def display_movies_type(_menu_params, view):
     )
 
     # Resumable Movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     params["Filters"] = "IsResumable"
     params["SortBy"] = "DatePlayed"
@@ -1483,7 +1488,7 @@ def display_movies_type(_menu_params, view):
     )
 
     # Recently Added Movies
-    params = {}
+    params: dict[str, object] = {}
     params.update(base_params)
     if hide_watched:
         params["IsPlayed"] = False
@@ -1505,7 +1510,7 @@ def display_movies_type(_menu_params, view):
     )
 
     # Collections
-    params = {}
+    params: dict[str, object] = {}
     if view is not None:
         params["ParentId"] = view.get("Id")
     params["Fields"] = "{field_filters}"
@@ -1535,43 +1540,43 @@ def display_movies_type(_menu_params, view):
     # Genres
     path = "plugin://plugin.video.embycon/?mode=GENRES&item_type=movie"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30325), path)
 
     # Pages
     path = "plugin://plugin.video.embycon/?mode=MOVIE_PAGES"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30397), path)
 
     # Alpha Picker
     path = "plugin://plugin.video.embycon/?mode=MOVIE_ALPHA"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30404), path)
 
     # Years
     path = "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=show_movie_years"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30411), path)
 
     # Decades
     path = "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=show_movie_years&group=true"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30412), path)
 
     # Tags
     path = "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=show_movie_tags"
     if view is not None:
-        path += "&parent_id=" + view.get("Id")
+        path += "&parent_id=" + view.get("Id", "none")
     add_menu_directory_item(view_name + string_load(30413), path)
 
     xbmcplugin.endOfDirectory(handle)
 
 
-def display_library_views(_params):
+def display_library_views(_params: dict[str, str]) -> None:
     handle = int(sys.argv[1])
     xbmcplugin.setContent(handle, "files")
 
@@ -1587,8 +1592,8 @@ def display_library_views(_params):
     views_url = "{server}/emby/Users/{userid}/Views?format=json"
     views = data_manager.get_content(views_url)
     if not views:
-        return []
-    views = views.get("Items")
+        return
+    views = views.get("Items", [])
 
     view_types = [
         "movies",
@@ -1634,8 +1639,8 @@ def display_library_views(_params):
     xbmcplugin.endOfDirectory(handle)
 
 
-def get_playlist_path(view_info):
-    params = {}
+def get_playlist_path(view_info: dict[str, object]) -> str:
+    params: dict[str, object] = {}
     params["ParentId"] = view_info.get("Id")
     params["Fields"] = "{field_filters}"
     params["ImageTypeLimit"] = 1
@@ -1650,8 +1655,8 @@ def get_playlist_path(view_info):
     return url
 
 
-def get_collection_path(view_info):
-    params = {}
+def get_collection_path(view_info: dict[str, object]) -> str:
+    params: dict[str, object] = {}
     params["ParentId"] = view_info.get("Id")
     params["Fields"] = "{field_filters}"
     params["ImageTypeLimit"] = 1
@@ -1671,8 +1676,8 @@ def get_collection_path(view_info):
     return url
 
 
-def get_channel_path(view):
-    params = {}
+def get_channel_path(view: dict[str, object]) -> str:
+    params: dict[str, object] = {}
     params["ParentId"] = view.get("Id")
     params["IsMissing"] = False
     params["ImageTypeLimit"] = 1
@@ -1688,8 +1693,8 @@ def get_channel_path(view):
     return url
 
 
-def display_library_view(params):
-    node_id = params.get("view_id")
+def display_library_view(params: dict[str, str]) -> None:
+    node_id = params.get("view_id", "none")
 
     view_info_url = "{server}/emby/Users/{userid}/Items/" + node_id
     data_manager = DataManager()
@@ -1713,8 +1718,8 @@ def display_library_view(params):
         display_livetv_type(params, view_info)
 
 
-def show_widgets():
-    settings = xbmcaddon.Addon()
+def show_widgets() -> None:
+    settings: xbmcaddon.Addon = xbmcaddon.Addon()
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     add_menu_directory_item(
@@ -1758,7 +1763,7 @@ def show_widgets():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def show_search():
+def show_search() -> None:
     add_menu_directory_item(
         string_load(30231),
         "plugin://plugin.video.embycon/?mode=NEW_SEARCH&item_type=Movie",
@@ -1787,7 +1792,7 @@ def show_search():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
-def set_library_window_values(force=False):
+def set_library_window_values(force: bool = False) -> None:
     log.debug("set_library_window_values Called forced={0}", force)
     home_window = HomeWindow()
 
@@ -1808,11 +1813,11 @@ def set_library_window_values(force=False):
     if result is None:
         return
 
-    result = result.get("Items")
+    result = result.get("Items", [])
     download_utils = DownloadUtils()
     server = download_utils.get_server()
 
-    settings = xbmcaddon.Addon()
+    settings: xbmcaddon.Addon = xbmcaddon.Addon()
     max_image_width = int(settings.getSetting("max_image_width"))
 
     index = 0

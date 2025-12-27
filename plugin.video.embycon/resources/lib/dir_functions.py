@@ -18,7 +18,13 @@ from .datamanager import DataManager
 from .downloadutils import DownloadUtils
 from .translation import string_load
 from .simple_logging import SimpleLogging
-from .item_functions import add_gui_item, ItemDetails, GuiItem
+from .item_functions import (
+    add_gui_item,
+    ItemDetails,
+    GuiItem,
+    GuiOptions,
+    DisplayOptions,
+)
 from .utils import send_event_notification
 from .tracking import timer
 from .filelock import FileLock
@@ -361,6 +367,9 @@ def process_directory(
     settings = xbmcaddon.Addon()
     download_utils = DownloadUtils()
     server = download_utils.get_server()
+    if not server:
+        xbmcgui.Dialog().ok(string_load(30135), string_load(30136))
+        return None
 
     name_format = params.get("name_format", None)
     name_format_type = None
@@ -376,13 +385,13 @@ def process_directory(
 
     max_image_width = int(settings.getSetting("max_image_width"))
 
-    gui_options = {}
-    gui_options["server"] = server
-    gui_options["name_format"] = name_format
-    gui_options["name_format_type"] = name_format_type
-    gui_options["max_image_width"] = max_image_width
-    gui_options["use_prem_date_for_added"] = (
-        settings.getSetting("use_prem_date_for_added") == "true"
+    use_prem_date_for_added = settings.getSetting("use_prem_date_for_added") == "true"
+    gui_options = GuiOptions(
+        server=server,
+        name_format=name_format,
+        name_format_type=name_format_type,
+        max_image_width=max_image_width,
+        use_prem_date_for_added=use_prem_date_for_added,
     )
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
@@ -440,17 +449,13 @@ def process_directory(
 
     hide_unwatched_details = settings.getSetting("hide_unwatched_details") == "true"
 
-    display_options = {}
-    display_options["addCounts"] = settings.getSetting("addCounts") == "true"
-    display_options["addResumePercent"] = (
-        settings.getSetting("addResumePercent") == "true"
-    )
-    display_options["addSubtitleAvailable"] = (
+    display_options = DisplayOptions()
+    display_options.addCounts = settings.getSetting("addCounts") == "true"
+    display_options.addResumePercent = settings.getSetting("addResumePercent") == "true"
+    display_options.addSubtitleAvailable = (
         settings.getSetting("addSubtitleAvailable") == "true"
     )
-    display_options["addUserRatings"] = (
-        settings.getSetting("add_user_ratings") == "true"
-    )
+    display_options.addUserRatings = settings.getSetting("add_user_ratings") == "true"
 
     show_empty_folders = settings.getSetting("show_empty_folders") == "true"
 
