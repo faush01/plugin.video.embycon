@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #################################################################################################
+from __future__ import annotations
 
 import json
 import threading
@@ -15,7 +16,7 @@ from . import downloadutils
 from .jsonrpc import JsonRpc
 from .kodi_utils import HomeWindow
 from .websocket import WebSocketApp, enableTrace
-
+from .library_change_monitor import LibraryChangeMonitor
 
 log = SimpleLogging(__name__)
 
@@ -24,10 +25,10 @@ class WebSocketClient(threading.Thread):
     _shared_state = {}
 
     _client = None
-    _stop_websocket = False
-    _library_monitor = None
+    _stop_websocket: bool = False
+    _library_monitor: LibraryChangeMonitor | None = None
 
-    def __init__(self, library_change_monitor: object) -> None:
+    def __init__(self, library_change_monitor: LibraryChangeMonitor) -> None:
         self.__dict__ = self._shared_state
         self.monitor = xbmc.Monitor()
 
@@ -38,36 +39,37 @@ class WebSocketClient(threading.Thread):
 
         threading.Thread.__init__(self)
 
-    def on_message(ws, message: str) -> None:
+    def on_message(self, message: str) -> None:
         result = json.loads(message)
         message_type = result["MessageType"]
 
         if message_type == "Play":
             data = result["Data"]
-            ws._play(data)
+            self._play(data)
 
         elif message_type == "Playstate":
             data = result["Data"]
-            ws._playstate(data)
+            self._playstate(data)
 
         elif message_type == "UserDataChanged":
             data = result["Data"]
-            ws._library_changed(data)
+            self._library_changed(data)
 
         elif message_type == "LibraryChanged":
             data = result["Data"]
-            ws._library_changed(data)
+            self._library_changed(data)
 
         elif message_type == "GeneralCommand":
             data = result["Data"]
-            ws._general_commands(data)
+            self._general_commands(data)
 
         else:
             log.debug("WebSocket Message Type: {0}", message)
 
     def _library_changed(self, data: dict) -> None:
         log.debug("Library_Changed: {0}", data)
-        self._library_monitor.check_for_updates()
+        if self._library_monitor is not None:
+            self._library_monitor.check_for_updates()
 
     def _play(self, data: dict) -> None:
         item_ids = data["ItemIds"]
@@ -211,14 +213,14 @@ class WebSocketClient(threading.Thread):
             if command in builtin:
                 xbmc.executebuiltin(builtin[command])
 
-    def on_close(ws) -> None:
+    def on_close(self) -> None:
         log.debug("Closed")
 
-    def on_open(ws) -> None:
+    def on_open(self) -> None:
         log.debug("Connected")
-        ws.post_capabilities()
+        self.post_capabilities()
 
-    def on_error(ws, error: Exception) -> None:
+    def on_error(self, error: Exception) -> None:
         log.error("Error: {0}", error)
 
     def run(self) -> None:
@@ -235,6 +237,10 @@ class WebSocketClient(threading.Thread):
         # Get the appropriate prefix for the websocket
         download_utils.set_host_domain()
         server = download_utils.get_server()
+        if server is None:
+            log.error("No server found for WebSocketClient")
+            return
+
         if "https" in server:
             server = server.replace("https", "wss")
         else:

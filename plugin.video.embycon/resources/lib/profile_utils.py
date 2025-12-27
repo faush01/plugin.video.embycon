@@ -1,3 +1,5 @@
+from __future__ import annotations
+import cProfile
 import json
 import sys
 import io
@@ -5,6 +7,7 @@ import os
 import pstats
 from datetime import datetime
 import time
+from typing import cast
 
 import xbmcplugin
 import xbmcgui
@@ -24,42 +27,48 @@ ACTION_BACKSPACE = 110
 
 
 class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
-    profile_details = {}
+    profile_details: dict = {}
     current_position = 0
     line_count = 0
     display_option = 0
 
-    def __init__(self, *_args, **_kwargs):
+    def __init__(
+        self,
+        xmlFilename: str,
+        scriptPath: str,
+        defaultSkin: str = "default",
+        defaultRes: str = "720p",
+    ) -> None:
         log.debug("ActionMenu: __init__")
-        xbmcgui.WindowXML.__init__(self)
+        xbmcgui.WindowXML.__init__(
+            self, xmlFilename, scriptPath, defaultSkin, defaultRes
+        )
 
-    def onInit(self):
+    def onInit(self) -> None:
         log.debug("ActionMenu: onInit")
         self.action_exitkeys_id = [10, 13]
         self.set_profile_details_text()
 
-    def onFocus(self, control_id):
+    def onFocus(self, controlId: int) -> None:
         pass
 
-    def doAction(self, action_id):
-        pass
-
-    def onMessage(self, message):
-        log.debug("ActionMenu: onMessage: {0}", message)
-
-    def onAction(self, action):
+    def onAction(self, action: xbmcgui.Action) -> None:
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.close()
         elif action.getId() == 92:  # ACTION_NAV_BACK
             self.close()
         elif action.getId() == ACTION_MOVE_DOWN:
-            details_text_control = self.getControl(3010)
+            details_text_control: xbmcgui.ControlTextBox = cast(
+                xbmcgui.ControlTextBox, self.getControl(3010)
+            )
             self.current_position += 1
             if self.current_position > self.line_count:
                 self.current_position = self.line_count
             details_text_control.scroll(self.current_position)
         elif action.getId() == ACTION_MOVE_UP:
-            details_text_control = self.getControl(3010)
+            details_text_control: xbmcgui.ControlTextBox = cast(
+                xbmcgui.ControlTextBox, self.getControl(3010)
+            )
             self.current_position -= 1
             if self.current_position < 0:
                 self.current_position = 0
@@ -77,14 +86,14 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         else:
             log.debug("ActionMenu: onAction: {0}", action.getId())
 
-    def onClick(self, control_id):
-        if control_id == 3000:
+    def onClick(self, controlId: int) -> None:
+        if controlId == 3000:
             self.close()
 
-    def set_profile_details(self, value):
+    def set_profile_details(self, value: dict) -> None:
         self.profile_details = value
 
-    def set_profile_details_text(self):
+    def set_profile_details_text(self) -> None:
         if self.display_option == 0 or self.display_option == 1:
             # build profile details text
             profile_details_text = "Profile Data\n\n"
@@ -147,10 +156,12 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         self.current_position = 0
         self.line_count = profile_details_text.count("\n")
 
-        details_text_control = self.getControl(3010)
+        details_text_control: xbmcgui.ControlTextBox = cast(
+            xbmcgui.ControlTextBox, self.getControl(3010)
+        )
         details_text_control.setText(profile_details_text)
 
-    def add_padding(self, value, target_len):
+    def add_padding(self, value: str, target_len: int) -> str:
         text_len = len(value)
         to_add = target_len - text_len
         if to_add < 1:
@@ -160,7 +171,7 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         return value
 
 
-def view_profile_details(params):
+def view_profile_details(params: dict[str, str]) -> None:
     log.debug("VIEW_PROFILE_DETAILS")
     log.debug("profile file : {0}", params["file"])
 
@@ -181,7 +192,7 @@ def view_profile_details(params):
     action_menu.doModal()
 
 
-def list_available_profiles(_params):
+def list_available_profiles(_params: dict[str, str]) -> None:
     handle = int(sys.argv[1])
     list_items = []
 
@@ -224,8 +235,8 @@ def list_available_profiles(_params):
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
 
 
-def remove_old_profiles(profile_path, keep=30):
-    dirs, files = xbmcvfs.listdir(profile_path)
+def remove_old_profiles(profile_path: str, keep: int = 30) -> None:
+    _dirs, files = xbmcvfs.listdir(profile_path)
     file_count = len(files)
     log.debug("Performance profile file count : {0} target : {1}", file_count, keep)
     if file_count > keep:
@@ -238,7 +249,7 @@ def remove_old_profiles(profile_path, keep=30):
             xbmcvfs.delete(full_path)
 
 
-def get_profile_data(pr):
+def get_profile_data(pr: cProfile.Profile) -> dict:
     s = io.StringIO()
     ps = pstats.Stats(pr, stream=s)
 

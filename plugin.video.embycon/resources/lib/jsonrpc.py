@@ -22,12 +22,12 @@ class JsonRpc(object):
         return json.loads(xbmc.executeJSONRPC(json.dumps(query)))
 
 
-def get_value(name: str) -> str:
+def get_value(name: str) -> object:
     result = JsonRpc("Settings.getSettingValue").execute({"setting": name})
     return result["result"]["value"]
 
 
-def set_value(name: str, value: str) -> dict:
+def set_value(name: str, value: object) -> dict:
     params = {"setting": name, "value": value}
     result = JsonRpc("Settings.setSettingValue").execute(params)
     return result

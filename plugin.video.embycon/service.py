@@ -217,7 +217,7 @@ library_change_monitor.stop()
 
 # stop the play next episdoe service
 if play_next_service:
-    play_next_service.stop_servcie()
+    play_next_service.stop_service()
 
 # call stop on the context menu monitor
 if context_monitor:

@@ -63,7 +63,7 @@ def main_entry_point() -> None:
     addon_dir = xbmcvfs.translatePath(settings.getAddonInfo("profile"))
 
     profiling_enabled = settings.getSetting("profiling_enabled") == "true"
-    pr = None
+    pr: cProfile.Profile | None = None
     if profiling_enabled:
         if mode in [
             "MOVIE_ALPHA",

@@ -12,7 +12,7 @@ from .utils import get_emby_url
 from .datamanager import DataManager
 from .simple_logging import SimpleLogging
 from .kodi_utils import HomeWindow
-from .dir_functions import process_directory
+from .dir_functions import process_directory, DirectoryResult
 from .tracking import timer
 
 
@@ -221,6 +221,9 @@ def get_widget_content_cast(handle: int, params: dict) -> Optional[int]:
     log.debug("getWigetContentCast Called: {0}", params)
     download_utils = DownloadUtils()
     server = download_utils.get_server()
+    if server is None:
+        log.error("get_widget_content_cast: No server info")
+        return
 
     item_id = params["id"]
     data_manager = DataManager()
@@ -429,9 +432,14 @@ def get_widget_content(handle: int, params: dict) -> Optional[int]:
 
     items_url = get_emby_url(url_verb, url_params)
 
-    list_items, detected_type, total_records = process_directory(
+    directory_result: DirectoryResult | None = process_directory(
         items_url, None, params, False
     )
+    if directory_result is None:
+        return
+
+    list_items = [item.as_tuple() for item in directory_result.dir_items]
+    detected_type = directory_result.detected_type
 
     # remove resumable items from next up
     """

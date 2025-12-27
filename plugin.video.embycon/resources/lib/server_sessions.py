@@ -11,12 +11,17 @@ from .datamanager import DataManager
 log = SimpleLogging(__name__)
 
 
-def show_server_sessions():
+def show_server_sessions() -> None:
     log.debug("showServerSessions Called")
 
     handle = int(sys.argv[1])
     download_utils = DownloadUtils()
     data_manager = DataManager()
+
+    server = download_utils.get_server()
+    if server is None:
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+        return
 
     url = "{server}/emby/Users/{userid}"
     results = data_manager.get_content(url)
@@ -61,7 +66,6 @@ def show_server_sessions():
 
         art = {}
         if now_playing:
-            server = download_utils.get_server()
             art = get_art(
                 now_playing,
                 server,
