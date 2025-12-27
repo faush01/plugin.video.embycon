@@ -30,7 +30,6 @@ from .functions import delete, mark_item_watched
 from .cache_images import CacheArtwork
 from .picture_viewer import PictureViewer
 from .tracking import timer
-from .playnext import PlayNextDialog
 from .skip_intro_dialog import SkipIntroMonitor
 
 log = SimpleLogging(__name__)
@@ -1440,6 +1439,8 @@ def prompt_for_stop_actions(item_id: str, data: dict) -> None:
         and percenatge_complete > prompt_next_percentage
     ):
         if play_prompt:
+            from .playnext import PlayNextDialog
+
             plugin_path = settings.getAddonInfo("path")
             plugin_path_real = xbmcvfs.translatePath(os.path.join(plugin_path))
 

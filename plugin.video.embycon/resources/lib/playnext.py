@@ -11,7 +11,8 @@ import xbmcaddon
 import xbmcvfs
 
 from .simple_logging import SimpleLogging
-from .play_utils import PlaybackMonitorService, send_event_notification
+from .play_utils import PlaybackMonitorService
+from .utils import send_event_notification
 from .auto_close import ActionAutoClose
 
 
