@@ -395,10 +395,10 @@ def process_directory(
     )
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
-    cache_file, item_list, total_records, cache_thread = data_manager.get_items(
-        url, gui_options, use_cache
-    )
-
+    get_items_result = data_manager.get_items(url, gui_options, use_cache)
+    item_list = get_items_result.item_list
+    total_records = get_items_result.total_records
+    cache_thread = get_items_result.cache_thread
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
     # build a new url, set the content media type and call get content again

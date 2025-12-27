@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Optional, List, Any
+from dataclasses import dataclass
 import json
 from collections import defaultdict
 import threading
@@ -94,6 +95,16 @@ def process_json_data(json_raw_data: str) -> DataSet:
     return new_dataset
 
 
+@dataclass
+class GetItemsResult:
+    """Result from get_items containing cache file path, items, total count, and cache thread."""
+
+    cache_file: str
+    item_list: List[Any]
+    total_records: int
+    cache_thread: Optional[CacheManagerThread]
+
+
 class CacheItem:
     def __init__(self) -> None:
         self.item_list: List[Any] | None = None
@@ -150,7 +161,7 @@ class DataManager:
     @timer
     def get_items(
         self, url: str, gui_options: GuiOptions, use_cache: bool = False
-    ) -> tuple[str, List[Any], int, Optional[CacheManagerThread]]:
+    ) -> GetItemsResult:
         home_window = HomeWindow()
         log.debug("last_content_url : use_cache={0} url={1}", use_cache, url)
         home_window.set_property("last_content_url", url)
@@ -236,7 +247,12 @@ class DataManager:
         if not use_cache:
             cache_thread = None
 
-        return cache_file, item_list, total_records, cache_thread
+        return GetItemsResult(
+            cache_file=cache_file,
+            item_list=item_list,
+            total_records=total_records,
+            cache_thread=cache_thread,
+        )
 
 
 class CacheManagerThread(threading.Thread):

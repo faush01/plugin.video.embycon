@@ -15,6 +15,8 @@ import math
 from datetime import datetime
 import calendar
 import re
+from dataclasses import dataclass
+from typing import Optional, List, Tuple
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -42,25 +44,52 @@ def get_emby_url(base_url: str, params: dict[str, object]) -> str:
 
 
 ###########################################################################
+@dataclass
+class StrmDetails:
+    """Result from get_strm_details containing playback URL and listitem properties."""
+
+    playurl: Optional[str]
+    listitem_props: List[Tuple[str, str]]
+
+
+@dataclass
+class PlayUrlResult:
+    """Result from get_play_url containing playback URL, playback type, and listitem properties."""
+
+    playurl: Optional[str]
+    playback_type: Optional[str]
+    listitem_props: List[Tuple[str, str]]
+
+
 class PlayUtils:
     @staticmethod
-    def get_play_url(media_source: dict) -> tuple:
+    def get_play_url(media_source: dict) -> PlayUrlResult:
         log.debug("get_play_url - media_source: {0}", media_source)
 
         # check if strm file Container
         if media_source.get("Container") == "strm":
             log.debug("Detected STRM Container")
-            playurl, listitem_props = PlayUtils().get_strm_details(media_source)
-            if playurl is None:
+            strm_result = PlayUtils().get_strm_details(media_source)
+            if strm_result.playurl is None:
                 log.debug("Error, no strm content")
-                return None, None, None
+                return PlayUrlResult(
+                    playurl=None, playback_type=None, listitem_props=[]
+                )
             else:
-                return playurl, "0", listitem_props
+                return PlayUrlResult(
+                    playurl=strm_result.playurl,
+                    playback_type="0",
+                    listitem_props=strm_result.listitem_props,
+                )
 
         # get all the options
         addon_settings = xbmcaddon.Addon()
         download_utils = DownloadUtils()
         server = download_utils.get_server(add_user_id=True)
+        if server is None:
+            log.debug("Error, no server info")
+            return PlayUrlResult(playurl=None, playback_type=None, listitem_props=[])
+
         use_https = addon_settings.getSetting("protocol") == "1"
         verify_cert = addon_settings.getSetting("verify_cert") == "true"
         allow_direct_file_play = (
@@ -146,16 +175,17 @@ class PlayUtils:
             playurl = transcode_stream_path
             playback_type = "2"
 
-        return playurl, playback_type, []
+        return PlayUrlResult(
+            playurl=playurl, playback_type=playback_type, listitem_props=[]
+        )
 
     @staticmethod
-    def get_strm_details(media_source: dict) -> tuple:
+    def get_strm_details(media_source: dict) -> StrmDetails:
         playurl = None
         listitem_props = []
 
-        contents = media_source.get(
-            "Path"
-        )  # contains contents of strm file with linebreaks
+        # contains contents of strm file with linebreaks
+        contents = media_source.get("Path", "")
 
         line_break = "\r"
         if "\r\n" in contents:
@@ -190,7 +220,7 @@ class PlayUtils:
                 log.debug("STRM playback url found")
 
         log.debug("Playback URL: {0} ListItem Properties: {1}", playurl, listitem_props)
-        return playurl, listitem_props
+        return StrmDetails(playurl=playurl, listitem_props=listitem_props)
 
 
 def get_checksum(item: dict) -> str:
@@ -209,7 +239,7 @@ def get_checksum(item: dict) -> str:
 
 
 def get_art(
-    item: dict, server: str, maxwidth: int, download_utils: object = None
+    item: dict, server: str, maxwidth: int, download_utils: DownloadUtils
 ) -> dict:
     art = {
         "thumb": "",
@@ -396,14 +426,14 @@ def id_generator(
     return "".join(random.choice(chars) for _ in range(size))
 
 
-def double_urlencode(text: str) -> str:
-    text: str = single_urlencode(text)
+def double_urlencode(value: str) -> str:
+    text: str = single_urlencode(value)
     text = single_urlencode(text)
     return text
 
 
-def single_urlencode(text: str) -> str:
-    text: str = urllib.parse.urlencode({"1": text})
+def single_urlencode(value: str) -> str:
+    text: str = urllib.parse.urlencode({"1": value})
     text = text[2:]
     return text
 
@@ -423,7 +453,7 @@ def datetime_from_string(time_string: str) -> datetime:
     if time_string[-1:] == "Z":
         time_string = re.sub("[0-9]{1}Z", " UTC", time_string)
     elif time_string[-6:] == "+00:00":
-        time_string = re.sub("[0-9]{1}\+00:00", " UTC", time_string)
+        time_string = re.sub("[0-9]{1}\\+00:00", " UTC", time_string)
     log.debug("New Time String : {0}", time_string)
 
     start_time = time.strptime(time_string, "%Y-%m-%dT%H:%M:%S.%f %Z")
