@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 import xbmcvfs
 import xbmcaddon
 
@@ -165,8 +166,8 @@ def build_image(path: str) -> bytes:
 
 
 class HttpImageHandler(BaseHTTPRequestHandler):
-    def log_message(self, fmt: str, *args: object) -> None:
-        log_line = fmt % args
+    def log_message(self, format: str, *args: Any) -> None:  # noqa: A002, ANN401
+        log_line = format % args
         log.debug(log_line)
         return
 

@@ -34,7 +34,7 @@ class BitrateDialog(xbmcgui.WindowXMLDialog):
         bitrate_label_string = str(self.slider_control.getInt()) + " Kbs"
         self.bitrate_label.setLabel(bitrate_label_string)
 
-    def onFocus(self, control_id: int) -> None:
+    def onFocus(self, controlId: int) -> None:
         pass
 
     def onAction(self, action: xbmcgui.Action) -> None:

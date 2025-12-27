@@ -1642,7 +1642,7 @@ class PlaybackMonitorService(xbmc.Player):
             play_data["paused"] = False
             send_progress(self)
 
-    def onPlayBackSeek(self, _time: int, _seekOffset: int) -> None:
+    def onPlayBackSeek(self, time: int, seekOffset: int) -> None:  # noqa: ARG002
         # Will be called when kodi seeks in video
         log.info("onPlayBackSeek")
         send_progress(self)

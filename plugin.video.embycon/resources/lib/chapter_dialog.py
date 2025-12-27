@@ -74,9 +74,9 @@ def get_chapter_items() -> list[str | xbmcgui.ListItem]:
 
 def get_current_chapter(chapters: list[str | xbmcgui.ListItem]) -> int:
     player = xbmc.Player()
+    index = 0
     if player.isPlaying():
         current_position = player.getTime()
-        index = 0
         for x in range(1, len(chapters)):
             chap = chapters[x]
             if chap is None or not isinstance(chap, xbmcgui.ListItem):

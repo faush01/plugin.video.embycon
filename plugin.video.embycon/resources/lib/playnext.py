@@ -222,6 +222,7 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
             if self.auto_close_thread is not None:
                 self.auto_close_thread.stop()
             self.close()
+            next_item_id = "-1"
             if self.episode_info is not None:
                 next_item_id = self.episode_info.get("Id")
             log.debug("Playing Next Episode: {0}", next_item_id)
