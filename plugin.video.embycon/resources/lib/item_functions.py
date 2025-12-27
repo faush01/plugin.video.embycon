@@ -1,4 +1,7 @@
+from __future__ import annotations
 import sys
+from typing import Optional
+from dataclasses import dataclass
 import urllib.parse
 
 from datetime import datetime
@@ -9,25 +12,45 @@ import xbmc
 import xbmcgui
 
 from .utils import get_art, datetime_from_string
+from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
 
 
 log = SimpleLogging(__name__)
 
 
+@dataclass
+class GuiItem:
+    """Represents a GUI item for Kodi directory listings.
+
+    Attributes:
+        url: The URL or path for the item
+        list_item: The Kodi ListItem object with metadata
+        is_folder: Whether this item is a folder (True) or playable item (False)
+    """
+
+    url: str
+    list_item: xbmcgui.ListItem
+    is_folder: bool
+
+    def as_tuple(self) -> tuple[str, xbmcgui.ListItem, bool]:
+        """Returns the item as a tuple for compatibility with xbmcplugin.addDirectoryItems."""
+        return (self.url, self.list_item, self.is_folder)
+
+
 class MediaStream:
     type = "na"
-    width = 0
-    height = 0
-    channels = 0
-    codec = "na"
-    aspect_ratio = 1.0
-    language = "na"
-    hdr_type = ""
+    width: int = 0
+    height: int = 0
+    channels: int = 0
+    codec: str = "na"
+    aspect_ratio: float = 1.0
+    language: str = "na"
+    hdr_type: str = ""
 
     # "default" if x is None else x
 
-    def set_hdr_type(self, value):
+    def set_hdr_type(self, value: Optional[str]) -> None:
         # Kodi options : dolbyvision, hdr10, hlg
         if value is not None:
             value = value.lower()
@@ -38,41 +61,41 @@ class MediaStream:
             elif value == "dolbyvision":
                 self.hdr_type = "dolbyvision"
 
-    def set_channels(self, value):
+    def set_channels(self, value: int | None) -> None:
         if value is not None:
             self.channels = int(value)
 
-    def set_language(self, value):
+    def set_language(self, value: str | None) -> None:
         if value is not None:
             self.language = value
 
-    def set_aspect_ratio(self, value):
+    def set_aspect_ratio(self, value: float | None) -> None:
         if value is not None:
             self.aspect_ratio = float(value)
 
-    def set_type(self, value):
+    def set_type(self, value: str | None) -> None:
         if value is not None:
             self.type = value
 
-    def set_codec(self, value):
+    def set_codec(self, value: str | None) -> None:
         if value is not None:
             self.codec = value
 
-    def set_width(self, value):
+    def set_width(self, value: int | None) -> None:
         if value is not None:
             self.width = int(value)
 
-    def set_height(self, value):
+    def set_height(self, value: int | None) -> None:
         if value is not None:
             self.height = int(value)
 
 
 class Person:
-    name = ""
-    role = ""
-    thumbnail = ""
+    name: str = ""
+    role: str = ""
+    thumbnail: str = ""
 
-    def __init__(self, n, r, t):
+    def __init__(self, n: str, r: str, t: str) -> None:
         self.name = n
         self.role = r
         self.thumbnail = t
@@ -80,31 +103,31 @@ class Person:
 
 class ItemDetails:
     # objects
-    media_streams = []
-    cast = None
+    media_streams: list[MediaStream] = []
+    cast: list[Person] | None = None
 
     # values
-    name = None
-    sort_name = None
+    name: str | None = None
+    sort_name: str | None = None
     id = None
     etag = None
     path = None
     is_folder = False
     plot = None
     series_name = None
-    episode_number = 0
-    season_number = 0
-    episode_sort_number = 0
-    season_sort_number = 0
-    track_number = 0
+    episode_number: int = 0
+    season_number: int = 0
+    episode_sort_number: int = 0
+    season_sort_number: int = 0
+    track_number: int = 0
     series_id = None
-    art = None
+    art: dict | None = None
 
     mpaa = None
     rating = None
     critic_rating = 0.0
     community_rating = 0.0
-    year = None
+    year: int | None = None
     premiere_date = ""
     date_added = ""
     location_type = None
@@ -116,10 +139,10 @@ class ItemDetails:
     writer = ""
     tagline = ""
     status = None
-    tags = None
+    tags: list[str] | None = None
 
     resume_time = 0
-    duration = 0
+    duration: float = 0.0
     recursive_item_count = 0
     recursive_unplayed_items_count = 0
     total_seasons = 0
@@ -127,14 +150,14 @@ class ItemDetails:
     watched_episodes = 0
     unwatched_episodes = 0
     number_episodes = 0
-    original_title = None
-    item_type = None
+    original_title: str | None = None
+    item_type: Optional[str] = None
     subtitle_available = False
     total_items = 0
 
     song_artist = ""
     album_artist = ""
-    album_name = ""
+    album_name: str | None = ""
 
     program_channel_name = None
     program_end_date = None
@@ -148,24 +171,24 @@ class ItemDetails:
 
     baseline_itemname = None
 
-    def set_episode_number(self, value):
+    def set_episode_number(self, value: int | None) -> None:
         if value is not None:
             self.episode_number = value
 
-    def set_season_sort_number(self, value):
+    def set_season_sort_number(self, value: int | None) -> None:
         if value is not None:
             self.season_sort_number = value
 
-    def set_season_number(self, value):
+    def set_season_number(self, value: int | None) -> None:
         if value is not None:
             self.season_number = value
 
-    def set_episode_sort_number(self, value):
+    def set_episode_sort_number(self, value: int | None) -> None:
         if value is not None:
             self.episode_sort_number = value
 
 
-def extract_media_info(item):
+def extract_media_info(item: dict) -> list[str]:
     media_info = []
 
     media_sources = item["MediaSources"]
@@ -299,7 +322,9 @@ def extract_media_info(item):
     return media_info
 
 
-def extract_item_info(item, gui_options, download_utils=None):
+def extract_item_info(
+    item: dict, gui_options: dict[str, object], download_utils: DownloadUtils
+) -> ItemDetails:
     item_details = ItemDetails()
 
     item_details.id = item["Id"]
@@ -310,6 +335,8 @@ def extract_item_info(item, gui_options, download_utils=None):
     item_details.name = item["Name"]
     item_details.sort_name = item["SortName"]
     item_details.original_title = item_details.name
+
+    server_url = str(gui_options["server"])
 
     if item_details.item_type == "Episode":
         item_details.set_episode_number(item["IndexNumber"])
@@ -399,13 +426,14 @@ def extract_item_info(item, gui_options, download_utils=None):
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
         airtime = item["AirTime"]
-        item_details.name = (
-            item_details.name
-            + " - "
-            + item_details.premiere_date
-            + " - "
-            + str(airtime)
-        )
+        if item_details.name:
+            item_details.name = (
+                item_details.name
+                + " - "
+                + item_details.premiere_date
+                + " - "
+                + str(airtime)
+            )
 
     if item_details.item_type == "Program":
         item_details.program_channel_name = item["ChannelName"]
@@ -475,7 +503,7 @@ def extract_item_info(item, gui_options, download_utils=None):
                         400,
                         400,
                         person_tag,
-                        server=gui_options["server"],
+                        server=server_url,
                     )
                 else:
                     person_thumbnail = ""
@@ -552,7 +580,7 @@ def extract_item_info(item, gui_options, download_utils=None):
 
     item_details.art = get_art(
         item,
-        gui_options["server"],
+        server_url,
         maxwidth=gui_options["max_image_width"],
         download_utils=download_utils,
     )
@@ -576,7 +604,9 @@ def extract_item_info(item, gui_options, download_utils=None):
     return item_details
 
 
-def add_gui_item(url, item_details, display_options, folder=True, default_sort=False):
+def add_gui_item(
+    url, item_details, display_options, folder=True, default_sort=False
+) -> Optional[GuiItem]:
     # log.debug("item_details: {0}", item_details.__dict__)
 
     if not item_details.name:
@@ -947,4 +977,4 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     # log.debug("item_properties: {0}", item_properties)
     list_item.setProperties(item_properties)
 
-    return u, list_item, folder
+    return GuiItem(url=u, list_item=list_item, is_folder=folder)

@@ -10,7 +10,7 @@ import xbmcvfs
 
 from .simple_logging import SimpleLogging
 from .play_utils import send_event_notification
-from .action_menu import ActionAutoClose
+from .auto_close import ActionAutoClose
 
 
 log = SimpleLogging(__name__)

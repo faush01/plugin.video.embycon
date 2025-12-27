@@ -9,9 +9,9 @@ log = SimpleLogging(__name__)
 
 
 class ContextMonitor(threading.Thread):
-    stop_thread = False
+    stop_thread: bool = False
 
-    def run(self):
+    def run(self) -> None:
         item_id = None
         log.debug("ContextMonitor Thread Started")
 
@@ -77,6 +77,6 @@ class ContextMonitor(threading.Thread):
 
         log.debug("ContextMonitor Thread Exited")
 
-    def stop_monitor(self):
+    def stop_monitor(self) -> None:
         log.debug("ContextMonitor Stop Called")
         self.stop_thread = True

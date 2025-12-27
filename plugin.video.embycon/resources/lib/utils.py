@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import xbmcaddon
 import xbmc
@@ -25,7 +26,7 @@ log = SimpleLogging(__name__)
 throwaway = time.strptime("20110101", "%Y%m%d")
 
 
-def get_emby_url(base_url, params):
+def get_emby_url(base_url: str, params: dict[str, str]) -> str:
     params["format"] = "json"
     param_list = []
     for key in params:
@@ -43,7 +44,7 @@ def get_emby_url(base_url, params):
 ###########################################################################
 class PlayUtils:
     @staticmethod
-    def get_play_url(media_source):
+    def get_play_url(media_source: dict) -> tuple:
         log.debug("get_play_url - media_source: {0}", media_source)
 
         # check if strm file Container
@@ -148,7 +149,7 @@ class PlayUtils:
         return playurl, playback_type, []
 
     @staticmethod
-    def get_strm_details(media_source):
+    def get_strm_details(media_source: dict) -> tuple:
         playurl = None
         listitem_props = []
 
@@ -192,7 +193,7 @@ class PlayUtils:
         return playurl, listitem_props
 
 
-def get_checksum(item):
+def get_checksum(item: dict) -> str:
     userdata = item["UserData"]
     checksum = "%s_%s_%s_%s_%s_%s_%s" % (
         item["Etag"],
@@ -207,7 +208,9 @@ def get_checksum(item):
     return checksum
 
 
-def get_art(item, server, maxwidth, download_utils=None):
+def get_art(
+    item: dict, server: str, maxwidth: int, download_utils: object = None
+) -> dict:
     art = {
         "thumb": "",
         "fanart": "",
@@ -387,23 +390,25 @@ def get_art(item, server, maxwidth, download_utils=None):
     return art
 
 
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+def id_generator(
+    size: int = 6, chars: str = string.ascii_uppercase + string.digits
+) -> str:
     return "".join(random.choice(chars) for _ in range(size))
 
 
-def double_urlencode(text):
-    text = single_urlencode(text)
+def double_urlencode(text: str) -> str:
+    text: str = single_urlencode(text)
     text = single_urlencode(text)
     return text
 
 
-def single_urlencode(text):
-    text = urllib.parse.urlencode({"1": text})
+def single_urlencode(text: str) -> str:
+    text: str = urllib.parse.urlencode({"1": text})
     text = text[2:]
     return text
 
 
-def send_event_notification(method, data):
+def send_event_notification(method: str, data: dict) -> None:
     message_data = json.dumps(data)
     source_id = "embycon"
     base64_data = base64.b64encode(message_data.encode("utf-8"))
@@ -414,7 +419,7 @@ def send_event_notification(method, data):
     xbmc.executebuiltin(command)
 
 
-def datetime_from_string(time_string):
+def datetime_from_string(time_string: str) -> datetime:
     if time_string[-1:] == "Z":
         time_string = re.sub("[0-9]{1}Z", " UTC", time_string)
     elif time_string[-6:] == "+00:00":
@@ -429,7 +434,7 @@ def datetime_from_string(time_string):
     return local_dt
 
 
-def convert_size(size_bytes):
+def convert_size(size_bytes: int) -> str:
     if size_bytes == 0:
         return "0B"
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")

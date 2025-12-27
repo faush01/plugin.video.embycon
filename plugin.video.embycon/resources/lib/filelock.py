@@ -84,11 +84,13 @@ either expressed or implied, of the FreeBSD Project.
 """
 
 # from builtins import object
+from __future__ import annotations
 
 import os
 import sys
 import time
 import errno
+import types
 
 # from .simple_logging import SimpleLogging
 # log = SimpleLogging(__name__)
@@ -100,12 +102,18 @@ class FileLock(object):
     compatible as it doesn't rely on ``msvcrt`` or ``fcntl`` for the locking.
     """
 
+    _lock_file_contents: str
+
     class FileLockException(Exception):
         pass
 
     def __init__(
-        self, protected_file_path, timeout=None, delay=0.2, lock_file_contents=None
-    ):
+        self,
+        protected_file_path: str,
+        timeout: float | None = None,
+        delay: float = 0.2,
+        lock_file_contents: str = "locked by FileLock class",
+    ) -> None:
         """Prepare the file locker. Specify the file to lock and optionally
         the maximum timeout and the delay between each attempt to lock.
         """
@@ -119,20 +127,20 @@ class FileLock(object):
             for arg in sys.argv:
                 self._lock_file_contents += arg + "\n"
 
-    def locked(self):
+    def locked(self) -> bool:
         """
         Returns True iff the file is owned by THIS FileLock instance.
         (Even if this returns false, the file could be owned by another FileLock instance, possibly in a different thread or process).
         """
         return self.is_locked
 
-    def available(self):
+    def available(self) -> bool:
         """
         Returns True iff the file is currently available to be locked.
         """
         return not os.path.exists(self.lockfile)
 
-    def acquire(self, blocking=True):
+    def acquire(self, blocking: bool = True) -> bool:
         """Acquire the lock, if possible. If the lock is in use, and `blocking` is False, return False.
         Otherwise, check again every `self.delay` seconds until it either gets the lock or
         exceeds `timeout` number of seconds, in which case it raises an exception.
@@ -167,7 +175,7 @@ class FileLock(object):
         self.is_locked = True
         return True
 
-    def release(self):
+    def release(self) -> None:
         """Get rid of the lock by deleting the lockfile.
         When working in a `with` statement, this gets automatically
         called at the end.
@@ -175,27 +183,32 @@ class FileLock(object):
         self.is_locked = False
         os.unlink(self.lockfile)
 
-    def __enter__(self):
+    def __enter__(self) -> FileLock:
         """Activated when used in the with statement.
         Should automatically acquire a lock to be used in the with block.
         """
         self.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(
+        self,
+        exc_type: type | None,
+        exc_value: BaseException | None,
+        exc_traceback: types.TracebackType | None,
+    ) -> None:
         """Activated at the end of the with statement.
         It automatically releases the lock if it isn't locked.
         """
         self.release()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Make sure this ``FileLock`` instance doesn't leave a .lock file
         lying around.
         """
         if self.is_locked:
             self.release()
 
-    def purge(self):
+    def purge(self) -> bool:
         """
         For debug purposes only.  Removes the lock file from the hard disk.
         """

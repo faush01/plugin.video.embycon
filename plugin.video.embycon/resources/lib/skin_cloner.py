@@ -44,7 +44,7 @@ def clone_default_skin():
     update_kodi_settings()
 
     current_skin = get_value("lookandfeel.skin")
-    log.debug("Current Skin : " + current_skin)
+    log.debug("Current Skin : {0}", current_skin)
     if current_skin == "skin.estuary_embycon":
         return
 

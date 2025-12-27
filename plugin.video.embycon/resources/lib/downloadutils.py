@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import xbmcgui
 import xbmcaddon
@@ -24,7 +25,9 @@ from .tracking import timer
 log = SimpleLogging(__name__)
 
 
-def save_user_details(settings, user_name, user_password):
+def save_user_details(
+    settings: xbmcaddon.Addon, user_name: str, user_password: str
+) -> None:
     save_user_to_settings = settings.getSetting("save_user_to_settings") == "true"
     if save_user_to_settings:
         settings.setSetting("username", user_name)
@@ -37,7 +40,7 @@ def save_user_details(settings, user_name, user_password):
         home_window.set_property("password", user_password)
 
 
-def load_user_details(settings):
+def load_user_details(settings: xbmcaddon.Addon) -> dict[str, str]:
     save_user_to_settings = settings.getSetting("save_user_to_settings") == "true"
     if save_user_to_settings:
         user_name = settings.getSetting("username")
@@ -53,8 +56,8 @@ def load_user_details(settings):
     return user_details
 
 
-def get_details_string():
-    addon_settings = xbmcaddon.Addon()
+def get_details_string() -> str:
+    addon_settings: xbmcaddon.Addon = xbmcaddon.Addon()
     include_media = addon_settings.getSetting("include_media") == "true"
     include_people = addon_settings.getSetting("include_people") == "true"
     include_overview = addon_settings.getSetting("include_overview") == "true"
@@ -101,14 +104,14 @@ class DownloadUtils:
     verify_cert = False
     host_domain = ""
 
-    def __new__(cls):
+    def __new__(cls) -> DownloadUtils:
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Only initialize once
         if hasattr(self, "_initialized"):
             return
@@ -117,7 +120,7 @@ class DownloadUtils:
         self.set_host_domain()
 
     @timer
-    def post_capabilities(self):
+    def post_capabilities(self) -> None:
         url = "{server}/emby/Sessions/Capabilities/Full?format=json"
         data = {
             "IconUrl": "https://raw.githubusercontent.com/faush01/plugin.video.embycon/develop/kodi.png",
@@ -163,8 +166,8 @@ class DownloadUtils:
         log.debug("Posted Capabilities: {0}", data)
 
     @timer
-    def get_item_playback_info(self, item_id, force_transcode):
-        addon_settings = xbmcaddon.Addon()
+    def get_item_playback_info(self, item_id: str, force_transcode: bool) -> dict:
+        addon_settings: xbmcaddon.Addon = xbmcaddon.Addon()
 
         # ["hevc", "h265", "h264", "mpeg4", "msmpeg4v3", "mpeg2video", "vc1"]
         filtered_codecs = []
@@ -189,8 +192,8 @@ class DownloadUtils:
         audio_playback_bitrate = addon_settings.getSetting("audio_playback_bitrate")
         audio_max_channels = addon_settings.getSetting("audio_max_channels")
 
-        audio_bitrate = int(audio_playback_bitrate) * 1000
-        bitrate = int(playback_bitrate) * 1000
+        audio_bitrate: int = int(audio_playback_bitrate) * 1000
+        bitrate: int = int(playback_bitrate) * 1000
 
         profile = {
             "Name": "Kodi",
@@ -304,8 +307,8 @@ class DownloadUtils:
 
         return play_info_result
 
-    def set_host_domain(self):
-        settings = xbmcaddon.Addon()
+    def set_host_domain(self) -> None:
+        settings: xbmcaddon.Addon = xbmcaddon.Addon()
 
         self.use_https = False
         if settings.getSetting("protocol") == "1":
@@ -358,7 +361,7 @@ class DownloadUtils:
 
         self.host_domain = host + ":" + port
 
-    def get_server(self, add_user_id=False):
+    def get_server(self, add_user_id: bool = False) -> str | None:
         host = self.host_domain
         if host is None or len(host) == 0:
             return None
@@ -376,7 +379,7 @@ class DownloadUtils:
         return server
 
     @staticmethod
-    def get_all_artwork(item, server):
+    def get_all_artwork(item: dict, server: str) -> defaultdict[str, str]:
         all_art = defaultdict(lambda: "")
 
         item_id = item["Id"]
@@ -410,8 +413,14 @@ class DownloadUtils:
         return all_art
 
     def get_artwork(
-        self, data, art_type, parent=False, index=0, server=None, maxwidth=0
-    ):
+        self,
+        data: dict,
+        art_type: str,
+        parent: bool = False,
+        index: int = 0,
+        server: str | None = None,
+        maxwidth: int = 0,
+    ) -> str:
         item_id = data["Id"]
         item_type = data["Type"]
 
@@ -498,7 +507,16 @@ class DownloadUtils:
 
         return artwork
 
-    def image_url(self, item_id, art_type, index, width, height, image_tag, server):
+    def image_url(
+        self,
+        item_id: str,
+        art_type: str,
+        index: int,
+        width: int,
+        height: int,
+        image_tag: str,
+        server: str,
+    ) -> str:
         # test imageTag e3ab56fe27d389446754d0fb04910a34
         artwork = "%s/emby/Items/%s/Images/%s/%s?Format=original&Tag=%s" % (
             server,
@@ -517,7 +535,7 @@ class DownloadUtils:
 
         return artwork
 
-    def get_user_artwork(self, user, item_type):
+    def get_user_artwork(self, user: dict, item_type: str) -> str:
         if "PrimaryImageTag" not in user:
             return ""
         user_id = user.get("Id")
@@ -536,7 +554,7 @@ class DownloadUtils:
 
         return artwork
 
-    def get_user_id(self):
+    def get_user_id(self) -> str:
         window = HomeWindow()
         userid = window.get_property("userid")
         user_image = window.get_property("userimage")
@@ -618,7 +636,7 @@ class DownloadUtils:
         return userid
 
     @timer
-    def authenticate(self):
+    def authenticate(self) -> str:
         log.debug("authenticate called")
         # import traceback
         # log.debug("StackTrace : \n{0}", ''.join(traceback.format_stack()))
@@ -689,7 +707,7 @@ class DownloadUtils:
             window.set_property("userimage", "")
             return ""
 
-    def get_auth_header(self, authenticate=True):
+    def get_auth_header(self, authenticate: bool = True) -> dict[str, str]:
         client_info = ClientInformation()
         txt_mac = client_info.get_device_id()
         version = client_info.get_version()
@@ -751,13 +769,13 @@ class DownloadUtils:
     @timer
     def download_url(
         self,
-        url,
-        suppress=False,
-        post_body=None,
-        method="GET",
-        authenticate=True,
-        headers=None,
-    ):
+        url: str,
+        suppress: bool = False,
+        post_body: str | dict | None = None,
+        method: str = "GET",
+        authenticate: bool = True,
+        headers: dict[str, str] | None = None,
+    ) -> str:
         log.debug("DownloadUrl : {0}", url)
 
         return_data = "null"
@@ -875,12 +893,12 @@ class DownloadUtils:
             log.debug("GET URL HEADERS: {0}", data.getheaders())
 
             if int(data.status) == 200:
-                ret_data = data.read()
+                ret_data: bytes = data.read()
                 content_type = data.getheader("content-encoding")
                 log.debug("Data Len Before: {0}", len(ret_data))
                 if content_type == "gzip":
-                    ret_data = BytesIO(ret_data)
-                    gzipper = gzip.GzipFile(fileobj=ret_data)
+                    ret_data_io: BytesIO = BytesIO(ret_data)
+                    gzipper = gzip.GzipFile(fileobj=ret_data_io)
                     return_data = gzipper.read()
                 else:
                     return_data = ret_data
@@ -925,8 +943,12 @@ class DownloadUtils:
         finally:
             try:
                 log.debug("Closing HTTP connection: {0}", conn)
-                conn.close()
+                if conn is not None:
+                    conn.close()
             except Exception:
                 pass
 
-        return return_data
+        if return_data is not None and isinstance(return_data, bytes):
+            return return_data.decode("utf-8")
+        else:
+            return "null"

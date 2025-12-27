@@ -17,7 +17,7 @@ from .utils import PlayUtils, get_art, send_event_notification, convert_size
 from .kodi_utils import HomeWindow
 from .translation import string_load
 from .datamanager import DataManager, clear_old_cache_data
-from .item_functions import extract_item_info, add_gui_item
+from .item_functions import extract_item_info, add_gui_item, GuiItem
 from .clientinfo import ClientInformation
 from .functions import delete, mark_item_watched
 from .cache_images import CacheArtwork
@@ -116,7 +116,7 @@ def play_all_files(items, auto_resume, monitor, play_items=True):
         display_options["addUserRatings"] = False
 
         gui_item = add_gui_item("", item_details, display_options, False)
-        list_item = gui_item[1]
+        list_item = gui_item.list_item
         # list_item = xbmcgui.ListItem(label=item_title)
 
         # add playurl and data to the monitor
@@ -603,7 +603,7 @@ def play_file(play_info, monitor):
     display_options["addUserRatings"] = False
 
     gui_item = add_gui_item("", item_details, display_options, False)
-    list_item = gui_item[1]
+    list_item = gui_item.list_item
 
     if playback_type == "2":  # if transcoding then prompt for audio and subtitle
         playurl = audio_subs_pref(

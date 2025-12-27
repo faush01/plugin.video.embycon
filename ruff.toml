@@ -46,7 +46,7 @@ extend-ignore = [
 extend-select = [
   "A",     # built-ins
   "AIR",   # Airflow
-  #"ANN",   # Type annotations
+  "ANN",   # Type annotations
   "ARG",   # used arguments
   #"ASYNC", # flake8-async
   #"B",     # flake8-bugbear
@@ -58,15 +58,15 @@ extend-select = [
   #"E",     # pylint error
   #"EM",    # flake8-errmsg
   #"ERA",   # eradicate
-  #"F",     # pyflakes
-  #"FA",    # future annotations
+  "F",     # pyflakes
+  "FA",    # future annotations
   #"FAST",  # FastAPI
   #"FBT",   # use named arguments for boolean flags
   #"FLY",   # flynt
   #"FURB",  # preview rules
-  #"G",     # logging format
+  "G",     # logging format
   #"I",     # isort
-  #"ICN",   # import convention
+  "ICN",   # import convention
   #"INP",   # implicit namespace package
   #"INT",   # flake8-gettext
   "ISC",   # implicit str concat
@@ -81,7 +81,7 @@ extend-select = [
   #"PT",    # pytest style
   #"PTH",   # use pathlib
   #"PYI",   # flake8-pyi
-  #"Q",     # quotes
+  "Q",     # quotes
   #"R",     # pylint refactor
   #"RET",   # return
   #"RSE",   # raise

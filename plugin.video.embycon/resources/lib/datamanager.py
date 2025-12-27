@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 from typing import Optional, List, Any
 import json
@@ -43,12 +44,12 @@ def process_json_data(json_raw_data: str) -> DataSet:
 
     log.info("loading emby data in dataclasses")
 
-    def parse_media_source(ms):
+    def parse_media_source(ms: dict) -> MediaSource:
         if "MediaStreams" in ms:
             ms["MediaStreams"] = [MediaStream(**s) for s in ms["MediaStreams"]]
         return MediaSource(**ms)
 
-    def parse_item(item):
+    def parse_item(item: dict) -> Item:
         if "MediaSources" in item:
             item["MediaSources"] = [
                 parse_media_source(ms) for ms in item["MediaSources"]
@@ -79,7 +80,7 @@ def process_json_data(json_raw_data: str) -> DataSet:
     log.info("process_json_data : {0}", new_dataset)
 
     m = hashlib.md5()
-    m.update(json_raw_data)
+    m.update(json_raw_data.encode("utf-8"))
     file_name = m.hexdigest()
     file_name = os.path.join("C:\\Temp\\test_pickle_files", file_name + ".pickle")
     with open(file_name, "wb") as handle:
@@ -94,7 +95,7 @@ def process_json_data(json_raw_data: str) -> DataSet:
 
 
 class CacheItem:
-    def __init__(self, *_args):
+    def __init__(self) -> None:
         self.item_list: Optional[List[Any]] = None
         self.item_list_hash: Optional[str] = None
         self.date_saved: Optional[float] = None
@@ -107,22 +108,24 @@ class CacheItem:
 
 
 class DataManager:
-    def __init__(self, *args):
+    def __init__(self) -> None:
         # log.debug("DataManager __init__")
         pass
 
     @timer
-    def get_content_dataset(self, url) -> DataSet:
+    def get_content_dataset(self, url: str) -> DataSet:
         json_data = DownloadUtils().download_url(url)
         dataset_data: DataSet = process_json_data(json_data)
         return dataset_data
 
     @staticmethod
-    def load_json_data(json_data):
+    def load_json_data(json_data: str) -> dict:
         return json.loads(json_data, object_hook=lambda d: defaultdict(lambda: None, d))
 
     @timer
-    def get_content(self, url):
+    def get_content(self, url: Optional[str]) -> dict:
+        if not url:
+            raise ValueError("URL cannot be None or empty")
         du = DownloadUtils()
         du.set_host_domain()
         json_data = du.download_url(url)
@@ -130,7 +133,7 @@ class DataManager:
         # process_json_data(json_data)
         return result
 
-    def get_cache_filename(self, url):
+    def get_cache_filename(self, url: str) -> str:
         download_utils = DownloadUtils()
         addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
         user_id = download_utils.get_user_id()
@@ -145,7 +148,9 @@ class DataManager:
         return cache_file
 
     @timer
-    def get_items(self, url, gui_options, use_cache=False):
+    def get_items(
+        self, url: str, gui_options: dict, use_cache: bool = False
+    ) -> tuple[str, List[Any], int, Optional[CacheManagerThread]]:
         home_window = HomeWindow()
         log.debug("last_content_url : use_cache={0} url={1}", use_cache, url)
         home_window.set_property("last_content_url", url)
@@ -235,13 +240,13 @@ class DataManager:
 
 
 class CacheManagerThread(threading.Thread):
-    def __init__(self, *args):
-        threading.Thread.__init__(self, *args)
+    def __init__(self) -> None:
+        threading.Thread.__init__(self)
         self.cached_item: Optional[CacheItem] = None
-        self.gui_options = None
+        self.gui_options: Optional[dict] = None
 
     @staticmethod
-    def get_data_hash(items):
+    def get_data_hash(items: list) -> str:
         m = hashlib.md5()
         for item in items:
             item_string = "%s_%s_%s_%s_%s_%s" % (
@@ -257,7 +262,7 @@ class CacheManagerThread(threading.Thread):
 
         return m.hexdigest()
 
-    def run(self):
+    def run(self) -> None:
         log.debug("CacheManagerThread : Started")
         # log.debug("CacheManagerThread : Cache Item : {0}", self.cached_item.__dict__)
 
@@ -371,7 +376,7 @@ class CacheManagerThread(threading.Thread):
         log.debug("CacheManagerThread : Exited")
 
 
-def clear_cached_server_data():
+def clear_cached_server_data() -> None:
     log.debug("clear_cached_server_data() called")
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
@@ -394,7 +399,7 @@ def clear_cached_server_data():
     xbmcgui.Dialog().ok(string_load(30393), msg)
 
 
-def clear_old_cache_data():
+def clear_old_cache_data() -> None:
     log.debug("clear_old_cache_data() : called")
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))

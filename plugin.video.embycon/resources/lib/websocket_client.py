@@ -27,7 +27,7 @@ class WebSocketClient(threading.Thread):
     _stop_websocket = False
     _library_monitor = None
 
-    def __init__(self, library_change_monitor):
+    def __init__(self, library_change_monitor: object) -> None:
         self.__dict__ = self._shared_state
         self.monitor = xbmc.Monitor()
 
@@ -38,7 +38,7 @@ class WebSocketClient(threading.Thread):
 
         threading.Thread.__init__(self)
 
-    def on_message(ws, message):
+    def on_message(ws, message: str) -> None:
         result = json.loads(message)
         message_type = result["MessageType"]
 
@@ -65,11 +65,11 @@ class WebSocketClient(threading.Thread):
         else:
             log.debug("WebSocket Message Type: {0}", message)
 
-    def _library_changed(self, data):
+    def _library_changed(self, data: dict) -> None:
         log.debug("Library_Changed: {0}", data)
         self._library_monitor.check_for_updates()
 
-    def _play(self, data):
+    def _play(self, data: dict) -> None:
         item_ids = data["ItemIds"]
         command = data["PlayCommand"]
 
@@ -100,7 +100,7 @@ class WebSocketClient(threading.Thread):
             params["audio_stream_index"] = audio_stream_index
             play_action(params)
 
-    def _playstate(self, data):
+    def _playstate(self, data: dict) -> None:
         command = data["Command"]
         player = xbmc.Player()
 
@@ -127,7 +127,7 @@ class WebSocketClient(threading.Thread):
             log.debug("Unknown command: {0}", command)
             return
 
-    def _general_commands(self, data):
+    def _general_commands(self, data: dict) -> None:
         command = data["Name"]
         arguments = data["Arguments"]
 
@@ -211,17 +211,17 @@ class WebSocketClient(threading.Thread):
             if command in builtin:
                 xbmc.executebuiltin(builtin[command])
 
-    def on_close(ws):
+    def on_close(ws) -> None:
         log.debug("Closed")
 
-    def on_open(ws):
+    def on_open(ws) -> None:
         log.debug("Connected")
         ws.post_capabilities()
 
-    def on_error(ws, error):
+    def on_error(ws, error: Exception) -> None:
         log.error("Error: {0}", error)
 
-    def run(self):
+    def run(self) -> None:
         # websocket.enableTrace(True)
         download_utils = downloadutils.DownloadUtils()
 
@@ -272,12 +272,12 @@ class WebSocketClient(threading.Thread):
 
         log.debug("WebSocketClient Stopped")
 
-    def stop_client(self):
+    def stop_client(self) -> None:
         self._stop_websocket = True
         if self._client is not None:
             self._client.close()
         log.debug("Stopping WebSocket (stop_client called)")
 
-    def post_capabilities(self):
+    def post_capabilities(self) -> None:
         download_utils = downloadutils.DownloadUtils()
         download_utils.post_capabilities()

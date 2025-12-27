@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Optional
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
@@ -20,7 +22,7 @@ background_current_item = 0
 
 
 @timer
-def set_random_movies():
+def set_random_movies() -> None:
     log.debug("set_random_movies Called")
 
     settings = xbmcaddon.Addon()
@@ -61,7 +63,7 @@ def set_random_movies():
     home_window.set_property("random-movies-changed", new_widget_hash)
 
 
-def set_background_image(force=False):
+def set_background_image(force: bool = False) -> None:
     log.debug("set_background_image Called forced={0}", force)
 
     global background_current_item
@@ -140,7 +142,7 @@ def set_background_image(force=False):
 
 
 @timer
-def check_for_new_content():
+def check_for_new_content() -> None:
     log.debug("checkForNewContent Called")
 
     home_window = HomeWindow()
@@ -215,7 +217,7 @@ def check_for_new_content():
 
 
 @timer
-def get_widget_content_cast(handle, params):
+def get_widget_content_cast(handle: int, params: dict) -> Optional[int]:
     log.debug("getWigetContentCast Called: {0}", params)
     download_utils = DownloadUtils()
     server = download_utils.get_server()
@@ -288,7 +290,7 @@ def get_widget_content_cast(handle, params):
 
 
 @timer
-def get_widget_content(handle, params):
+def get_widget_content(handle: int, params: dict) -> Optional[int]:
     log.debug("getWigetContent Called: {0}", params)
 
     settings = xbmcaddon.Addon()
