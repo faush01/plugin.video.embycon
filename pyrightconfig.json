@@ -1,3 +1,6 @@
 {
+    "ignore": [
+        "**/resources/lib/websocket/*.py"
+    ],
     "typeCheckingMode": "standard"
 }
