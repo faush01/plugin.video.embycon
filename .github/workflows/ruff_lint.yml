@@ -22,3 +22,20 @@ jobs:
 
       - name: Run Ruff lint check
         run: ruff check .
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x' # Or specify a specific version
+
+      - name: Install Pyright
+        run: pip install pyright
+
+      - name: Run Pyright type check
+        run: pyright --level standard
