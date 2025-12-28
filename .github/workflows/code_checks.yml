@@ -38,7 +38,7 @@ jobs:
         run: pip install pyright
 
       - name: Install support libraries
-        run: pip install "kodistubs==21.*"
+        run: pip install "kodistubs==21.*" Pillow
 
       - name: Run Pyright type check
         run: pyright
