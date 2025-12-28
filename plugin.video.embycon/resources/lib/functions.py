@@ -436,7 +436,7 @@ def show_node_content(params: dict[str, str]) -> None:
 def show_menu(params: dict[str, str]) -> None:
     log.debug("showMenu(): {0}", params)
 
-    home_window = HomeWindow()
+    home_window: HomeWindow = HomeWindow()
     settings = xbmcaddon.Addon()
     plugin_path = xbmcvfs.translatePath(settings.getAddonInfo("path"))
 

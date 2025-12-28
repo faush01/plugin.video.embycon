@@ -38,4 +38,4 @@ jobs:
         run: pip install pyright
 
       - name: Run Pyright type check
-        run: pyright --typeCheckingMode standard
+        run: pyright
