@@ -145,7 +145,7 @@ class CacheArtwork(threading.Thread):
                     and url not in emby_texture_urls
                     or url.find("localhost:24276") > -1
                 ):
-                    log.debug("adding unused texture url: {0}", url)
+                    # log.debug("adding unused texture url: {0}", url)
                     unused_texture_ids.add(texture["textureid"])
 
             log.debug("unused texture ids: {0}", unused_texture_ids)

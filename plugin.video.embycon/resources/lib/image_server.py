@@ -98,7 +98,7 @@ def build_image(path: str) -> bytes:
     image_urls = get_image_links(decoded_url, maxwidth=max_image_width)
 
     width, height = 500, 750
-    collage = Image.new("RGB", (width, height), (5, 5, 5))
+    collage = Image.new("RGB", (width, height), (5, 5, 5))  # type: ignore
 
     cols: int = 2
     rows: int = 2
@@ -131,11 +131,11 @@ def build_image(path: str) -> bytes:
                 image_responce = conn.getresponse()
                 image_data = image_responce.read()
 
-                loaded_image = Image.open(io.BytesIO(image_data))
-                image = ImageOps.fit(
+                loaded_image = Image.open(io.BytesIO(image_data))  # type: ignore
+                image = ImageOps.fit(  # type: ignore
                     loaded_image,
                     size,
-                    method=Image.LANCZOS,
+                    method=Image.LANCZOS,  # type: ignore
                     bleed=0.0,
                     centering=(0.5, 0.5),
                 )
