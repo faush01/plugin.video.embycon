@@ -28,9 +28,9 @@ ACTION_BACKSPACE = 110
 
 class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
     profile_details: dict = {}
-    current_position = 0
-    line_count = 0
-    display_option = 0
+    current_position: int = 0
+    line_count: int = 0
+    display_option: int = 0
 
     def __init__(
         self,

@@ -51,7 +51,7 @@ class DirectoryResult:
 def get_content(url: str, params: dict[str, str]) -> int:
     log.debug("== ENTER: getContent ==")
 
-    default_sort = params.get("sort", "none")
+    default_sort = params.get("sort", "")
     media_type = params.get("media_type", None)
     if not media_type:
         xbmcgui.Dialog().ok(string_load(30135), string_load(30139))
