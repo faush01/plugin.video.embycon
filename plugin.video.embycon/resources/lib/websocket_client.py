@@ -227,11 +227,13 @@ class WebSocketClient(threading.Thread):
 
         token = None
         while token is None or token == "":
+            download_utils.set_host_domain()
             token = download_utils.authenticate()
             if self.monitor.waitForAbort(10):
                 return
 
         # Get the appropriate prefix for the websocket
+        download_utils.set_host_domain()
         server = download_utils.get_server()
         if "https" in server:
             server = server.replace("https", "wss")

@@ -31,6 +31,8 @@ from .menu_functions import (
     show_movie_pages,
     show_tvshow_pages,
     get_node_url,
+    show_user_lists,
+    do_user_change,
 )
 from .translation import string_load
 from .server_sessions import show_server_sessions
@@ -98,6 +100,10 @@ def main_entry_point():
         item_count = show_content(new_params)
     elif mode == "CHANGE_USER":
         check_server(change_user=True)
+    elif mode == "SHOW_USERS":
+        show_user_lists(params)
+    elif mode == "DO_USER_CHANGE":
+        do_user_change(params)
     elif mode == "CACHE_ARTWORK":
         CacheArtwork().cache_artwork_interactive()
     elif mode == "DETECT_SERVER":

@@ -182,6 +182,7 @@ def check_server(force=False, change_user=False):
     server_url = ""
     something_changed = False
     du = DownloadUtils()
+    du.set_host_domain()
 
     if force is False:
         # if not forcing use server details from settings
@@ -324,6 +325,7 @@ def check_server(force=False, change_user=False):
         # stop playback when switching users
         xbmc.Player().stop()
         du = DownloadUtils()
+        du.set_host_domain()
 
         # get a list of users
         log.debug("Getting user list")
@@ -531,6 +533,7 @@ def check_server(force=False, change_user=False):
             home_window.clear_property("userimage")
             home_window.clear_property("embycon_widget_reload")
             du = DownloadUtils()
+            du.set_host_domain()
             du.authenticate()
             du.get_user_id()
             log.debug("Changed user - reloading skin")

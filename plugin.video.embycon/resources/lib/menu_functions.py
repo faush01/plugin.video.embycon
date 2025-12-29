@@ -5,12 +5,16 @@ import os
 import sys
 import urllib.parse
 import base64
+import json
+import hashlib
 
 import xbmcplugin
 import xbmcaddon
 import xbmcvfs
+import xbmcgui
+import xbmc
 
-from .downloadutils import DownloadUtils
+from .downloadutils import DownloadUtils, save_user_details, load_user_details
 from .kodi_utils import add_menu_directory_item, HomeWindow
 from .simple_logging import SimpleLogging
 from .translation import string_load
@@ -19,6 +23,174 @@ from .utils import get_art, get_emby_url
 from .custom_nodes import CustomNode, load_custom_nodes
 
 log = SimpleLogging(__name__)
+
+
+def do_user_change(menu_params):
+    log.info("do_user_change: {0}", menu_params)
+
+    settings = xbmcaddon.Addon()
+
+    user_details = load_user_details(settings)
+    current_username = user_details.get("username", "")
+    user_name = menu_params.get("user")
+    user_id = menu_params.get("userid")
+
+    if current_username != user_name:
+        log.info("Changing user to: {0}", user_name)
+
+        # looking up new user details
+        du = DownloadUtils()
+
+        # get a list of users
+        log.debug("Getting user list")
+        json_data = du.download_url(
+            du.get_server() + "/emby/Users/Public?format=json", authenticate=False
+        )
+
+        log.debug("jsonData: {0}", json_data)
+        try:
+            result = json.loads(json_data)
+        except Exception:
+            result = None
+
+        if result is None:
+            xbmcgui.Dialog().ok("Error", "Failed to retrieve user list.")
+            return
+
+        selected_user = None
+        for user in result:
+            if user.get("Id") == user_id:
+                selected_user = user
+                break
+
+        if selected_user is None:
+            xbmcgui.Dialog().ok("Error", "Could not find selected user.")
+            return
+
+        selected_user_name = selected_user.get("Name", "")
+
+        # handle passwords
+        if selected_user.get("HasPassword", False) is True:
+            m = hashlib.md5()
+            m.update(selected_user_name.encode("utf-8"))
+            hashed_username = m.hexdigest()
+            saved_password = settings.getSetting(
+                "saved_user_password_" + hashed_username
+            )
+            allow_password_saving = (
+                settings.getSetting("allow_password_saving") == "true"
+            )
+
+            # if not saving passwords but have a saved ask to clear it
+            if not allow_password_saving and saved_password:
+                clear_password = xbmcgui.Dialog().yesno(
+                    string_load(30368), string_load(30369)
+                )
+                if clear_password:
+                    settings.setSetting("saved_user_password_" + hashed_username, "")
+
+            if saved_password:
+                log.debug("Saving username and password: {0}", selected_user_name)
+                log.debug("Using stored password for user: {0}", hashed_username)
+                save_user_details(settings, selected_user_name, saved_password)
+
+            else:
+                kb = xbmc.Keyboard()
+                kb.setHeading(string_load(30006))
+                kb.setHiddenInput(True)
+                kb.doModal()
+                if kb.isConfirmed():
+                    log.debug("Saving username and password: {0}", selected_user_name)
+                    save_user_details(settings, selected_user_name, kb.getText())
+
+                    # should we save the password
+                    if allow_password_saving:
+                        save_password = xbmcgui.Dialog().yesno(
+                            string_load(30363), string_load(30364)
+                        )
+                        if save_password:
+                            log.debug(
+                                "Saving password for fast user switching: {0}",
+                                hashed_username,
+                            )
+                            settings.setSetting(
+                                "saved_user_password_" + hashed_username,
+                                kb.getText(),
+                            )
+
+        else:
+            log.debug("User has no password, saving details.")
+            save_user_details(settings, selected_user_name, "")
+
+        home_window = HomeWindow()
+        home_window.clear_property("userid")
+        home_window.clear_property("AccessToken")
+        home_window.clear_property("userimage")
+        home_window.clear_property("embycon_widget_reload")
+        du = DownloadUtils()
+        du.authenticate()
+        du.get_user_id()
+        log.debug("Changed user - reloading skin")
+        xbmc.executebuiltin("Dialog.Close(all,true)")
+        xbmc.executebuiltin("ActivateWindow(Home)")
+        if "estuary_embycon" in xbmc.getSkinDir():
+            xbmc.executebuiltin("SetFocus(9000, 0, absolute)")
+        xbmc.executebuiltin("ReloadSkin()")
+
+
+def show_user_lists(menu_params):
+    log.info("show_user_lists: {0}", menu_params)
+    du = DownloadUtils()
+
+    server = du.get_server()
+    if server is None or len(server) == 0:
+        return
+
+    # get a list of users
+    log.info("Getting user list")
+    json_data = du.download_url(
+        du.get_server() + "/emby/Users/Public?format=json", authenticate=False
+    )
+
+    log.debug("jsonData: {0}", json_data)
+    try:
+        result = json.loads(json_data)
+    except Exception:
+        result = []
+
+    settings = xbmcaddon.Addon()
+    user_details = load_user_details(settings)
+    current_username = user_details.get("username", "")
+
+    for user in result:
+        is_hidden = False
+        if user.get("Configuration", {}).get("IsHidden", False) is True:
+            is_hidden = True
+
+        if not is_hidden:
+            name = user.get("Name")
+            display_name = name
+            if name == current_username:
+                display_name = name + " *"
+            user_item = xbmcgui.ListItem(
+                label=display_name, label2=name, offscreen=True
+            )
+            user_image = du.get_user_artwork(user, "Primary")
+            if not user_image:
+                user_image = "DefaultUser.png"
+            art = {"Thumb": user_image}
+            user_item.setArt(art)
+
+            url = sys.argv[0] + (
+                "?mode=DO_USER_CHANGE" + "&user=" + name + "&userid=" + user.get("Id")
+            )
+
+            log.info("Adding User: {0}", name)
+            xbmcplugin.addDirectoryItem(
+                handle=int(sys.argv[1]), url=url, listitem=user_item, isFolder=False
+            )
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
 def show_movie_tags(menu_params):
@@ -840,6 +1012,9 @@ def display_addon_menu(_params):
     )
     add_menu_directory_item(
         string_load(30012), "plugin://plugin.video.embycon/?mode=CHANGE_USER"
+    )
+    add_menu_directory_item(
+        "Show Users", "plugin://plugin.video.embycon/?mode=SHOW_USERS"
     )
     add_menu_directory_item(
         string_load(30011), "plugin://plugin.video.embycon/?mode=DETECT_SERVER_USER"
