@@ -336,7 +336,12 @@ def get_widget_content(handle: int, params: dict) -> int:
 
     elif widget_type == "random_movies":
         xbmcplugin.setContent(handle, "movies")
-        url_params["Ids"] = "{random_movies}"
+
+        home_window = HomeWindow()
+        random_movies = home_window.get_property("random-movies")
+        if not random_movies:
+            return 0
+        url_params["Ids"] = random_movies
 
     elif widget_type == "recent_tvshows":
         xbmcplugin.setContent(handle, "tvshows")
@@ -435,7 +440,11 @@ def get_widget_content(handle: int, params: dict) -> int:
     directory_result: DirectoryResult | None = process_directory(
         items_url, None, params, False
     )
-    if directory_result is None:
+    if (
+        directory_result is None
+        or directory_result.dir_items is None
+        or len(directory_result.dir_items) == 0
+    ):
         return 0
 
     list_items = [item.as_tuple() for item in directory_result.dir_items]

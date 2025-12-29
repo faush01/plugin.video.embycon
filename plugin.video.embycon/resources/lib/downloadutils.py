@@ -816,13 +816,6 @@ class DownloadUtils:
             filter_string = get_details_string()
             url = url.replace("{field_filters}", filter_string)
 
-        if url.find("{random_movies}") != -1:
-            home_window = HomeWindow()
-            random_movies = home_window.get_property("random-movies")
-            if not random_movies:
-                return return_data
-            url = url.replace("{random_movies}", random_movies)
-
         log.debug("After: {0}", url)
         conn = None
 
