@@ -5,7 +5,7 @@ import os
 import threading
 import json
 import datetime
-from typing import Optional, cast
+from typing import cast
 
 import xbmcgui
 import xbmc
@@ -135,7 +135,7 @@ class ChapterDialogMonitor(threading.Thread):
 
 
 class ChapterDialog(xbmcgui.WindowXMLDialog):
-    chapter_list: Optional[xbmcgui.ControlList] = None
+    chapter_list: xbmcgui.ControlList | None = None
     action_exitkeys_id: list[int] = []
 
     def __init__(

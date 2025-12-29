@@ -1,6 +1,5 @@
 from __future__ import annotations
 import sys
-from typing import Optional
 from dataclasses import dataclass
 import urllib.parse
 
@@ -51,8 +50,8 @@ class GuiOptions:
     """
 
     server: str
-    name_format: Optional[str] = None
-    name_format_type: Optional[str] = None
+    name_format: str | None = None
+    name_format_type: str | None = None
     use_prem_date_for_added: bool = False
     max_image_width: int = 400
 
@@ -86,7 +85,7 @@ class MediaStream:
 
     # "default" if x is None else x
 
-    def set_hdr_type(self, value: Optional[str]) -> None:
+    def set_hdr_type(self, value: str | None) -> None:
         # Kodi options : dolbyvision, hdr10, hlg
         if value is not None:
             value = value.lower()
@@ -645,7 +644,7 @@ def add_gui_item(
     display_options: DisplayOptions,
     folder: bool = True,
     default_sort: bool = False,
-) -> Optional[GuiItem]:
+) -> GuiItem | None:
     # log.debug("item_details: {0}", item_details.__dict__)
 
     if not item_details.name:

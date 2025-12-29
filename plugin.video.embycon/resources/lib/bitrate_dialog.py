@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, cast
+from typing import cast
 import xbmcgui
 
 from .simple_logging import SimpleLogging
@@ -8,8 +8,8 @@ log = SimpleLogging(__name__)
 
 
 class BitrateDialog(xbmcgui.WindowXMLDialog):
-    slider_control: Optional[xbmcgui.ControlSlider] = None
-    bitrate_label: Optional[xbmcgui.ControlLabel] = None
+    slider_control: xbmcgui.ControlSlider | None = None
+    bitrate_label: xbmcgui.ControlLabel | None = None
     initial_bitrate_value: int = 0
     selected_transcode_value: int = 0
 

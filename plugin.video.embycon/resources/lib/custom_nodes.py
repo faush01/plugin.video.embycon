@@ -16,7 +16,7 @@ log = SimpleLogging(__name__)
 """
 &reload=$INFO[Window(Home).Property(plugin.video.embycon-embycon_widget_reload)]
 
-Node types : 
+Node types :
 
 Resume ({server}/emby/Users/c3d953c03c084d71a8ecbbf9d6e865fc/Items/Resume)
 
@@ -167,6 +167,7 @@ class CustomNode(xbmcgui.WindowXMLDialog):
         current_value = control.getLabel()
         types = current_value.split(",")
         selected = []
+
         for index in range(0, len(option_list)):
             if option_list[index] in types:
                 selected.append(index)
@@ -175,14 +176,15 @@ class CustomNode(xbmcgui.WindowXMLDialog):
             option_list,
             preselect=selected,
         )
+
         if return_indexes is not None:
             type_list = []
             for selected_index in return_indexes:
                 type_list.append(option_list[selected_index])
             control.setLabel(",".join(type_list))
             return len(return_indexes)
-        else:
-            return 0
+
+        return 0
 
     def set_label_on_item(
         self,

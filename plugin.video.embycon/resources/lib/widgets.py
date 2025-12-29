@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
@@ -217,13 +216,13 @@ def check_for_new_content() -> None:
 
 
 @timer
-def get_widget_content_cast(handle: int, params: dict) -> Optional[int]:
+def get_widget_content_cast(handle: int, params: dict) -> int:
     log.debug("getWigetContentCast Called: {0}", params)
     download_utils = DownloadUtils()
     server = download_utils.get_server()
     if server is None:
         log.error("get_widget_content_cast: No server info")
-        return
+        return 0
 
     item_id = params["id"]
     data_manager = DataManager()
@@ -233,7 +232,7 @@ def get_widget_content_cast(handle: int, params: dict) -> Optional[int]:
     log.debug("ItemInfo: {0}", result)
 
     if not result:
-        return
+        return 0
 
     if (
         result.get("Type", "") in ["Episode", "Season"]
@@ -290,10 +289,11 @@ def get_widget_content_cast(handle: int, params: dict) -> Optional[int]:
     xbmcplugin.setContent(handle, "artists")
     xbmcplugin.addDirectoryItems(handle, list_items)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+    return 0
 
 
 @timer
-def get_widget_content(handle: int, params: dict) -> Optional[int]:
+def get_widget_content(handle: int, params: dict) -> int:
     log.debug("getWigetContent Called: {0}", params)
 
     settings = xbmcaddon.Addon()
@@ -302,7 +302,7 @@ def get_widget_content(handle: int, params: dict) -> Optional[int]:
     widget_type = params.get("type")
     if widget_type is None:
         log.error("getWigetContent type not set")
-        return
+        return 0
 
     log.debug("widget_type: {0}", widget_type)
 
@@ -436,7 +436,7 @@ def get_widget_content(handle: int, params: dict) -> Optional[int]:
         items_url, None, params, False
     )
     if directory_result is None:
-        return
+        return 0
 
     list_items = [item.as_tuple() for item in directory_result.dir_items]
     detected_type = directory_result.detected_type

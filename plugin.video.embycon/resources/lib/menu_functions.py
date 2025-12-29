@@ -897,8 +897,7 @@ def get_node_url(node_info: dict[str, str]) -> str:
     if "sortorder" in node_info and node_info["sortorder"]:
         base_params["SortOrder"] = node_info["sortorder"]
 
-    path = get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
-    return path
+    return get_emby_url("{server}/emby/Users/{userid}/Items", base_params)
 
 
 def show_custom_nodes(_params: dict[str, str]) -> None:
@@ -1646,13 +1645,10 @@ def get_playlist_path(view_info: dict[str, object]) -> str:
     params["ImageTypeLimit"] = 1
 
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
-    url = (
-        sys.argv[0]
-        + "?url="
-        + urllib.parse.quote(path)
-        + "&mode=GET_CONTENT&media_type=playlists"
+    return "%s?url=%s&mode=GET_CONTENT&media_type=playlists" % (
+        sys.argv[0],
+        urllib.parse.quote(path),
     )
-    return url
 
 
 def get_collection_path(view_info: dict[str, object]) -> str:
@@ -1667,13 +1663,10 @@ def get_collection_path(view_info: dict[str, object]) -> str:
     params["IsMissing"] = False
 
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
-    url = (
-        sys.argv[0]
-        + "?url="
-        + urllib.parse.quote(path)
-        + "&mode=GET_CONTENT&media_type=boxsets"
+    return "%s?url=%s&mode=GET_CONTENT&media_type=boxsets" % (
+        sys.argv[0],
+        urllib.parse.quote(path),
     )
-    return url
 
 
 def get_channel_path(view: dict[str, object]) -> str:
@@ -1684,13 +1677,10 @@ def get_channel_path(view: dict[str, object]) -> str:
     params["Fields"] = "{field_filters}"
 
     path = get_emby_url("{server}/emby/Users/{userid}/Items", params)
-    url = (
-        sys.argv[0]
-        + "?url="
-        + urllib.parse.quote(path)
-        + "&mode=GET_CONTENT&media_type=files"
+    return "%s?url=%s&mode=GET_CONTENT&media_type=files" % (
+        sys.argv[0],
+        urllib.parse.quote(path),
     )
-    return url
 
 
 def display_library_view(params: dict[str, str]) -> None:

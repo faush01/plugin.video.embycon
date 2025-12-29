@@ -322,7 +322,7 @@ class DownloadUtils:
 
         if len(host) == 0 or host == "<none>":
             log.debug("No host set in settings")
-            return None
+            return
 
         port = settings.getSetting("port")
 
@@ -700,12 +700,12 @@ class DownloadUtils:
             self.post_capabilities()
 
             return access_token
-        else:
-            log.debug("User NOT Authenticated")
-            window.set_property("AccessToken", "")
-            window.set_property("userid", "")
-            window.set_property("userimage", "")
-            return ""
+
+        log.debug("User NOT Authenticated")
+        window.set_property("AccessToken", "")
+        window.set_property("userid", "")
+        window.set_property("userimage", "")
+        return ""
 
     def get_auth_header(self, authenticate: bool = True) -> dict[str, str]:
         client_info = ClientInformation()
@@ -741,30 +741,30 @@ class DownloadUtils:
             # headers["Authorization"] = authString
             headers["X-Emby-Authorization"] = auth_string
             return headers
-        else:
-            userid = self.get_user_id()
-            auth_string = (
-                'MediaBrowser UserId="'
-                + userid
-                + '",Client="'
-                + client
-                + '",Device="'
-                + device_name
-                + '",DeviceId="'
-                + txt_mac
-                + '",Version="'
-                + version
-                + '"'
-            )
-            # headers["Authorization"] = authString
-            headers["X-Emby-Authorization"] = auth_string
 
-            auth_token = self.authenticate()
-            if auth_token != "":
-                headers["X-MediaBrowser-Token"] = auth_token
+        userid = self.get_user_id()
+        auth_string = (
+            'MediaBrowser UserId="'
+            + userid
+            + '",Client="'
+            + client
+            + '",Device="'
+            + device_name
+            + '",DeviceId="'
+            + txt_mac
+            + '",Version="'
+            + version
+            + '"'
+        )
+        # headers["Authorization"] = authString
+        headers["X-Emby-Authorization"] = auth_string
 
-            log.debug("EmbyCon Authentication Header: {0}", headers)
-            return headers
+        auth_token = self.authenticate()
+        if auth_token != "":
+            headers["X-MediaBrowser-Token"] = auth_token
+
+        log.debug("EmbyCon Authentication Header: {0}", headers)
+        return headers
 
     @timer
     def download_url(
@@ -950,5 +950,4 @@ class DownloadUtils:
 
         if return_data is not None and isinstance(return_data, bytes):
             return return_data.decode("utf-8")
-        else:
-            return "null"
+        return "null"

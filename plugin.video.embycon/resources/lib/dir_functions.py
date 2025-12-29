@@ -12,7 +12,10 @@ import os
 import re
 import base64
 from dataclasses import dataclass
-from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 from .datamanager import DataManager
 from .downloadutils import DownloadUtils
@@ -43,7 +46,7 @@ class DirectoryResult:
     """
 
     dir_items: list[GuiItem]
-    detected_type: Optional[str]
+    detected_type: str | None
     total_records: int
 
 
@@ -360,7 +363,7 @@ def process_directory(
     progress: xbmcgui.DialogProgress | None,
     params: dict[str, str],
     use_cache_data: bool = False,
-) -> Optional[DirectoryResult]:
+) -> DirectoryResult | None:
     log.debug("== ENTER: processDirectory ==")
 
     data_manager = DataManager()
@@ -425,7 +428,8 @@ def process_directory(
         params["media_type"] = "Episodes"
         get_content(season_url, params)
         return None
-    elif (
+
+    if (
         flatten_tvshow_seasons == "2"
         and len(item_list) > 0
         and item_list[0].item_type == "Season"

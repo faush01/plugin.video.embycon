@@ -279,14 +279,13 @@ def check_server(force: bool = False, change_user: bool = False) -> None:
                         "%s://%s:%s/" % (server_protocol, server_address, server_port),
                     )
                     break
-                else:
-                    message = server_url + "\n" + string_load(30371)
-                    return_index = xbmcgui.Dialog().yesno(
-                        addon_name + " : " + string_load(30135), message
-                    )
-                    if not return_index:
-                        xbmc.executebuiltin("ActivateWindow(Home)")
-                        return
+                message = server_url + "\n" + string_load(30371)
+                return_index = xbmcgui.Dialog().yesno(
+                    addon_name + " : " + string_load(30135), message
+                )
+                if not return_index:
+                    xbmc.executebuiltin("ActivateWindow(Home)")
+                    return
 
         log.debug("Selected server: {0}", server_url)
 

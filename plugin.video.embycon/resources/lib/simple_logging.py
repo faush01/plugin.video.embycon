@@ -65,5 +65,4 @@ class SimpleLogging:
             #    new_args.append(arg.encode("utf-8"))
             # else:
             #    new_args.append(arg)
-        log_line = fmt.format(*new_args)
-        return log_line
+        return fmt.format(*new_args)

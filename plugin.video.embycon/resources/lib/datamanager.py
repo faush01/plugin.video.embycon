@@ -1,7 +1,7 @@
 # Gnu General Public License - see LICENSE.TXT
 from __future__ import annotations
 
-from typing import Optional, List, Any
+from typing import List, Any
 from dataclasses import dataclass
 import json
 from collections import defaultdict
@@ -102,7 +102,7 @@ class GetItemsResult:
     cache_file: str
     item_list: List[Any]
     total_records: int
-    cache_thread: Optional[CacheManagerThread]
+    cache_thread: CacheManagerThread | None
 
 
 class CacheItem:
@@ -134,15 +134,13 @@ class DataManager:
         return json.loads(json_data, object_hook=lambda d: defaultdict(lambda: None, d))
 
     @timer
-    def get_content(self, url: Optional[str]) -> dict:
+    def get_content(self, url: str | None) -> dict:
         if not url:
             raise ValueError("URL cannot be None or empty")
         du = DownloadUtils()
         du.set_host_domain()
         json_data = du.download_url(url)
-        result = self.load_json_data(json_data)
-        # process_json_data(json_data)
-        return result
+        return self.load_json_data(json_data)
 
     def get_cache_filename(self, url: str) -> str:
         download_utils = DownloadUtils()
@@ -155,8 +153,7 @@ class DataManager:
         url_hash = m.hexdigest()
         cache_path = os.path.join(addon_dir, "cache")
         xbmcvfs.mkdirs(cache_path)
-        cache_file = os.path.join(cache_path, "cache_" + url_hash + ".pickle")
-        return cache_file
+        return os.path.join(cache_path, "cache_" + url_hash + ".pickle")
 
     @timer
     def get_items(
@@ -258,7 +255,7 @@ class DataManager:
 class CacheManagerThread(threading.Thread):
     def __init__(self) -> None:
         threading.Thread.__init__(self)
-        self.cached_item: Optional[CacheItem] = None
+        self.cached_item: CacheItem | None = None
         self.gui_options: GuiOptions
 
     @staticmethod

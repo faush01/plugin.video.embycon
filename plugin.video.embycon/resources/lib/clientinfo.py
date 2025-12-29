@@ -41,8 +41,7 @@ class ClientInformation:
     @staticmethod
     def get_version() -> str:
         addon = xbmcaddon.Addon()
-        version = addon.getAddonInfo("version")
-        return version
+        return addon.getAddonInfo("version")
 
     @staticmethod
     def get_client() -> str:

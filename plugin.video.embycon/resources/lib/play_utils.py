@@ -46,7 +46,7 @@ def play_all_files(
     server = download_utils.get_server()
     if server is None or server == "":
         log.debug("playAllFiles: No server found, cannot play files")
-        return
+        return None
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
@@ -63,7 +63,7 @@ def play_all_files(
             log.debug(
                 "playback_info was None, could not get MediaSources so can not play!"
             )
-            return
+            return None
         if playback_info.get("ErrorCode") is not None:
             error_string = playback_info.get("ErrorCode", "code_unknown")
             xbmcgui.Dialog().notification(
@@ -71,7 +71,7 @@ def play_all_files(
                 error_string,
                 icon="special://home/addons/plugin.video.embycon/icon.png",
             )
-            return
+            return None
 
         play_session_id = playback_info.get("PlaySessionId", "")
         live_stream_id = playback_info.get("LiveStreamId", "")
@@ -80,7 +80,7 @@ def play_all_files(
         sources = playback_info.get("MediaSources")
         if sources is None or len(sources) == 0:
             log.debug("Play Failed! There is no MediaSources data!")
-            return
+            return None
 
         selected_media_source = sources[0]
         source_id = selected_media_source.get("Id")
@@ -97,7 +97,7 @@ def play_all_files(
         )
 
         if playurl is None:
-            return
+            return None
 
         playback_type_string = "DirectPlay"
         if playback_type == "2":
@@ -201,7 +201,7 @@ def play_all_files(
                     "PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting"
                 )
                 player.stop()
-                return
+                return None
 
             log.info("PlaybackResumeAction : Playback is Running")
 
@@ -247,8 +247,7 @@ def play_all_files(
                     log.info("PlaybackResumeAction : Playback resumed")
 
         return None
-    else:
-        return playlist
+    return playlist
 
 
 def play_list_of_items(
@@ -264,7 +263,7 @@ def play_list_of_items(
         result = data_manager.get_content(url)
         if result is None:
             log.debug("Playfile item was None, so can not play!")
-            return
+            return None
         items.append(result)
 
     return play_all_files(items, auto_resume, monitor)
@@ -387,7 +386,7 @@ def get_playback_intros(item_id: str) -> list[dict] | None:
 
     if intro_items is None:
         log.debug("get_playback_intros failed!")
-        return
+        return None
 
     into_list = []
     intro_items = intro_items["Items"]
@@ -404,7 +403,7 @@ def play_file(
     item_id = play_info.get("item_id")
     if item_id is None:
         log.debug("No item_id in play_info, cannot play file")
-        return
+        return None
 
     home_window = HomeWindow()
     last_url = home_window.get_property("last_content_url")
@@ -415,7 +414,7 @@ def play_file(
     action = play_info.get("action", "play")
     if action == "add_to_playlist":
         add_to_playlist(play_info, monitor)
-        return
+        return None
 
     # if this is a list of items add them all to the play list
     if isinstance(item_id, list):
@@ -444,7 +443,7 @@ def play_file(
     server = download_utils.get_server()
     if server is None or server == "":
         log.debug("No server found, cannot play file")
-        return
+        return None
 
     url = "{server}/emby/Users/{userid}/Items/%s?fields=Chapters&format=json" % (
         item_id,
@@ -455,7 +454,7 @@ def play_file(
 
     if result is None:
         log.debug("Playfile item was None, so can not play!")
-        return
+        return None
 
     # if this is a season, playlist or album then play all items in that parent
     if result.get("Type") in ["Season", "MusicAlbum", "Playlist"]:
@@ -495,13 +494,13 @@ def play_file(
         action_menu = PictureViewer("PictureViewer.xml", plugin_path, "default", "720p")
         action_menu.setPicture(play_url)
         action_menu.doModal()
-        return
+        return None
 
     # get playback info from the server using the device profile
     playback_info = download_utils.get_item_playback_info(item_id, force_transcode)
     if playback_info is None:
         log.debug("playback_info was None, could not get MediaSources so can not play!")
-        return
+        return None
     if playback_info.get("ErrorCode") is not None:
         error_string = playback_info.get("ErrorCode", "code_unknown")
         xbmcgui.Dialog().notification(
@@ -509,7 +508,7 @@ def play_file(
             error_string,
             icon="special://home/addons/plugin.video.embycon/icon.png",
         )
-        return
+        return None
 
     play_session_id = playback_info.get("PlaySessionId", "")
 
@@ -519,9 +518,9 @@ def play_file(
 
     if media_sources is None or len(media_sources) == 0:
         log.debug("Play Failed! There is no MediaSources data!")
-        return
+        return None
 
-    elif len(media_sources) == 1 or auto_play_first_version:
+    if len(media_sources) == 1 or auto_play_first_version:
         selected_media_source = media_sources[0]
 
     elif media_source_id != "":
@@ -542,11 +541,11 @@ def play_file(
             selected_media_source = media_sources[resp]
         else:
             log.debug("Play Aborted, user did not select a MediaSource")
-            return
+            return None
 
     if selected_media_source is None:
         log.debug("Play Aborted, MediaSource was None")
-        return
+        return None
 
     source_id = selected_media_source.get("Id")
     live_stream_id = selected_media_source.get("LiveStreamId", "")
@@ -599,7 +598,7 @@ def play_file(
             if resume_result == 1:
                 seek_time = 0
             elif resume_result == -1:
-                return
+                return None
 
     log.debug("play_session_id: {0}", play_session_id)
     log.debug("live_stream_id: {0}", live_stream_id)
@@ -615,7 +614,7 @@ def play_file(
     )
 
     if playurl is None:
-        return
+        return None
 
     playback_type_string = "DirectPlay"
     if playback_type == "2":
@@ -655,7 +654,7 @@ def play_file(
     gui_item: GuiItem | None = add_gui_item("", item_details, display_options, False)
     if gui_item is None:
         log.debug("gui_item was None, cannot play item")
-        return
+        return None
 
     list_item = gui_item.list_item
 
@@ -755,7 +754,7 @@ def play_file(
                 "PlaybackResumeAction : Playback item did not get to a play state in 10 seconds so exiting"
             )
             player.stop()
-            return
+            return None
 
         log.info("PlaybackResumeAction : Playback is Running")
 
@@ -813,6 +812,7 @@ def play_file(
 
     data["next_episode"] = next_episode
     send_next_episode_details(result, next_episode)
+    return None
 
 
 def __build_label2_from(source: dict) -> str:
@@ -1524,8 +1524,7 @@ def get_playing_data(play_data_map: dict[str, dict]) -> dict | None:
         if infolabel_path_and_file not in play_data_map:
             log.debug("get_playing_data : play data not found")
             return None
-        else:
-            playing_file = infolabel_path_and_file
+        playing_file = infolabel_path_and_file
 
     return play_data_map.get(playing_file)
 

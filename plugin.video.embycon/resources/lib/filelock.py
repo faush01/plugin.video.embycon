@@ -225,7 +225,7 @@ if __name__ == "__main__":
     import threading
     import tempfile
     from builtins import range
-    
+
 
     temp_dir = tempfile.mkdtemp()
     protected_filepath = os.path.join(temp_dir, "somefile.txt")

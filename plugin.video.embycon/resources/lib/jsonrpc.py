@@ -29,5 +29,4 @@ def get_value(name: str) -> object:
 
 def set_value(name: str, value: object) -> dict:
     params = {"setting": name, "value": value}
-    result = JsonRpc("Settings.setSettingValue").execute(params)
-    return result
+    return JsonRpc("Settings.setSettingValue").execute(params)

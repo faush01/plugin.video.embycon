@@ -16,7 +16,7 @@ from datetime import datetime
 import calendar
 import re
 from dataclasses import dataclass
-from typing import Optional, List, Tuple
+from typing import List, Tuple
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -48,7 +48,7 @@ def get_emby_url(base_url: str, params: dict[str, object]) -> str:
 class StrmDetails:
     """Result from get_strm_details containing playback URL and listitem properties."""
 
-    playurl: Optional[str]
+    playurl: str | None
     listitem_props: List[Tuple[str, str]]
 
 
@@ -56,8 +56,8 @@ class StrmDetails:
 class PlayUrlResult:
     """Result from get_play_url containing playback URL, playback type, and listitem properties."""
 
-    playurl: Optional[str]
-    playback_type: Optional[str]
+    playurl: str | None
+    playback_type: str | None
     listitem_props: List[Tuple[str, str]]
 
 
@@ -75,12 +75,11 @@ class PlayUtils:
                 return PlayUrlResult(
                     playurl=None, playback_type=None, listitem_props=[]
                 )
-            else:
-                return PlayUrlResult(
-                    playurl=strm_result.playurl,
-                    playback_type="0",
-                    listitem_props=strm_result.listitem_props,
-                )
+            return PlayUrlResult(
+                playurl=strm_result.playurl,
+                playback_type="0",
+                listitem_props=strm_result.listitem_props,
+            )
 
         # get all the options
         addon_settings = xbmcaddon.Addon()
@@ -225,7 +224,7 @@ class PlayUtils:
 
 def get_checksum(item: dict) -> str:
     userdata = item["UserData"]
-    checksum = "%s_%s_%s_%s_%s_%s_%s" % (
+    return "%s_%s_%s_%s_%s_%s_%s" % (
         item["Etag"],
         userdata["Played"],
         userdata["IsFavorite"],
@@ -234,8 +233,6 @@ def get_checksum(item: dict) -> str:
         userdata.get("UnplayedItemCount", "-"),
         userdata.get("PlayedPercentage", "-"),
     )
-
-    return checksum
 
 
 def get_art(
@@ -428,14 +425,12 @@ def id_generator(
 
 def double_urlencode(value: str) -> str:
     text: str = single_urlencode(value)
-    text = single_urlencode(text)
-    return text
+    return single_urlencode(text)
 
 
 def single_urlencode(value: str) -> str:
     text: str = urllib.parse.urlencode({"1": value})
-    text = text[2:]
-    return text
+    return text[2:]
 
 
 def send_event_notification(method: str, data: dict) -> None:

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 import threading
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import xbmc
 import xbmcgui
@@ -19,9 +19,9 @@ log = SimpleLogging(__name__)
 
 class ActionAutoClose(threading.Thread):
     last_interaction = time.time()
-    parent_dialog: Optional[xbmcgui.WindowXMLDialog] = None
+    parent_dialog: xbmcgui.WindowXMLDialog | None = None
     stop_thread = False
-    progress_call_back: Optional[PlayNextDialog] = None
+    progress_call_back: PlayNextDialog | None = None
     time_out = 20
 
     def __init__(self, parent: xbmcgui.WindowXMLDialog) -> None:

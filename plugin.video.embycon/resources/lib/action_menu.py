@@ -1,7 +1,7 @@
 # Gnu General Public License - see LICENSE.TXT
 from __future__ import annotations
 
-from typing import List, Optional, cast
+from typing import List, cast
 
 import xbmcgui
 
@@ -14,10 +14,10 @@ log = SimpleLogging(__name__)
 
 class ActionMenu(xbmcgui.WindowXMLDialog):
     selected_action: xbmcgui.ListItem | None = None
-    action_items: Optional[List[str | xbmcgui.ListItem]] = None
-    auto_close_thread: Optional[ActionAutoClose] = None
-    listControl: Optional[xbmcgui.ControlList] = None
-    action_exitkeys_id: Optional[List[int]] = None
+    action_items: List[str | xbmcgui.ListItem] | None = None
+    auto_close_thread: ActionAutoClose | None = None
+    listControl: xbmcgui.ControlList | None = None
+    action_exitkeys_id: List[int] | None = None
 
     def __init__(
         self,
@@ -69,10 +69,8 @@ class ActionMenu(xbmcgui.WindowXMLDialog):
                 self.auto_close_thread.stop()
             self.close()
 
-    def setActionItems(
-        self, action_items: Optional[List[str | xbmcgui.ListItem]]
-    ) -> None:
+    def setActionItems(self, action_items: List[str | xbmcgui.ListItem] | None) -> None:
         self.action_items = action_items
 
-    def getActionItem(self) -> Optional[xbmcgui.ListItem]:
+    def getActionItem(self) -> xbmcgui.ListItem | None:
         return self.selected_action
