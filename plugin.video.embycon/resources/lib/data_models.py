@@ -48,6 +48,8 @@ class MediaStream:
     ColorPrimaries: str | None = None
     ColorSpace: str | None = None
     CodecTag: str | None = None
+    Path: str | None = None
+    MimeType: str | None = None
 
 
 @dataclass
@@ -78,6 +80,8 @@ class MediaSource:
     ReadAtNativeFramerate: bool | None = None
     DefaultAudioStreamIndex: int | None = None
     ItemId: str | None = None
+    Chapters: List[Any] = field(default_factory=list)
+    DefaultSubtitleStreamIndex: int | None = None
 
 
 @dataclass
@@ -190,6 +194,8 @@ class Item:
     ParentIndexNumber: int | None = None
     SeasonId: str | None = None
     SeasonName: str | None = None
+    DateModified: str | None = None
+    FileName: str | None = None
 
 
 @dataclass
