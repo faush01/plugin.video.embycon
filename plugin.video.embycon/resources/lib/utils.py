@@ -237,7 +237,7 @@ def get_checksum(item: dict) -> str:
 
 def get_art(
     item: dict, server: str, maxwidth: int, download_utils: DownloadUtils
-) -> dict:
+) -> dict[str, str]:
     art = {
         "thumb": "",
         "fanart": "",

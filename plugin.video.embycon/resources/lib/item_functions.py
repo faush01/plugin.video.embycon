@@ -145,38 +145,38 @@ class ItemDetails:
     name: str | None = None
     sort_name: str | None = None
     id: str | None = None
-    etag = None
-    path = None
-    is_folder = False
+    etag: str | None = None
+    path: str | None = None
+    is_folder: bool = False
     plot: str | None = None
-    series_name = None
+    series_name: str | None = None
     episode_number: int = 0
     season_number: int = 0
     episode_sort_number: int = 0
     season_sort_number: int = 0
     track_number: int = 0
-    series_id = None
-    art: dict | None = None
+    series_id: str | None = None
+    art: dict[str, str] | None = None
 
-    mpaa = None
-    rating = None
-    critic_rating = 0.0
-    community_rating = 0.0
+    mpaa: str | None = None
+    rating: float = 0.0
+    critic_rating: float = 0.0
+    community_rating: float = 0.0
     year: int | None = None
-    premiere_date = ""
-    date_added = ""
-    location_type = None
-    studio = None
-    production_location = None
-    genres = None
-    play_count = 0
-    director = ""
-    writer = ""
-    tagline = ""
-    status = None
+    premiere_date: str | None = None
+    date_added: str | None = None
+    location_type: str | None = None
+    studio: str | None = None
+    production_location: str | None = None
+    genres: list[str] | None = None
+    play_count: int = 0
+    director: str = ""
+    writer: str = ""
+    tagline: str = ""
+    status: str | None = None
     tags: list[str] | None = None
 
-    resume_time = 0
+    resume_time: float = 0.0
     duration: float = 0.0
     recursive_item_count: int = 0
     recursive_unplayed_items_count: int | None = 0
@@ -189,21 +189,21 @@ class ItemDetails:
     item_type: str | None = None
     subtitle_available: bool = False
     total_items: int = 0
-    song_artist = ""
-    album_artist = ""
+    song_artist: str = ""
+    album_artist: str = ""
     album_name: str | None = ""
 
-    program_channel_name = None
-    program_end_date = None
-    program_start_date = None
+    program_channel_name: str | None = None
+    program_end_date: str | None = None
+    program_start_date: str | None = None
 
-    favorite = "false"
-    overlay = "0"
+    favorite: str = "false"
+    overlay: str = "0"
 
-    name_format = ""
-    mode = ""
+    name_format: str = ""
+    mode: str = ""
 
-    baseline_itemname = None
+    baseline_itemname: str | None = None
 
     def set_episode_number(self, value: int | None) -> None:
         if value is not None:
@@ -450,7 +450,7 @@ def extract_item_info(
         item_details.premiere_date = tokens[0]
 
     # use premier date for date added
-    if gui_options.use_prem_date_for_added:
+    if gui_options.use_prem_date_for_added and item_details.premiere_date is not None:
         item_details.date_added = item_details.premiere_date + " 00:00:00"
     else:
         create_date = item["DateCreated"]
@@ -460,13 +460,13 @@ def extract_item_info(
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
         airtime = item["AirTime"]
-        if item_details.name:
+        if (
+            item_details.name
+            and item_details.premiere_date is not None
+            and airtime is not None
+        ):
             item_details.name = (
-                item_details.name
-                + " - "
-                + item_details.premiere_date
-                + " - "
-                + str(airtime)
+                f"{item_details.name} - {item_details.premiere_date} - {airtime}"
             )
 
     if item_details.item_type == "Program":
@@ -557,7 +557,7 @@ def extract_item_info(
     # production location
     prod_location = item["ProductionLocations"]
     # log.debug("ProductionLocations : {0}", prod_location)
-    if prod_location and len(prod_location) > 0:
+    if prod_location is not None and len(prod_location) > 0:
         item_details.production_location = prod_location[0]
 
     # Process Genres

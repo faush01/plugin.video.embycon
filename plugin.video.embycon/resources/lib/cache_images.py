@@ -284,7 +284,7 @@ class CacheArtwork(threading.Thread):
 
         progress.update(0, string_load(30359))
 
-        texture_urls = set()
+        texture_urls: set[str] = set()
 
         image_types = {
             "thumb",
@@ -296,7 +296,9 @@ class CacheArtwork(threading.Thread):
             "tvshow.landscape",
         }
         for item in results:
-            art = get_art(item, server, max_image_width, download_utils=download_utils)
+            art: dict[str, str] = get_art(
+                item, server, max_image_width, download_utils=download_utils
+            )
             for art_type in art:
                 if not limit:
                     texture_urls.add(art[art_type])
