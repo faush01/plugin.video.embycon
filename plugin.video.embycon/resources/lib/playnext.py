@@ -185,6 +185,8 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         epp_image.setImage(self.episode_info["art"]["thumb"])
 
         runtime_ticks = self.episode_info.get("RunTimeTicks", 0)
+        if runtime_ticks is None:
+            runtime_ticks = 0
         duration = (runtime_ticks / 10000000.0) / 60.0  # convert ticks to minutes
         duration = int(round(duration, 0))
         duration_string = "%s m" % (duration,)
