@@ -61,7 +61,10 @@ class PlayNextService(threading.Thread):
                 ):
                     play_next_triggered = True
                     log.debug(
-                        "play_next_triggered hit at {0} seconds from end", time_to_end
+                        "play_next_triggered duration: {0}, position: {1} time to end: {2} seconds from end",
+                        duration,
+                        position,
+                        time_to_end,
                     )
 
                     play_data = get_playing_data(self.monitor.played_information)
