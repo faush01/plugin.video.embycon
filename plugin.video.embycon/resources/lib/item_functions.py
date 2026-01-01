@@ -753,16 +753,7 @@ def add_gui_item(
     # log.debug("Setting thumbnail as: {0}", thumbPath)
 
     item_properties = {}
-
-    # calculate percentage
-    # if capped_percentage != 0:
-    #    item_properties["complete_percentage"] = str(capped_percentage)
-
     item_properties["IsPlayable"] = "false"
-
-    # if not folder and is_video:
-    #    item_properties["TotalTime"] = str(item_details.duration)
-    #    item_properties["ResumeTime"] = str(item_details.resume_time)
 
     if item_details.art:
         list_item.setArt(item_details.art)
@@ -793,8 +784,6 @@ def add_gui_item(
         mediatype = "artist"
     elif item_type == "audio" or item_type == "music":
         mediatype = "song"
-
-    # info_labels["mediatype"] = mediatype
 
     if is_video:
         info_tag_video = list_item.getVideoInfoTag()
@@ -828,11 +817,6 @@ def add_gui_item(
             info_tag_video.setSortSeason(item_details.season_sort_number)
             info_tag_video.setSortEpisode(item_details.episode_sort_number)
             info_tag_video.setTvShowTitle(item_details.series_name)
-            # info_labels["episode"] = item_details.episode_number
-            # info_labels["season"] = item_details.season_number
-            # info_labels["sortseason"] = item_details.season_sort_number
-            # info_labels["sortepisode"] = item_details.episode_sort_number
-            # info_labels["tvshowtitle"] = item_details.series_name
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
@@ -840,9 +824,6 @@ def add_gui_item(
             info_tag_video.setSeason(item_details.season_number)
             info_tag_video.setEpisode(item_details.total_episodes)
             info_tag_video.setTvShowTitle(item_details.series_name)
-            # info_labels["season"] = item_details.season_number
-            # info_labels["episode"] = item_details.total_episodes
-            # info_labels["tvshowtitle"] = item_details.series_name
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
@@ -851,10 +832,6 @@ def add_gui_item(
             info_tag_video.setSeason(item_details.total_seasons)
             info_tag_video.setTvShowStatus(item_details.status)
             info_tag_video.setTvShowTitle(item_details.name)
-            # info_labels["episode"] = item_details.total_episodes
-            # info_labels["season"] = item_details.total_seasons
-            # info_labels["status"] = item_details.status
-            # info_labels["tvshowtitle"] = item_details.name
 
         info_tag_video.setTagLine(item_details.tagline)
         info_tag_video.setStudios([item_details.studio])
@@ -871,25 +848,11 @@ def add_gui_item(
         if item_details.id:
             info_tag_video.setDbId(int(item_details.id))
 
-        # info_labels["Overlay"] = item_details.overlay # not used ??
-        # info_labels["tagline"] = item_details.tagline
-        # info_labels["studio"] = item_details.studio
-        # info_labels["premiered"] = item_details.premiere_date
-        # info_labels["plot"] = item_details.plot
-        # info_labels["director"] = item_details.director
-        # info_labels["writer"] = item_details.writer
-        # info_labels["dateadded"] = item_details.date_added
-        # info_labels["country"] = item_details.production_location
-        # info_labels["mpaa"] = item_details.mpaa
-        # info_labels["tag"] = item_details.tags
-
         if item_type in ("movie", "series") and item_details.id:
             info_tag_video.setTrailer(
                 "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
             )
 
-        # list_item.setInfo('video', info_labels)
-        # log.debug("info_labels: {0}", info_labels)
         for stream in item_details.media_streams:
             if stream.type == "video":
                 vsd = xbmc.VideoStreamDetail()
@@ -901,13 +864,6 @@ def add_gui_item(
                 vsd.setHDRType(stream.hdr_type)
                 info_tag_video.addVideoStream(vsd)
 
-                # list_item.addStreamInfo('video',
-                #                        {'duration': item_details.duration,
-                #                         'aspect': stream["apect_ratio"],
-                #                         'codec': stream["codec"],
-                #                         'width': stream["width"],
-                #                         'height': stream["height"]})
-
             elif stream.type == "audio":
                 asd = xbmc.AudioStreamDetail()
                 asd.setCodec(stream.codec)
@@ -915,18 +871,10 @@ def add_gui_item(
                 asd.setLanguage(stream.language)
                 info_tag_video.addAudioStream(asd)
 
-                # list_item.addStreamInfo('audio',
-                #                        {'codec': stream["codec"],
-                #                         'channels': stream["channels"],
-                #                         'language': stream["language"]})
-
             elif stream.type == "sub":
                 ssd = xbmc.SubtitleStreamDetail()
                 ssd.setLanguage(stream.language)
                 info_tag_video.addSubtitleStream(ssd)
-
-                # list_item.addStreamInfo('subtitle',
-                #                        {'language': stream["language"]})
 
         item_properties["TotalSeasons"] = str(item_details.total_seasons)
         item_properties["TotalEpisodes"] = str(item_details.total_episodes)
@@ -945,10 +893,6 @@ def add_gui_item(
 
         info_tag_video.setResumePoint(item_details.resume_time, item_details.duration)
         # info_tag_video.setDuration(item_details.duration)
-
-        # list_item.setRating("imdb", item_details.community_rating, 0, True)
-        # list_item.setRating("rt", item_details.critic_rating, 0, False)
-        # item_properties["TotalTime"] = str(item_details.duration)
 
     else:
         info_tag_music = list_item.getMusicInfoTag()
@@ -969,16 +913,6 @@ def add_gui_item(
             info_tag_music.setAlbumArtist(item_details.album_artist)
         if item_details.song_artist:
             info_tag_music.setArtist(item_details.song_artist)
-
-        # info_labels = {}
-        # info_labels["tracknumber"] = item_details.track_number
-        # if item_details.album_artist:
-        #    info_labels["artist"] = item_details.album_artist
-        # elif item_details.song_artist:
-        #    info_labels["artist"] = item_details.song_artist
-        # info_labels["album"] = item_details.album_name
-        # log.debug("info_labels: {0}", info_labels)
-        # list_item.setInfo('music', info_labels)
 
     list_item.setContentLookup(False)
     item_properties["ItemType"] = item_details.item_type
