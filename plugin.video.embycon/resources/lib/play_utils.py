@@ -567,7 +567,7 @@ def play_file(
         user_data = result.get("UserData")
         if playback_pos > 0:
             reasonable_ticks = playback_pos / 1000
-            seek_time = reasonable_ticks / 10000
+            seek_time = int(reasonable_ticks / 10000)
             display_time = str(timedelta(seconds=seek_time))
 
             resume_dialog = ResumeDialog(
