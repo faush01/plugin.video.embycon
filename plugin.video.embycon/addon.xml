@@ -12,6 +12,21 @@
         <medialibraryscanpath content="movies">library/movies</medialibraryscanpath>
   </extension>
   <extension point="xbmc.service" library="service.py" start="login"/>
+  <extension point="kodi.context.item">
+    <menu id="kodi.core.main">
+      <menu>
+        <label>EmbyCon Actions</label>
+        <item library="context.py" args="test_01">
+          <label>TEST CONTEXT</label>
+          <visible>[false + String.Contains(ListItem.Path,"plugin://") + !String.IsEmpty(ListItem.Property(id))]</visible>
+        </item>
+        <item library="context.py" args="test_02">
+          <label>TEST 2 CONTEXT</label>
+          <visible>[false + String.Contains(ListItem.Path,"plugin://") + !String.IsEmpty(ListItem.Property(id))]</visible>
+        </item>
+      </menu>
+    </menu>
+  </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <license>GPL-2.0-only</license>
