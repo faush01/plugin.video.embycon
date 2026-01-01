@@ -459,7 +459,6 @@ def process_directory(
     display_options.addSubtitleAvailable = (
         settings.getSetting("addSubtitleAvailable") == "true"
     )
-    display_options.addUserRatings = settings.getSetting("add_user_ratings") == "true"
 
     show_empty_folders = settings.getSetting("show_empty_folders") == "true"
 

@@ -70,7 +70,6 @@ class DisplayOptions:
     addCounts: bool = False
     addResumePercent: bool = False
     addSubtitleAvailable: bool = False
-    addUserRatings: bool = False
 
 
 class MediaStream:
@@ -883,9 +882,6 @@ def add_gui_item(
         # info_labels["country"] = item_details.production_location
         # info_labels["mpaa"] = item_details.mpaa
         # info_labels["tag"] = item_details.tags
-
-        # if display_options.addUserRatings:
-        #    info_labels["userrating"] = item_details.critic_rating
 
         if item_type in ("movie", "series") and item_details.id:
             info_tag_video.setTrailer(

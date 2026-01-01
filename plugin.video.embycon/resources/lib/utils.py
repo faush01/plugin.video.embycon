@@ -149,7 +149,7 @@ class PlayUtils:
                 "SubtitleStreamIndex",
                 "AudioBitrate",
             ]
-            reduced_params = []
+            reduced_params: list[str] = []
             for param in params:
                 param_bits = param.split("=")
                 if param_bits[0] not in params_to_remove:

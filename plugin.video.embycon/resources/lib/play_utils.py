@@ -133,7 +133,6 @@ def play_all_files(
         display_options.addCounts = False
         display_options.addResumePercent = False
         display_options.addSubtitleAvailable = False
-        display_options.addUserRatings = False
 
         gui_item: GuiItem | None = add_gui_item(
             "", item_details, display_options, False
@@ -649,7 +648,6 @@ def play_file(
     display_options.addCounts = False
     display_options.addResumePercent = False
     display_options.addSubtitleAvailable = False
-    display_options.addUserRatings = False
 
     gui_item: GuiItem | None = add_gui_item("", item_details, display_options, False)
     if gui_item is None:
