@@ -77,6 +77,9 @@ def main_entry_point() -> None:
             pr.enable()
 
     kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
+    param_url = params.get("url", "")
+    if param_url:
+        param_url = urllib.parse.unquote(param_url)
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().get_version())
@@ -84,22 +87,12 @@ def main_entry_point() -> None:
     log.debug("Kodi Version: {0}", kodi_version)
     log.debug("Script argument data: {0}", sys.argv)
     log.debug("Script params: {0}", params)
-
-    request_path = params.get("request_path", None)
-    param_url = params.get("url", "")
-
-    if param_url:
-        param_url = urllib.parse.unquote(param_url)
+    log.debug("EmbyCon -> Mode: {0}", mode)
+    log.debug("EmbyCon -> URL: {0}", param_url)
 
     item_count = 0
 
-    if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
-        check_server()
-        new_params = {}
-        new_params["item_type"] = "Movie"
-        new_params["media_type"] = "movies"
-        item_count = show_content(new_params)
-    elif mode == "CHANGE_USER":
+    if mode == "CHANGE_USER":
         check_server(change_user=True)
     elif mode == "SHOW_USERS":
         show_user_lists(params)
@@ -149,11 +142,9 @@ def main_entry_point() -> None:
     elif mode == "WIDGET_CONTENT_CAST":
         get_widget_content_cast(int(sys.argv[1]), params)
     elif mode == "SHOW_CONTENT":
-        # plugin://plugin.video.embycon?mode=SHOW_CONTENT&item_type=Movie|Series
         check_server()
         item_count = show_content(params)
     elif mode == "SEARCH":
-        # plugin://plugin.video.embycon?mode=SEARCH
         xbmcplugin.setContent(int(sys.argv[1]), "files")
         show_search()
     elif mode == "NEW_SEARCH":
@@ -175,17 +166,13 @@ def main_entry_point() -> None:
             item_count = get_content(enriched_url, params)
         else:
             log.info("Unable to find TV show parent ID.")
+    elif mode == "GET_CONTENT":
+        item_count = get_content(param_url, params)
+    elif mode == "PLAY":
+        play_action(params)
     else:
-        log.debug("EmbyCon -> Mode: {0}", mode)
-        log.debug("EmbyCon -> URL: {0}", param_url)
-
-        if mode == "GET_CONTENT":
-            item_count = get_content(param_url, params)
-        elif mode == "PLAY":
-            play_action(params)
-        else:
-            check_server()
-            display_main_menu()
+        check_server()
+        display_main_menu()
 
     if pr:
         pr.disable()
@@ -382,10 +369,6 @@ def get_params() -> dict[str, str]:
     log.debug("Plugin Path string: {0}", plugin_path)
 
     param = {}
-
-    # add plugin path
-    request_path = plugin_path.replace("plugin://plugin.video.embycon", "")
-    param["request_path"] = request_path
 
     if len(paramstring) >= 2:
         if paramstring[0] == "?":

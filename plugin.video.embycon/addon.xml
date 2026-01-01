@@ -9,7 +9,6 @@
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video audio</provides>
-        <medialibraryscanpath content="movies">library/movies</medialibraryscanpath>
   </extension>
   <extension point="xbmc.service" library="service.py" start="login"/>
   <extension point="kodi.context.item">

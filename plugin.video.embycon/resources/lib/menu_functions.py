@@ -1713,7 +1713,13 @@ def show_widgets() -> None:
     show_x_filtered_items = settings.getSetting("show_x_filtered_items")
 
     add_menu_directory_item(
-        "All Movies", "plugin://plugin.video.embycon/library/movies"
+        "All Movies",
+        "plugin://plugin.video.embycon/?mode=SHOW_CONTENT&item_type=movie&media_type=movies",
+    )
+
+    add_menu_directory_item(
+        "All Shows",
+        "plugin://plugin.video.embycon/?mode=SHOW_CONTENT&item_type=series&media_type=tvshows",
     )
 
     add_menu_directory_item(
