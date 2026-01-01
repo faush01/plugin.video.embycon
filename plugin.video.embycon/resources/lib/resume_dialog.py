@@ -24,7 +24,7 @@ class ResumeDialog(xbmcgui.WindowXMLDialog):
         xbmcgui.WindowXMLDialog.__init__(
             self, xmlFilename, scriptPath, defaultSkin, defaultRes
         )
-        log.debug("ResumeDialog INITIALISED")
+        log.debug("ResumeDialog __init__")
 
     def onInit(self) -> None:
         self.action_exitkeys_id = [10, 13]
