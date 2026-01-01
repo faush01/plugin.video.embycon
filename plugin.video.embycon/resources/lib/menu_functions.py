@@ -905,6 +905,7 @@ def show_custom_nodes(_params: dict[str, str]) -> None:
     add_menu_directory_item(
         "[Edit Nodes]",
         "plugin://plugin.video.embycon/?mode=SHOW_ADDON_MENU&type=create_new_node",
+        folder=False,
     )
 
     # show custom nodes
