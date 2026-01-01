@@ -340,6 +340,8 @@ def get_widget_content(handle: int, params: dict) -> int:
         home_window = HomeWindow()
         random_movies = home_window.get_property("random-movies")
         if not random_movies:
+            xbmcplugin.addDirectoryItems(handle, [])
+            xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
             return 0
         url_params["Ids"] = random_movies
 
@@ -445,6 +447,8 @@ def get_widget_content(handle: int, params: dict) -> int:
         or directory_result.dir_items is None
         or len(directory_result.dir_items) == 0
     ):
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
         return 0
 
     list_items = [item.as_tuple() for item in directory_result.dir_items]
