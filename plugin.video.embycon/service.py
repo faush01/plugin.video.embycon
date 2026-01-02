@@ -94,7 +94,6 @@ monitor_service: MonitoringService = MonitoringService(play_monitor_service)
 
 home_window = HomeWindow()
 last_progress_update = time.time()
-last_content_check = time.time()
 last_background_update = 0
 last_random_movie_update = 0
 skin_checked = False
@@ -132,7 +131,6 @@ if emby_bookmarks:
     chapter_dialog_monitor.start()
 
 background_interval = int(settings.getSetting("background_interval"))
-newcontent_interval = int(settings.getSetting("new_content_check_interval"))
 random_movie_list_interval = int(settings.getSetting("random_movie_refresh_interval"))
 random_movie_list_interval = random_movie_list_interval * 60
 
@@ -165,13 +163,6 @@ while not kodi_monitor.abortRequested():
                 ):
                     last_random_movie_update = time.time()
                     set_random_movies()
-
-                if user_changed or (
-                    newcontent_interval != 0
-                    and (time.time() - last_content_check) > newcontent_interval
-                ):
-                    last_content_check = time.time()
-                    library_change_monitor.check_for_updates()
 
                 if user_changed or (
                     background_interval != 0

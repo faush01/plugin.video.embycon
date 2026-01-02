@@ -31,7 +31,13 @@ class LibraryChangeMonitor(threading.Thread):
         log.debug("Library Monitor Started")
         monitor = xbmc.Monitor()
         while not self.exit_now and not monitor.abortRequested():
-            if self.library_check_triggered and not xbmc.Player().isPlaying():
+            if (
+                self.library_check_triggered
+                and not xbmc.Player().isPlaying()
+                and not xbmc.getCondVisibility("System.ScreenSaverActive")
+            ):
+                if self.exit_now or monitor.waitForAbort(self.time_between_checks):
+                    break
                 log.debug("Doing new content check")
                 check_for_new_content()
                 self.library_check_triggered = False

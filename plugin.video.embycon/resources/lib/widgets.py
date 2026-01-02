@@ -1,4 +1,5 @@
 from __future__ import annotations
+import time
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
@@ -142,10 +143,14 @@ def set_background_image(force: bool = False) -> None:
 
 @timer
 def check_for_new_content() -> None:
-    log.debug("checkForNewContent Called")
+    log.info("check_for_new_content called")
 
     home_window = HomeWindow()
+    ts = int(time.time())
+    home_window.set_property("embycon_widget_reload", str(ts))
+    home_window.set_property("random-movies-changed", str(ts))
 
+    """
     url_params = {}
     url_params["Recursive"] = True
     url_params["limit"] = 1
@@ -213,6 +218,7 @@ def check_for_new_content() -> None:
     if current_widget_hash != new_widget_hash:
         home_window.set_property("embycon_widget_reload", new_widget_hash)
         log.debug("Setting New Widget Hash: {0}", new_widget_hash)
+    """
 
 
 @timer

@@ -509,18 +509,6 @@
 						<popup>false</popup>
 					</control>
 				</setting>
-				<setting id="new_content_check_interval" type="integer" label="30342" help="">
-					<level>0</level>
-					<default>20</default>
-					<constraints>
-						<minimum>0</minimum>
-						<step>1</step>
-						<maximum>300</maximum>
-					</constraints>
-					<control type="slider" format="integer">
-						<popup>false</popup>
-					</control>
-				</setting>
 				<setting id="random_movie_refresh_interval" type="integer" label="30384" help="">
 					<level>0</level>
 					<default>5</default>
