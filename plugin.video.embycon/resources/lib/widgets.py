@@ -223,11 +223,13 @@ def check_for_new_content() -> None:
 
 @timer
 def get_widget_content_cast(handle: int, params: dict) -> int:
-    log.debug("getWigetContentCast Called: {0}", params)
+    log.debug("get_widget_content_cast Called: {0}", params)
     download_utils = DownloadUtils()
     server = download_utils.get_server()
     if server is None:
         log.error("get_widget_content_cast: No server info")
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
         return 0
 
     item_id = params["id"]
@@ -238,6 +240,8 @@ def get_widget_content_cast(handle: int, params: dict) -> int:
     log.debug("ItemInfo: {0}", result)
 
     if not result:
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
         return 0
 
     if (
