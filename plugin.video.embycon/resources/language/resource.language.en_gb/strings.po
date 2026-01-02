@@ -186,6 +186,10 @@ msgctxt "#30135"
 msgid "Error"
 msgstr ""
 
+msgctxt "#30136"
+msgid "Server not configured in settings"
+msgstr ""
+
 msgctxt "#30139"
 msgid "No Media Type Set"
 msgstr ""

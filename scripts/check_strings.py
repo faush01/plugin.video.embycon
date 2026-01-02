@@ -44,14 +44,14 @@ def find_string_ids(strings_po_path: Path) -> list[tuple[str, str]]:
                 string_id = match.group(1)
                 if string_id in seen_ids:
                     raise Exception(f"ERROR: String ID Already Exists : {string_id}")
-                else:
-                    seen_ids.add(string_id)
-                    # Look for the msgid on the next line
-                    if i + 1 < len(lines) and lines[i + 1].startswith("msgid "):
-                        msgid_match = re.search(r'"(.*)"', lines[i + 1])
-                        if msgid_match:
-                            string_text = msgid_match.group(1)
-                            string_data.append((string_id, string_text))
+
+                seen_ids.add(string_id)
+                # Look for the msgid on the next line
+                if i + 1 < len(lines) and lines[i + 1].startswith("msgid "):
+                    msgid_match = re.search(r'"(.*)"', lines[i + 1])
+                    if msgid_match:
+                        string_text = msgid_match.group(1)
+                        string_data.append((string_id, string_text))
         i += 1
 
     return string_data
@@ -80,6 +80,28 @@ def search_string_usage(string_id: str, search_files: list[Path]) -> int:
     return count
 
 
+def find_string_load_references(repo_root: Path) -> set[str]:
+    """Find all string_load() calls in Python files and extract the string IDs."""
+    string_ids = set()
+    pattern = re.compile(r"string_load\s*\(\s*(\d+)\s*\)")
+
+    # Find all Python files
+    python_files = list(repo_root.rglob("*.py"))
+
+    for py_file in python_files:
+        try:
+            with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+                matches = pattern.findall(content)
+                for match in matches:
+                    string_ids.add(match)
+        except Exception:
+            # Skip files that can't be read
+            pass
+
+    return string_ids
+
+
 def main() -> None:
     # Get repository root
     repo_root = get_repo_root()
@@ -103,6 +125,7 @@ def main() -> None:
     # Get all string IDs
     logger.info("Extracting string IDs from strings.po...")
     string_data = find_string_ids(strings_po)
+    defined_string_ids = {string_id for string_id, _ in string_data}
 
     # Get all files to search
     logger.info("Finding files to search...")
@@ -117,6 +140,7 @@ def main() -> None:
 
     # Check usage of each string ID
     logger.info("Checking string usage...\n")
+    logger.info("=== Unused Strings ===")
     for string_id, string_text in string_data:
         usage_count = search_string_usage(string_id, search_files)
         if usage_count == 1:
@@ -124,6 +148,24 @@ def main() -> None:
             logger.info(
                 "ID: %s\tCount: %s\tText: '%s', ", string_id, usage_count, string_text
             )
+
+    # Find all string_load() references and check if they exist
+    logger.info("\n=== Checking string_load() References ===")
+    referenced_ids = find_string_load_references(repo_root)
+
+    missing_ids = referenced_ids - defined_string_ids
+
+    if missing_ids:
+        logger.info("\nMissing string IDs (referenced but not defined):")
+        for missing_id in sorted(missing_ids, key=int):
+            logger.info("  Missing ID: %s", missing_id)
+    else:
+        logger.info("\nAll string_load() references are valid!")
+
+    logger.info("\nSummary:")
+    logger.info("  Total strings defined: %d", len(defined_string_ids))
+    logger.info("  Total string_load() references found: %d", len(referenced_ids))
+    logger.info("  Missing string definitions: %d", len(missing_ids))
 
 
 if __name__ == "__main__":
