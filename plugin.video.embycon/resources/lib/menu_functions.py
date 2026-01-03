@@ -162,6 +162,9 @@ def show_user_lists(menu_params: dict[str, str]) -> None:
     except Exception:
         result = []
 
+    if result is None:
+        result = []
+
     settings = xbmcaddon.Addon()
     user_details = load_user_details(settings)
     current_username = user_details.get("username", "")
