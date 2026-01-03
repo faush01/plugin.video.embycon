@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import xbmcaddon
 import xbmcplugin
@@ -10,12 +11,23 @@ import sys
 import os
 import re
 import base64
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 from .datamanager import DataManager
 from .downloadutils import DownloadUtils
 from .translation import string_load
 from .simple_logging import SimpleLogging
-from .item_functions import add_gui_item, ItemDetails
+from .item_functions import (
+    add_gui_item,
+    ItemDetails,
+    GuiItem,
+    GuiOptions,
+    DisplayOptions,
+)
 from .utils import send_event_notification
 from .tracking import timer
 from .filelock import FileLock
@@ -23,11 +35,26 @@ from .filelock import FileLock
 log = SimpleLogging(__name__)
 
 
+@dataclass
+class DirectoryResult:
+    """Represents the result of processing a directory.
+
+    Attributes:
+        dir_items: List of GuiItem objects
+        detected_type: The detected media type, if any
+        total_records: Total number of records available
+    """
+
+    dir_items: list[GuiItem]
+    detected_type: str | None
+    total_records: int
+
+
 @timer
-def get_content(url, params):
+def get_content(url: str, params: dict[str, str]) -> int:
     log.debug("== ENTER: getContent ==")
 
-    default_sort = params.get("sort")
+    default_sort = params.get("sort", "")
     media_type = params.get("media_type", None)
     if not media_type:
         xbmcgui.Dialog().ok(string_load(30135), string_load(30139))
@@ -99,10 +126,11 @@ def get_content(url, params):
     # if the page_limit in the settings is not set but the url has a limit use the url limit number
     if page_limit == 0 and re.search(limit_rex, url, flags=re.IGNORECASE):
         url_limit_result = re.search(limit_rex, url, flags=re.IGNORECASE)
-        page_limit = int(url_limit_result.group(1))
+        if url_limit_result is not None:
+            page_limit = int(url_limit_result.group(1))
 
-    url_prev = None
-    url_next = None
+    url_prev: str = ""
+    url_next: str = ""
     if page_limit > 0 and media_type.lower() in ["movies", "movie", "tvshows"]:
         log.debug("Creating Paging URLS: {0}", url)
 
@@ -125,7 +153,9 @@ def get_content(url, params):
 
         # create NEXT and PREV urls
         start_index_match = re.search(start_index_rex, url, flags=re.IGNORECASE)
-        start_index = int(start_index_match.group(1))
+        start_index: int = 0
+        if start_index_match is not None:
+            start_index = int(start_index_match.group(1))
         if start_index > 0:
             prev_index = start_index - page_limit
             if prev_index < 0:
@@ -159,11 +189,9 @@ def get_content(url, params):
     #    total_records = result.get("TotalRecordCount", 0)
 
     use_cache = params.get("use_cache", "true") == "true"
-    dir_items = None
+    result = None
     try:
-        dir_items, detected_type, total_records = process_directory(
-            url, progress, params, use_cache
-        )
+        result = process_directory(url, progress, params, use_cache)
     except Exception as e:
         log.debug("There was an error processing the URL : {0}", e)
         data_manager = DataManager()
@@ -174,8 +202,12 @@ def get_content(url, params):
                 xbmcvfs.delete(cache_file_path)
         raise
 
-    if dir_items is None:
+    if result is None:
         return 0
+
+    dir_items = result.dir_items
+    detected_type = result.detected_type
+    total_records = result.total_records
 
     log.debug("total_records: {0}", total_records)
 
@@ -203,7 +235,7 @@ def get_content(url, params):
             }
             list_item.setArt(art)
             log.debug("ADDING PREV ListItem: {0} - {1}", u, list_item)
-            dir_items.insert(0, (u, list_item, True))
+            dir_items.insert(0, GuiItem(url=u, list_item=list_item, is_folder=True))
 
         if start_index + page_limit < total_records:
             upper_count = start_index + (page_limit * 2)
@@ -230,7 +262,7 @@ def get_content(url, params):
             }
             list_item.setArt(art)
             log.debug("ADDING NEXT ListItem: {0} - {1}", u, list_item)
-            dir_items.append((u, list_item, True))
+            dir_items.append(GuiItem(url=u, list_item=list_item, is_folder=True))
 
     # set the Kodi content type
     if content_type:
@@ -252,7 +284,9 @@ def get_content(url, params):
     else:
         set_sort(pluginhandle, view_type, default_sort)
 
-    xbmcplugin.addDirectoryItems(pluginhandle, dir_items)
+    # Convert GuiItem objects to tuples for Kodi API
+    dir_item_tuples = [item.as_tuple() for item in dir_items]
+    xbmcplugin.addDirectoryItems(pluginhandle, dir_item_tuples)
     xbmcplugin.endOfDirectory(pluginhandle, cacheToDisc=False)
 
     # set the view based on saved value
@@ -277,7 +311,7 @@ def get_content(url, params):
     return len(dir_items)
 
 
-def set_sort(pluginhandle, view_type, default_sort):
+def set_sort(pluginhandle: int, view_type: str, default_sort: str) -> None:
     log.debug("SETTING_SORT for media type: {0}", view_type)
 
     if default_sort == "none":
@@ -324,13 +358,21 @@ def set_sort(pluginhandle, view_type, default_sort):
 
 
 @timer
-def process_directory(url, progress, params, use_cache_data=False):
+def process_directory(
+    url: str,
+    progress: xbmcgui.DialogProgress | None,
+    params: dict[str, str],
+    use_cache_data: bool = False,
+) -> DirectoryResult | None:
     log.debug("== ENTER: processDirectory ==")
 
     data_manager = DataManager()
     settings = xbmcaddon.Addon()
     download_utils = DownloadUtils()
     server = download_utils.get_server()
+    if not server:
+        xbmcgui.Dialog().ok(string_load(30135), string_load(30136))
+        return None
 
     name_format = params.get("name_format", None)
     name_format_type = None
@@ -346,20 +388,20 @@ def process_directory(url, progress, params, use_cache_data=False):
 
     max_image_width = int(settings.getSetting("max_image_width"))
 
-    gui_options = {}
-    gui_options["server"] = server
-    gui_options["name_format"] = name_format
-    gui_options["name_format_type"] = name_format_type
-    gui_options["max_image_width"] = max_image_width
-    gui_options["use_prem_date_for_added"] = (
-        settings.getSetting("use_prem_date_for_added") == "true"
+    use_prem_date_for_added = settings.getSetting("use_prem_date_for_added") == "true"
+    gui_options = GuiOptions(
+        server=server,
+        name_format=name_format,
+        name_format_type=name_format_type,
+        max_image_width=max_image_width,
+        use_prem_date_for_added=use_prem_date_for_added,
     )
 
     use_cache = settings.getSetting("use_cache") == "true" and use_cache_data
-    cache_file, item_list, total_records, cache_thread = data_manager.get_items(
-        url, gui_options, use_cache
-    )
-
+    get_items_result = data_manager.get_items(url, gui_options, use_cache)
+    item_list = get_items_result.item_list
+    total_records = get_items_result.total_records
+    cache_thread = get_items_result.cache_thread
     # flatten single season
     # if there is only one result and it is a season and you have flatten signle season turned on then
     # build a new url, set the content media type and call get content again
@@ -385,8 +427,9 @@ def process_directory(url, progress, params, use_cache_data=False):
             progress.close()
         params["media_type"] = "Episodes"
         get_content(season_url, params)
-        return None, None, None
-    elif (
+        return None
+
+    if (
         flatten_tvshow_seasons == "2"
         and len(item_list) > 0
         and item_list[0].item_type == "Season"
@@ -406,20 +449,15 @@ def process_directory(url, progress, params, use_cache_data=False):
             progress.close()
         params["media_type"] = "Episodes"
         get_content(season_url, params)
-        return None, None, None
+        return None
 
     hide_unwatched_details = settings.getSetting("hide_unwatched_details") == "true"
 
-    display_options = {}
-    display_options["addCounts"] = settings.getSetting("addCounts") == "true"
-    display_options["addResumePercent"] = (
-        settings.getSetting("addResumePercent") == "true"
-    )
-    display_options["addSubtitleAvailable"] = (
+    display_options = DisplayOptions()
+    display_options.addCounts = settings.getSetting("addCounts") == "true"
+    display_options.addResumePercent = settings.getSetting("addResumePercent") == "true"
+    display_options.addSubtitleAvailable = (
         settings.getSetting("addSubtitleAvailable") == "true"
-    )
-    display_options["addUserRatings"] = (
-        settings.getSetting("add_user_ratings") == "true"
     )
 
     show_empty_folders = settings.getSetting("show_empty_folders") == "true"
@@ -431,8 +469,8 @@ def process_directory(url, progress, params, use_cache_data=False):
     total_episodes = 0
     total_watched = 0
 
-    detected_type = None
-    dir_items = []
+    detected_type: str | None = None
+    dir_items: list[GuiItem] = []
 
     for item_details in item_list:
         item_details.total_items = item_count
@@ -575,4 +613,6 @@ def process_directory(url, progress, params, use_cache_data=False):
     if cache_thread is not None:
         cache_thread.start()
 
-    return dir_items, detected_type, total_records
+    return DirectoryResult(
+        dir_items=dir_items, detected_type=detected_type, total_records=total_records
+    )

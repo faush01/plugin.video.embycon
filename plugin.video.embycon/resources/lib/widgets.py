@@ -1,3 +1,5 @@
+from __future__ import annotations
+import time
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
@@ -10,7 +12,7 @@ from .utils import get_emby_url
 from .datamanager import DataManager
 from .simple_logging import SimpleLogging
 from .kodi_utils import HomeWindow
-from .dir_functions import process_directory
+from .dir_functions import process_directory, DirectoryResult
 from .tracking import timer
 
 
@@ -20,7 +22,7 @@ background_current_item = 0
 
 
 @timer
-def set_random_movies():
+def set_random_movies() -> None:
     log.debug("set_random_movies Called")
 
     settings = xbmcaddon.Addon()
@@ -61,7 +63,7 @@ def set_random_movies():
     home_window.set_property("random-movies-changed", new_widget_hash)
 
 
-def set_background_image(force=False):
+def set_background_image(force: bool = False) -> None:
     log.debug("set_background_image Called forced={0}", force)
 
     global background_current_item
@@ -140,11 +142,15 @@ def set_background_image(force=False):
 
 
 @timer
-def check_for_new_content():
-    log.debug("checkForNewContent Called")
+def check_for_new_content() -> None:
+    log.info("check_for_new_content called")
 
     home_window = HomeWindow()
+    ts = int(time.time())
+    home_window.set_property("embycon_widget_reload", str(ts))
+    home_window.set_property("random-movies-changed", str(ts))
 
+    """
     url_params = {}
     url_params["Recursive"] = True
     url_params["limit"] = 1
@@ -212,13 +218,19 @@ def check_for_new_content():
     if current_widget_hash != new_widget_hash:
         home_window.set_property("embycon_widget_reload", new_widget_hash)
         log.debug("Setting New Widget Hash: {0}", new_widget_hash)
+    """
 
 
 @timer
-def get_widget_content_cast(handle, params):
-    log.debug("getWigetContentCast Called: {0}", params)
+def get_widget_content_cast(handle: int, params: dict) -> int:
+    log.debug("get_widget_content_cast Called: {0}", params)
     download_utils = DownloadUtils()
     server = download_utils.get_server()
+    if server is None:
+        log.error("get_widget_content_cast: No server info")
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+        return 0
 
     item_id = params["id"]
     data_manager = DataManager()
@@ -228,7 +240,9 @@ def get_widget_content_cast(handle, params):
     log.debug("ItemInfo: {0}", result)
 
     if not result:
-        return
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+        return 0
 
     if (
         result.get("Type", "") in ["Episode", "Season"]
@@ -285,10 +299,11 @@ def get_widget_content_cast(handle, params):
     xbmcplugin.setContent(handle, "artists")
     xbmcplugin.addDirectoryItems(handle, list_items)
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+    return 0
 
 
 @timer
-def get_widget_content(handle, params):
+def get_widget_content(handle: int, params: dict) -> int:
     log.debug("getWigetContent Called: {0}", params)
 
     settings = xbmcaddon.Addon()
@@ -297,7 +312,7 @@ def get_widget_content(handle, params):
     widget_type = params.get("type")
     if widget_type is None:
         log.error("getWigetContent type not set")
-        return
+        return 0
 
     log.debug("widget_type: {0}", widget_type)
 
@@ -331,7 +346,14 @@ def get_widget_content(handle, params):
 
     elif widget_type == "random_movies":
         xbmcplugin.setContent(handle, "movies")
-        url_params["Ids"] = "{random_movies}"
+
+        home_window = HomeWindow()
+        random_movies = home_window.get_property("random-movies")
+        if not random_movies:
+            xbmcplugin.addDirectoryItems(handle, [])
+            xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+            return 0
+        url_params["Ids"] = random_movies
 
     elif widget_type == "recent_tvshows":
         xbmcplugin.setContent(handle, "tvshows")
@@ -427,9 +449,20 @@ def get_widget_content(handle, params):
 
     items_url = get_emby_url(url_verb, url_params)
 
-    list_items, detected_type, total_records = process_directory(
+    directory_result: DirectoryResult | None = process_directory(
         items_url, None, params, False
     )
+    if (
+        directory_result is None
+        or directory_result.dir_items is None
+        or len(directory_result.dir_items) == 0
+    ):
+        xbmcplugin.addDirectoryItems(handle, [])
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
+        return 0
+
+    list_items = [item.as_tuple() for item in directory_result.dir_items]
+    detected_type = directory_result.detected_type
 
     # remove resumable items from next up
     """

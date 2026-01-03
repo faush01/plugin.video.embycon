@@ -1,5 +1,6 @@
 # coding=utf-8
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import urllib.parse
 import http.client
@@ -28,15 +29,15 @@ log = SimpleLogging(__name__)
 class CacheArtwork(threading.Thread):
     stop_all_activity = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         log.debug("CacheArtwork init")
         self.stop_all_activity = False
         super(CacheArtwork, self).__init__()
 
-    def stop_activity(self):
+    def stop_activity(self) -> None:
         self.stop_all_activity = True
 
-    def run(self):
+    def run(self) -> None:
         log.debug("CacheArtwork background thread started")
         last_update = 0
         home_window = HomeWindow()
@@ -73,7 +74,7 @@ class CacheArtwork(threading.Thread):
         )
 
     @staticmethod
-    def delete_cached_images(item_id):
+    def delete_cached_images(item_id: str) -> None:
         log.debug("cache_delete_for_links")
 
         progress = xbmcgui.DialogProgress()
@@ -116,7 +117,7 @@ class CacheArtwork(threading.Thread):
 
         xbmcgui.Dialog().ok(string_load(30281), string_load(30344) % delete_count)
 
-    def remove_unused_artwork(self, p_dialog):
+    def remove_unused_artwork(self, p_dialog: xbmcgui.DialogProgress) -> list[str]:
         delete_canceled = False
 
         params = {"properties": ["url"]}
@@ -133,7 +134,7 @@ class CacheArtwork(threading.Thread):
         unused_texture_ids = set()
         index = 0
 
-        if emby_texture_urls is not None:
+        if emby_texture_urls is not None and len(emby_texture_urls) > 0:
             for texture in textures:
                 url = texture.get("url")
                 url = urllib.parse.unquote(url)
@@ -144,7 +145,7 @@ class CacheArtwork(threading.Thread):
                     and url not in emby_texture_urls
                     or url.find("localhost:24276") > -1
                 ):
-                    log.debug("adding unused texture url: {0}", url)
+                    # log.debug("adding unused texture url: {0}", url)
                     unused_texture_ids.add(texture["textureid"])
 
             log.debug("unused texture ids: {0}", unused_texture_ids)
@@ -180,7 +181,7 @@ class CacheArtwork(threading.Thread):
 
         return result_report
 
-    def cache_artwork_interactive(self):
+    def cache_artwork_interactive(self) -> None:
         log.debug("cache_artwork_interactive")
 
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
@@ -228,7 +229,7 @@ class CacheArtwork(threading.Thread):
             msg = "\r\n".join(result_report)
             xbmcgui.Dialog().textviewer(string_load(30125), msg, usemono=True)
 
-    def cache_artwork_background(self):
+    def cache_artwork_background(self) -> None:
         log.debug("cache_artwork_background")
         dp = xbmcgui.DialogProgressBG()
         dp.create(string_load(30301), "")
@@ -243,8 +244,17 @@ class CacheArtwork(threading.Thread):
         if result_text is not None:
             log.debug("Cache Images reuslt : {0}", " - ".join(result_text))
 
-    def get_emby_artwork(self, progress, limit=False):
+    def get_emby_artwork(
+        self,
+        progress: xbmcgui.DialogProgress | xbmcgui.DialogProgressBG,
+        limit: bool = False,
+    ) -> set[str]:
         log.debug("get_emby_artwork")
+
+        download_utils = DownloadUtils()
+        server = download_utils.get_server()
+        if not server:
+            return set()
 
         url = ""
         url += "{server}/emby/Users/{userid}/Items"
@@ -264,20 +274,17 @@ class CacheArtwork(threading.Thread):
             results = []
 
         if isinstance(results, dict):
-            results = results.get("Items")
+            results = results.get("Items", [])
 
         # log.debug("Cache Emby Images Items: {0}", results)
-
-        download_utils = DownloadUtils()
-        server = download_utils.get_server()
         log.debug("Emby Item Count Count: {0}", len(results))
 
         if self.stop_all_activity:
-            return None
+            return set()  # return an empty set
 
         progress.update(0, string_load(30359))
 
-        texture_urls = set()
+        texture_urls: set[str] = set()
 
         image_types = {
             "thumb",
@@ -289,7 +296,9 @@ class CacheArtwork(threading.Thread):
             "tvshow.landscape",
         }
         for item in results:
-            art = get_art(item, server, max_image_width, download_utils=download_utils)
+            art: dict[str, str] = get_art(
+                item, server, max_image_width, download_utils=download_utils
+            )
             for art_type in art:
                 if not limit:
                     texture_urls.add(art[art_type])
@@ -298,7 +307,9 @@ class CacheArtwork(threading.Thread):
 
         return texture_urls
 
-    def cache_artwork(self, progress):
+    def cache_artwork(
+        self, progress: xbmcgui.DialogProgressBG | xbmcgui.DialogProgress
+    ) -> list[str]:
         log.debug("cache_artwork")
 
         # is the web server enabled
@@ -307,7 +318,7 @@ class CacheArtwork(threading.Thread):
         xbmc_webserver_enabled = result["result"]["value"]
         if not xbmc_webserver_enabled:
             log.error("Kodi web server not enabled, can not cache images")
-            return
+            return []
 
         # get the port
         web_port = {"setting": "services.webserverport"}
@@ -334,7 +345,7 @@ class CacheArtwork(threading.Thread):
         log.debug("Textures.GetTextures Count: {0}", len(textures))
 
         if self.stop_all_activity:
-            return
+            return []
 
         progress.update(0, string_load(30357))
 
@@ -352,13 +363,13 @@ class CacheArtwork(threading.Thread):
         log.debug("texture_urls Count: {0}", len(texture_urls))
 
         if self.stop_all_activity:
-            return
+            return []
 
         progress.update(0, string_load(30358))
 
         emby_texture_urls = self.get_emby_artwork(progress, limit=True)
-        if emby_texture_urls is None:
-            return
+        if emby_texture_urls is None or len(emby_texture_urls) == 0:
+            return []
 
         missing_texture_urls = set()
         # image_types = ["thumb", "poster", "banner", "clearlogo", "tvshow.poster", "tvshow.banner", "tvshow.landscape"]
@@ -371,7 +382,7 @@ class CacheArtwork(threading.Thread):
                 missing_texture_urls.add(image_url)
 
             if self.stop_all_activity:
-                return
+                return []
 
         # log.debug("texture_urls: {0}", texture_urls)
         # log.debug("missing_texture_urls: {0}", missing_texture_urls)

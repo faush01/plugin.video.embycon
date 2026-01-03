@@ -1,9 +1,11 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import os
 import threading
 import json
 import datetime
+from typing import cast
 
 import xbmcgui
 import xbmc
@@ -17,7 +19,7 @@ from .simple_logging import SimpleLogging
 log = SimpleLogging(__name__)
 
 
-def get_chapter_items():
+def get_chapter_items() -> list[str | xbmcgui.ListItem]:
     download_utils = DownloadUtils()
     home_screen = HomeWindow()
 
@@ -70,13 +72,15 @@ def get_chapter_items():
     return chapters
 
 
-def get_current_chapter(chapters):
+def get_current_chapter(chapters: list[str | xbmcgui.ListItem]) -> int:
     player = xbmc.Player()
+    index = 0
     if player.isPlaying():
         current_position = player.getTime()
-        index = 0
         for x in range(1, len(chapters)):
             chap = chapters[x]
+            if chap is None or not isinstance(chap, xbmcgui.ListItem):
+                continue
             resume = int(chap.getProperty("resume"))
             log.debug(
                 "ChapterDialogMonitor: get_current_chapter : {0} - {1}",
@@ -92,7 +96,7 @@ def get_current_chapter(chapters):
 class ChapterDialogMonitor(threading.Thread):
     stop_thread = False
 
-    def run(self):
+    def run(self) -> None:
         log.debug("ChapterDialogMonitor Thread Started")
 
         home_screen = HomeWindow()
@@ -125,41 +129,44 @@ class ChapterDialogMonitor(threading.Thread):
 
         log.debug("ChapterDialogMonitor Thread Exited")
 
-    def stop_monitor(self):
+    def stop_monitor(self) -> None:
         log.debug("ContextMonitor Stop Called")
         self.stop_thread = True
 
 
 class ChapterDialog(xbmcgui.WindowXMLDialog):
-    chapter_list = None
+    chapter_list: xbmcgui.ControlList | None = None
+    action_exitkeys_id: list[int] = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, xml_filename: str, script_path: str, default_skin: str, default_res: str
+    ) -> None:
         log.debug("ChapterDialog: __init__")
-        xbmcgui.WindowXML.__init__(self, *args, **kwargs)
+        super().__init__(xml_filename, script_path, default_skin, default_res)
 
-    def onInit(self):
+    def onInit(self) -> None:
         log.debug("ChapterDialog: onInit")
         self.action_exitkeys_id = [10, 13]
 
-        chapter_items = get_chapter_items()
+        chapter_items: list[str | xbmcgui.ListItem] = get_chapter_items()
         selected_chap = get_current_chapter(chapter_items)
 
-        self.chapter_list = self.getControl(1234)
+        self.chapter_list = cast(xbmcgui.ControlList, self.getControl(1234))
         self.chapter_list.addItems(chapter_items)
         self.chapter_list.selectItem(selected_chap)
         self.setFocus(self.chapter_list)
 
-    def onFocus(self, control_id):
+    def onFocus(self, controlId: int) -> None:
         pass
 
-    def onAction(self, action):
+    def onAction(self, action: xbmcgui.Action) -> None:
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.close()
         elif action.getId() == 92:  # ACTION_NAV_BACK
             self.close()
 
-    def onClick(self, control_id):
-        if control_id == 1234:
+    def onClick(self, controlId: int) -> None:
+        if controlId == 1234 and self.chapter_list is not None:
             selected = self.chapter_list.getSelectedItem()
             log.debug("ChapterDialog: Selected Item: {0}", selected)
 

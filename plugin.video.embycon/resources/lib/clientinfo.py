@@ -12,7 +12,7 @@ log = SimpleLogging(__name__)
 
 class ClientInformation:
     @staticmethod
-    def get_device_id():
+    def get_device_id() -> str:
         window = HomeWindow()
         client_id = window.get_property("client_id")
 
@@ -39,11 +39,10 @@ class ClientInformation:
         return client_id
 
     @staticmethod
-    def get_version():
+    def get_version() -> str:
         addon = xbmcaddon.Addon()
-        version = addon.getAddonInfo("version")
-        return version
+        return addon.getAddonInfo("version")
 
     @staticmethod
-    def get_client():
+    def get_client() -> str:
         return "Kodi EmbyCon"

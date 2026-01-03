@@ -46,9 +46,9 @@ extend-ignore = [
 extend-select = [
   "A",     # built-ins
   "AIR",   # Airflow
-  #"ANN",   # Type annotations
+  "ANN",   # Type annotations
   "ARG",   # used arguments
-  #"ASYNC", # flake8-async
+  "ASYNC", # flake8-async
   #"B",     # flake8-bugbear
   #"BLE",   # flake8-blind-except
   #"C",     # pylint conventions
@@ -58,15 +58,15 @@ extend-select = [
   #"E",     # pylint error
   #"EM",    # flake8-errmsg
   #"ERA",   # eradicate
-  #"F",     # pyflakes
-  #"FA",    # future annotations
-  #"FAST",  # FastAPI
+  "F",     # pyflakes
+  "FA",    # future annotations
+  "FAST",  # FastAPI
   #"FBT",   # use named arguments for boolean flags
   #"FLY",   # flynt
   #"FURB",  # preview rules
-  #"G",     # logging format
+  "G",     # logging format
   #"I",     # isort
-  #"ICN",   # import convention
+  "ICN",   # import convention
   #"INP",   # implicit namespace package
   #"INT",   # flake8-gettext
   "ISC",   # implicit str concat
@@ -81,22 +81,22 @@ extend-select = [
   #"PT",    # pytest style
   #"PTH",   # use pathlib
   #"PYI",   # flake8-pyi
-  #"Q",     # quotes
+  "Q",     # quotes
   #"R",     # pylint refactor
-  #"RET",   # return
-  #"RSE",   # raise
+  "RET",   # return
+  "RSE",   # raise
   #"RUF",   # ruff specific rules
   #"S",     # flake8-bandidt
   #"SIM",   # flake8-simplify
   #"SLF",   # self
   #"SLOT",  # flake8-slots
-  #"T10",   # flake8-debugger
+  "T10",   # flake8-debugger
   "T20",   # print isn't used
   #"TCH",   # flake8-type-checking
-  #"TID",   # flake8-tidy-imports
+  "TID",   # flake8-tidy-imports
   #"TRY",   # tryceratops
   #"UP",    # pyupgrade
-  #"W",     # pylint warning
+  "W",     # pylint warning
   #"YTT",   # flake8-2020
   #"FIX", # fixme
   #"TD", # todos

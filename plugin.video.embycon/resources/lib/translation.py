@@ -5,7 +5,7 @@ log = SimpleLogging(__name__)
 addon = xbmcaddon.Addon()
 
 
-def string_load(string_id):
+def string_load(string_id: int) -> str:
     try:
         return addon.getLocalizedString(string_id)
     except Exception as e:

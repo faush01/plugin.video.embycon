@@ -10,7 +10,11 @@ import xbmcgui
 
 from resources.lib.downloadutils import DownloadUtils
 from resources.lib.simple_logging import SimpleLogging
-from resources.lib.play_utils import Service, PlaybackService, send_progress
+from resources.lib.play_utils import (
+    PlaybackMonitorService,
+    MonitoringService,
+    send_progress,
+)
 from resources.lib.kodi_utils import HomeWindow
 from resources.lib.widgets import set_background_image, set_random_movies
 from resources.lib.websocket_client import WebSocketClient
@@ -36,12 +40,11 @@ home_window.clear_property("AccessToken")
 home_window.clear_property("Params")
 
 log = SimpleLogging("service")
-monitor = xbmc.Monitor()
 kodi_monitor = xbmc.Monitor()
 
 # wait for 10 seconds for the Kodi splash screen to close
 i = 0
-while not monitor.abortRequested():
+while not kodi_monitor.abortRequested():
     if i == 100 or not xbmc.getCondVisibility("Window.IsVisible(startup)"):
         break
     i += 1
@@ -59,13 +62,13 @@ if enable_logging:
 
 # make sure we have a server before starting the service
 du = DownloadUtils()
-while not monitor.abortRequested():
+while not kodi_monitor.abortRequested():
     server = du.get_server()
     if server is not None:
         break
     kodi_monitor.waitForAbort(5)
 
-if monitor.abortRequested():
+if kodi_monitor.abortRequested():
     log.debug("Abort requested before service started")
     exit(0)
 
@@ -86,12 +89,11 @@ image_server = HttpImageServerThread()
 image_server.start()
 
 # set up all the services
-monitor = Service()
-playback_service = PlaybackService(monitor)
+play_monitor_service: PlaybackMonitorService = PlaybackMonitorService()
+monitor_service: MonitoringService = MonitoringService(play_monitor_service)
 
 home_window = HomeWindow()
 last_progress_update = time.time()
-last_content_check = time.time()
 last_background_update = 0
 last_random_movie_update = 0
 skin_checked = False
@@ -111,7 +113,7 @@ if remote_control:
 play_next_service = None
 play_next_trigger_time = int(settings.getSetting("play_next_trigger_time"))
 if play_next_trigger_time > 0:
-    play_next_service = PlayNextService(monitor)
+    play_next_service = PlayNextService(play_monitor_service)
     play_next_service.start()
 
 # Start the context menu monitor
@@ -129,7 +131,6 @@ if emby_bookmarks:
     chapter_dialog_monitor.start()
 
 background_interval = int(settings.getSetting("background_interval"))
-newcontent_interval = int(settings.getSetting("new_content_check_interval"))
 random_movie_list_interval = int(settings.getSetting("random_movie_refresh_interval"))
 random_movie_list_interval = random_movie_list_interval * 60
 
@@ -142,7 +143,7 @@ while not kodi_monitor.abortRequested():
             # if playing every 10 seconds updated the server with progress
             if (time.time() - last_progress_update) > 10:
                 last_progress_update = time.time()
-                send_progress(monitor)
+                send_progress(play_monitor_service)
 
         else:
             screen_saver_active = xbmc.getCondVisibility("System.ScreenSaverActive")
@@ -162,13 +163,6 @@ while not kodi_monitor.abortRequested():
                 ):
                     last_random_movie_update = time.time()
                     set_random_movies()
-
-                if user_changed or (
-                    newcontent_interval != 0
-                    and (time.time() - last_content_check) > newcontent_interval
-                ):
-                    last_content_check = time.time()
-                    library_change_monitor.check_for_updates()
 
                 if user_changed or (
                     background_interval != 0
@@ -214,7 +208,7 @@ library_change_monitor.stop()
 
 # stop the play next episdoe service
 if play_next_service:
-    play_next_service.stop_servcie()
+    play_next_service.stop_service()
 
 # call stop on the context menu monitor
 if context_monitor:

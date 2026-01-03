@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import threading
 import xbmc
@@ -6,12 +7,12 @@ import xbmcaddon
 
 
 class SimpleLogging:
-    _instances = {}
+    _instances: dict[str, SimpleLogging] = {}
     _lock = threading.Lock()
     name = ""
     enable_logging = False
 
-    def __new__(cls, name):
+    def __new__(cls, name: str) -> SimpleLogging:
         if name not in cls._instances:
             with cls._lock:
                 # Double-checked locking pattern
@@ -20,7 +21,7 @@ class SimpleLogging:
                     cls._instances[name] = instance
         return cls._instances[name]
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         # Only initialize once
         if hasattr(self, "_initialized") and self._initialized:
             return
@@ -38,24 +39,24 @@ class SimpleLogging:
         #     self.enable_logging = current_value.get("value", False)
         # xbmc.log("LOGGING_ENABLED %s : %s" % (self.name, str(self.enable_logging)), level=xbmc.LOGDEBUG)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "LoggingEnabled: " + str(self.enable_logging)
 
-    def info(self, fmt, *args):
+    def info(self, fmt: str, *args: object) -> None:
         log_line = self.name + "|INFO|" + self.log_line(fmt, *args)
         xbmc.log(log_line, level=xbmc.LOGINFO)
 
-    def error(self, fmt, *args):
+    def error(self, fmt: str, *args: object) -> None:
         log_line = self.name + "|ERROR|" + self.log_line(fmt, *args)
         xbmc.log(log_line, level=xbmc.LOGERROR)
 
-    def debug(self, fmt, *args):
+    def debug(self, fmt: str, *args: object) -> None:
         if self.enable_logging:
             log_line = self.name + "|DEBUG|" + self.log_line(fmt, *args)
             xbmc.log(log_line, level=xbmc.LOGINFO)
 
     @staticmethod
-    def log_line(fmt, *args):
+    def log_line(fmt: str, *args: object) -> str:
         new_args = []
         # convert any unicode to utf-8 strings
         for arg in args:
@@ -64,5 +65,4 @@ class SimpleLogging:
             #    new_args.append(arg.encode("utf-8"))
             # else:
             #    new_args.append(arg)
-        log_line = fmt.format(*new_args)
-        return log_line
+        return fmt.format(*new_args)

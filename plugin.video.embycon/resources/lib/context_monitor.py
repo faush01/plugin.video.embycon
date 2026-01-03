@@ -9,9 +9,9 @@ log = SimpleLogging(__name__)
 
 
 class ContextMonitor(threading.Thread):
-    stop_thread = False
+    stop_thread: bool = False
 
-    def run(self):
+    def run(self) -> None:
         item_id = None
         log.debug("ContextMonitor Thread Started")
 
@@ -43,7 +43,7 @@ class ContextMonitor(threading.Thread):
         """
         context_up = False
         is_embycon_item = False
-        
+
         while not xbmc.Monitor().abortRequested() and not self.stop_thread:
 
             if xbmc.getCondVisibility("Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)"):
@@ -72,11 +72,10 @@ class ContextMonitor(threading.Thread):
                 is_embycon_item = xbmc.getCondVisibility(condition)
 
                 xbmc.sleep(200)
-                
         """
 
         log.debug("ContextMonitor Thread Exited")
 
-    def stop_monitor(self):
+    def stop_monitor(self) -> None:
         log.debug("ContextMonitor Stop Called")
         self.stop_thread = True

@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Any
 import xbmcvfs
 import xbmcaddon
 
@@ -29,7 +31,7 @@ except Exception as err:
     log.debug("PIL not loaded : {0}", str(err))
 
 
-def get_image_links(url, maxwidth=0):
+def get_image_links(url: str, maxwidth: int = 0) -> list[dict[str, str]]:
     download_utils = DownloadUtils()
     server = download_utils.get_server()
     if server is None:
@@ -77,7 +79,7 @@ def get_image_links(url, maxwidth=0):
     return art_urls
 
 
-def build_image(path):
+def build_image(path: str) -> bytes:
     log.debug("build_image()")
 
     log.debug("Request Path : {0}", path)
@@ -85,7 +87,7 @@ def build_image(path):
     request_path = path[1:]
 
     if request_path == "favicon.ico":
-        return []
+        return bytes()
 
     decoded_url = base64.b64decode(request_path).decode("utf-8")
     log.debug("decoded_url : {0}", decoded_url)
@@ -96,15 +98,14 @@ def build_image(path):
     image_urls = get_image_links(decoded_url, maxwidth=max_image_width)
 
     width, height = 500, 750
-    collage = Image.new("RGB", (width, height), (5, 5, 5))
+    collage = Image.new("RGB", (width, height), (5, 5, 5))  # type: ignore
 
-    cols = 2
-    rows = 2
-    thumbnail_width = int(width / cols)
-    thumbnail_height = int(height / rows)
-    size = (thumbnail_width, thumbnail_height)
-    image_count = 0
-
+    cols: int = 2
+    rows: int = 2
+    thumbnail_width: int = int(width / cols)
+    thumbnail_height: int = int(height / rows)
+    size: tuple[int, int] = (thumbnail_width, thumbnail_height)
+    image_count: int = 0
     for art in image_urls:
         thumb_url = art.get("thumb")
         if thumb_url:
@@ -130,11 +131,11 @@ def build_image(path):
                 image_responce = conn.getresponse()
                 image_data = image_responce.read()
 
-                loaded_image = Image.open(io.BytesIO(image_data))
-                image = ImageOps.fit(
+                loaded_image = Image.open(io.BytesIO(image_data))  # type: ignore
+                image = ImageOps.fit(  # type: ignore
                     loaded_image,
                     size,
-                    method=Image.LANCZOS,
+                    method=Image.LANCZOS,  # type: ignore
                     bleed=0.0,
                     centering=(0.5, 0.5),
                 )
@@ -157,37 +158,37 @@ def build_image(path):
 
     del image_urls
 
-    img_byte_arr = io.BytesIO()
+    img_byte_arr: io.BytesIO = io.BytesIO()
     collage.save(img_byte_arr, format="JPEG")
-    image_bytes = img_byte_arr.getvalue()
+    image_bytes: bytes = img_byte_arr.getvalue()
 
     return image_bytes
 
 
 class HttpImageHandler(BaseHTTPRequestHandler):
-    def log_message(self, fmt, *args):
-        log_line = fmt % args
+    def log_message(self, format: str, *args: Any) -> None:  # noqa: A002, ANN401
+        log_line = format % args
         log.debug(log_line)
         return
 
-    def do_GET(self):
+    def do_GET(self) -> None:
         log.debug("HttpImageHandler:do_GET()")
         self.serve_image()
         return
 
-    def do_HEAD(self):
+    def do_HEAD(self) -> None:
         log.debug("HttpImageHandler:do_HEAD()")
         self.send_response(200)
         self.end_headers()
         return
 
-    def do_QUIT(self):
+    def do_QUIT(self) -> None:
         log.debug("HttpImageHandler:do_QUIT()")
         self.send_response(200)
         self.end_headers()
         return
 
-    def serve_image(self):
+    def serve_image(self) -> None:
         if pil_loaded:
             image_bytes = build_image(self.path)
             self.send_response(200)
@@ -197,9 +198,9 @@ class HttpImageHandler(BaseHTTPRequestHandler):
             self.wfile.write(image_bytes)
 
         else:
-            image_path = xbmcvfs.translatePath(
+            image_path: str = xbmcvfs.translatePath(
                 "special://home/addons/plugin.video.embycon/icon.png"
-            ).decode("utf-8")
+            )
             self.send_response(200)
             self.send_header("Content-type", "image/png")
             modified = xbmcvfs.Stat(image_path).st_mtime()
@@ -216,10 +217,10 @@ class HttpImageHandler(BaseHTTPRequestHandler):
 class HttpImageServerThread(threading.Thread):
     keep_running = True
 
-    def __init__(self):
+    def __init__(self) -> None:
         threading.Thread.__init__(self)
 
-    def stop(self):
+    def stop(self) -> None:
         self.keep_running = False
         log.debug("HttpImageServerThread:stop called")
         try:
@@ -229,7 +230,7 @@ class HttpImageServerThread(threading.Thread):
         except Exception:
             pass
 
-    def run(self):
+    def run(self) -> None:
         log.debug("HttpImageServerThread:started")
         server = HTTPServer(("", PORT_NUMBER), HttpImageHandler)
 

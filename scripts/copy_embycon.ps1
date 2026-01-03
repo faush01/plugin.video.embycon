@@ -19,6 +19,7 @@ Copy-Item -Path "$PLUGINROOT\fanart.jpg" -Destination "$PORTABLE_DATA\addons\plu
 Copy-Item -Path "$PLUGINROOT\icon.png" -Destination "$PORTABLE_DATA\addons\plugin.video.embycon\" -Force -ErrorAction SilentlyContinue
 # Copy-Item -Path "$PLUGINROOT\kodi.png" -Destination "$PORTABLE_DATA\addons\plugin.video.embycon\" -Force
 Copy-Item -Path "$PLUGINROOT\service.py" -Destination "$PORTABLE_DATA\addons\plugin.video.embycon\" -Force
+Copy-Item -Path "$PLUGINROOT\context.py" -Destination "$PORTABLE_DATA\addons\plugin.video.embycon\" -Force
 
 # Copy resources directory recursively
 Copy-Item -Path "$PLUGINROOT\resources" -Destination "$PORTABLE_DATA\addons\plugin.video.embycon\resources" -Recurse -Force

@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import os
 
@@ -12,7 +13,7 @@ from .simple_logging import SimpleLogging
 log = SimpleLogging(__name__)
 
 
-def check_skin_installed():
+def check_skin_installed() -> None:
     params = {"addonid": "skin.estuary_embycon", "properties": ["version", "enabled"]}
     result = JsonRpc("Addons.GetAddonDetails").execute(params)
     log.debug("EmbyCon Skin Details: {0}", result)
@@ -23,7 +24,7 @@ def check_skin_installed():
         clone_default_skin()
 
 
-def clone_default_skin():
+def clone_default_skin() -> None:
     xbmc.executebuiltin("Dialog.Close(all,true)")
     xbmc.executebuiltin("ActivateWindow(Home)")
 
@@ -44,7 +45,7 @@ def clone_default_skin():
     update_kodi_settings()
 
     current_skin = get_value("lookandfeel.skin")
-    log.debug("Current Skin : " + current_skin)
+    log.debug("Current Skin : {0}", current_skin)
     if current_skin == "skin.estuary_embycon":
         return
 
@@ -73,7 +74,7 @@ def clone_default_skin():
     # xbmc.executebuiltin("ReloadSkin()")
 
 
-def walk_path(root_path, relative_path, all_files):
+def walk_path(root_path: str, relative_path: str, all_files: list[str]) -> None:
     files = xbmcvfs.listdir(root_path)
     found_paths = files[0]
     found_files = files[1]
@@ -89,7 +90,7 @@ def walk_path(root_path, relative_path, all_files):
         walk_path(new_path, rel_path, all_files)
 
 
-def clone_skin():
+def clone_skin() -> bool:
     log.debug("Cloning Estuary Skin")
 
     ver = xbmc.getInfoLabel("System.BuildVersion")[:2]
@@ -198,7 +199,7 @@ def clone_skin():
     return True
 
 
-def update_kodi_settings():
+def update_kodi_settings() -> None:
     log.debug("Settings Kodi Settings")
 
     # set_value("screensaver.mode", "script.screensaver.logoff")
@@ -211,7 +212,7 @@ def update_kodi_settings():
     set_value("myvideos.extractthumb", False)
 
 
-def set_skin_settings():
+def set_skin_settings() -> None:
     log.debug("Settings Skin Settings")
 
     xbmc.executebuiltin("Skin.SetBool(HomeMenuNoPicturesButton)")

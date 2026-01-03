@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import urllib.parse
 import sys
@@ -52,7 +53,7 @@ log = SimpleLogging(__name__)
 
 
 @timer
-def main_entry_point():
+def main_entry_point() -> None:
     log.debug("===== EmbyCon START =====")
 
     params = get_params()
@@ -62,7 +63,7 @@ def main_entry_point():
     addon_dir = xbmcvfs.translatePath(settings.getAddonInfo("profile"))
 
     profiling_enabled = settings.getSetting("profiling_enabled") == "true"
-    pr = None
+    pr: cProfile.Profile | None = None
     if profiling_enabled:
         if mode in [
             "MOVIE_ALPHA",
@@ -76,6 +77,9 @@ def main_entry_point():
             pr.enable()
 
     kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
+    param_url = params.get("url", "")
+    if param_url:
+        param_url = urllib.parse.unquote(param_url)
 
     log.debug("Running Python: {0}", sys.version_info)
     log.debug("Running EmbyCon: {0}", ClientInformation().get_version())
@@ -83,22 +87,12 @@ def main_entry_point():
     log.debug("Kodi Version: {0}", kodi_version)
     log.debug("Script argument data: {0}", sys.argv)
     log.debug("Script params: {0}", params)
-
-    request_path = params.get("request_path", None)
-    param_url = params.get("url", None)
-
-    if param_url:
-        param_url = urllib.parse.unquote(param_url)
+    log.debug("EmbyCon -> Mode: {0}", mode)
+    log.debug("EmbyCon -> URL: {0}", param_url)
 
     item_count = 0
 
-    if len(params) == 1 and request_path and request_path.find("/library/movies") > -1:
-        check_server()
-        new_params = {}
-        new_params["item_type"] = "Movie"
-        new_params["media_type"] = "movies"
-        item_count = show_content(new_params)
-    elif mode == "CHANGE_USER":
+    if mode == "CHANGE_USER":
         check_server(change_user=True)
     elif mode == "SHOW_USERS":
         show_user_lists(params)
@@ -148,11 +142,9 @@ def main_entry_point():
     elif mode == "WIDGET_CONTENT_CAST":
         get_widget_content_cast(int(sys.argv[1]), params)
     elif mode == "SHOW_CONTENT":
-        # plugin://plugin.video.embycon?mode=SHOW_CONTENT&item_type=Movie|Series
         check_server()
         item_count = show_content(params)
     elif mode == "SEARCH":
-        # plugin://plugin.video.embycon?mode=SEARCH
         xbmcplugin.setContent(int(sys.argv[1]), "files")
         show_search()
     elif mode == "NEW_SEARCH":
@@ -174,17 +166,13 @@ def main_entry_point():
             item_count = get_content(enriched_url, params)
         else:
             log.info("Unable to find TV show parent ID.")
+    elif mode == "GET_CONTENT":
+        item_count = get_content(param_url, params)
+    elif mode == "PLAY":
+        play_action(params)
     else:
-        log.debug("EmbyCon -> Mode: {0}", mode)
-        log.debug("EmbyCon -> URL: {0}", param_url)
-
-        if mode == "GET_CONTENT":
-            item_count = get_content(param_url, params)
-        elif mode == "PLAY":
-            play_action(params)
-        else:
-            check_server()
-            display_main_menu()
+        check_server()
+        display_main_menu()
 
     if pr:
         pr.disable()
@@ -209,7 +197,7 @@ def main_entry_point():
     log.debug("===== EmbyCon FINISHED =====")
 
 
-def __enrich_url(param_url, params):
+def __enrich_url(param_url: str, params: dict[str, str]) -> str:
     enriched_url = param_url
     parent_id = __get_parent_id_from(params)
     if parent_id is not None:
@@ -217,7 +205,7 @@ def __enrich_url(param_url, params):
     return enriched_url
 
 
-def __get_parent_id_from(params):
+def __get_parent_id_from(params: dict[str, str]) -> str | None:
     result = None
     show_provider_ids = params.get("show_ids")
     if show_provider_ids is not None:
@@ -235,9 +223,9 @@ def __get_parent_id_from(params):
             ]
         )
         content = DataManager().get_content(get_show_url)
-        show = content.get("Items")
-        if len(show) == 1:
-            result = content.get("Items")[0].get("Id")
+        show_items = content.get("Items", [])
+        if len(show_items) == 1:
+            result = show_items[0].get("Id")
         else:
             log.debug("TV show not found for ids: {}", show_provider_ids)
     else:
@@ -245,7 +233,7 @@ def __get_parent_id_from(params):
     return result
 
 
-def toggle_watched(params):
+def toggle_watched(params: dict[str, str]) -> None:
     log.debug("toggle_watched: {0}", params)
     item_id = params.get("item_id", None)
     if item_id is None:
@@ -265,7 +253,7 @@ def toggle_watched(params):
         mark_item_unwatched(item_id)
 
 
-def mark_item_watched(item_id, refresh=True):
+def mark_item_watched(item_id: str, refresh: bool = True) -> None:
     log.debug("Mark Item Watched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
     downloadUtils = DownloadUtils()
@@ -281,7 +269,7 @@ def mark_item_watched(item_id, refresh=True):
         xbmc.executebuiltin("Container.Refresh")
 
 
-def mark_item_unwatched(item_id, refresh=True):
+def mark_item_unwatched(item_id: str, refresh: bool = True) -> None:
     log.debug("Mark Item UnWatched: {0}", item_id)
     url = "{server}/emby/Users/{userid}/PlayedItems/" + item_id
     downloadUtils = DownloadUtils()
@@ -297,7 +285,7 @@ def mark_item_unwatched(item_id, refresh=True):
         xbmc.executebuiltin("Container.Refresh")
 
 
-def mark_item_favorite(item_id, refresh=True):
+def mark_item_favorite(item_id: str, refresh: bool = True) -> None:
     log.debug("Add item to favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
     downloadUtils = DownloadUtils()
@@ -312,7 +300,7 @@ def mark_item_favorite(item_id, refresh=True):
         xbmc.executebuiltin("Container.Refresh")
 
 
-def unmark_item_favorite(item_id, refresh=True):
+def unmark_item_favorite(item_id: str, refresh: bool = True) -> None:
     log.debug("Remove item from favourites: {0}", item_id)
     url = "{server}/emby/Users/{userid}/FavoriteItems/" + item_id
     downloadUtils = DownloadUtils()
@@ -327,7 +315,7 @@ def unmark_item_favorite(item_id, refresh=True):
         xbmc.executebuiltin("Container.Refresh")
 
 
-def delete(item_id, refresh=True):
+def delete(item_id: str, refresh: bool = True) -> None:
     downloadUtils = DownloadUtils()
     json_data = downloadUtils.download_url(
         "{server}/emby/Users/{userid}/Items/" + item_id + "?format=json"
@@ -373,7 +361,7 @@ def delete(item_id, refresh=True):
             xbmc.executebuiltin("Container.Refresh")
 
 
-def get_params():
+def get_params() -> dict[str, str]:
     plugin_path = sys.argv[0]
     paramstring = sys.argv[2]
 
@@ -381,10 +369,6 @@ def get_params():
     log.debug("Plugin Path string: {0}", plugin_path)
 
     param = {}
-
-    # add plugin path
-    request_path = plugin_path.replace("plugin://plugin.video.embycon", "")
-    param["request_path"] = request_path
 
     if len(paramstring) >= 2:
         if paramstring[0] == "?":
@@ -405,7 +389,7 @@ def get_params():
     return param
 
 
-def show_node_content(params):
+def show_node_content(params: dict[str, str]) -> None:
     log.debug("show_node_content : {0}", params)
     node_name = params["node_name"]
     node_name = urllib.parse.unquote(node_name)
@@ -432,10 +416,10 @@ def show_node_content(params):
         get_content(url, content_params)
 
 
-def show_menu(params):
+def show_menu(params: dict[str, str]) -> None:
     log.debug("showMenu(): {0}", params)
 
-    home_window = HomeWindow()
+    home_window: HomeWindow = HomeWindow()
     settings = xbmcaddon.Addon()
     plugin_path = xbmcvfs.translatePath(settings.getAddonInfo("path"))
 
@@ -752,10 +736,13 @@ def show_menu(params):
         xbmc.executebuiltin("Action(info)")
 
 
-def show_content(params):
+def show_content(params: dict[str, str]) -> int:
     log.debug("showContent Called: {0}", params)
 
     item_type = params.get("item_type")
+    if item_type is None:
+        raise ValueError("item_type parameter is required")
+
     settings = xbmcaddon.Addon()
     group_movies = settings.getSetting("group_movies") == "true"
 
@@ -783,10 +770,13 @@ def show_content(params):
     return get_content(content_url, params)
 
 
-def search_results_person(params):
+def search_results_person(params: dict[str, str]) -> None:
     handle = int(sys.argv[1])
 
     person_id = params.get("person_id")
+    if person_id is None:
+        raise ValueError("person_id parameter is required")
+
     details_url = "".join(
         [
             "{server}/emby/Users/{userid}/items",
@@ -812,28 +802,29 @@ def search_results_person(params):
 
     params["name_format"] = "Episode|episode_name_format"
 
-    dir_items, detected_type, total_records = process_directory(
-        details_url, None, params, False
-    )
+    # dir_items, detected_type, total_records
+    process_dir_res = process_directory(details_url, None, params, False)
+    if process_dir_res is None:
+        return
 
-    log.debug("search_results_person results: {0}", dir_items)
-    log.debug("search_results_person detect_type: {0}", detected_type)
+    log.debug("search_results_person results: {0}", process_dir_res.dir_items)
+    log.debug("search_results_person detect_type: {0}", process_dir_res.detected_type)
 
-    if detected_type is not None:
+    if process_dir_res.detected_type is not None:
         # if the media type is not set then try to use the detected type
-        log.debug("Detected content type: {0}", detected_type)
+        log.debug("Detected content type: {0}", process_dir_res.detected_type)
         content_type = None
 
-        if detected_type == "Movie":
+        if process_dir_res.detected_type == "Movie":
             content_type = "movies"
-        elif detected_type == "Episode":
+        elif process_dir_res.detected_type == "Episode":
             content_type = "episodes"
-        elif detected_type == "Series":
+        elif process_dir_res.detected_type == "Series":
             content_type = "tvshows"
         elif (
-            detected_type == "Music"
-            or detected_type == "Audio"
-            or detected_type == "Musicalbum"
+            process_dir_res.detected_type == "Music"
+            or process_dir_res.detected_type == "Audio"
+            or process_dir_res.detected_type == "Musicalbum"
         ):
             content_type = "songs"
 
@@ -842,14 +833,15 @@ def search_results_person(params):
 
     # xbmcplugin.setContent(handle, detected_type)
 
-    if dir_items is not None:
+    if process_dir_res.dir_items is not None:
+        dir_items = [item.as_tuple() for item in process_dir_res.dir_items]
         xbmcplugin.addDirectoryItems(handle, dir_items)
 
     xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
 
 
-def search_results(params):
-    item_type = params.get("item_type")
+def search_results(params: dict[str, str]) -> None:
+    item_type = params.get("item_type", "none")
     query_string = params.get("query")
     if query_string:
         log.debug("query_string : {0}", query_string)
@@ -996,10 +988,10 @@ def search_results(params):
 
         # set content type
         xbmcplugin.setContent(handle, content_type)
-        dir_items, detected_type, total_records = process_directory(
-            search_url, progress, params, False
-        )
-        xbmcplugin.addDirectoryItems(handle, dir_items)
+        process_dir_res = process_directory(search_url, progress, params, False)
+        if process_dir_res:
+            dir_item_tuples = [item.as_tuple() for item in process_dir_res.dir_items]
+            xbmcplugin.addDirectoryItems(handle, dir_item_tuples)
         xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
 
     if progress is not None:
@@ -1007,7 +999,7 @@ def search_results(params):
         progress.close()
 
 
-def play_action(params):
+def play_action(params: dict[str, str]) -> None:
     log.debug("== ENTER: PLAY ==")
 
     log.debug("PLAY ACTION PARAMS: {0}", params)
@@ -1048,7 +1040,7 @@ def play_action(params):
     send_event_notification("embycon_play_action", play_info)
 
 
-def play_item_trailer(item_id):
+def play_item_trailer(item_id: str) -> None:
     log.debug("== ENTER: playTrailer ==")
 
     url = "{server}/emby/Users/{userid}/Items/%s/LocalTrailers?format=json" % item_id

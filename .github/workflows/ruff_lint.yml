@@ -1,4 +1,4 @@
-name: Ruff Lint Check
+name: Code Analysis Checks
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     branches: [ develop ] # Adjust branch name as needed
 
 jobs:
-  lint:
+  ruff-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,3 +22,23 @@ jobs:
 
       - name: Run Ruff lint check
         run: ruff check .
+
+  pyright-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x' # Or specify a specific version
+
+      - name: Install Pyright
+        run: pip install pyright
+
+      - name: Install support libraries
+        run: pip install "kodistubs==21.*" Pillow
+
+      - name: Run Pyright type check
+        run: pyright

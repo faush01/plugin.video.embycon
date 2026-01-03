@@ -1,3 +1,4 @@
+from __future__ import annotations
 import xbmc
 import xbmcgui
 import xbmcplugin
@@ -16,29 +17,29 @@ class HomeWindow:
     xbmcgui.Window(10000) with add-on id prefixed to keys
     """
 
-    def __init__(self):
+    window: xbmcgui.Window
+
+    def __init__(self) -> None:
         self.id_string = "plugin.video.embycon-%s"
         self.window = xbmcgui.Window(10000)
 
-    def get_property(self, key):
+    def get_property(self, key: str) -> str:
         key = self.id_string % key
-        value = self.window.getProperty(key)
-        # log.debug('HomeWindow: getProperty |{0}| -> |{1}|', key, value)
-        return value
+        return self.window.getProperty(key)
 
-    def set_property(self, key, value):
+    def set_property(self, key: str, value: str) -> None:
         key = self.id_string % key
-        # log.debug('HomeWindow: setProperty |{0}| -> |{1}|', key, value)
         self.window.setProperty(key, value)
 
-    def clear_property(self, key):
+    def clear_property(self, key: str) -> None:
         key = self.id_string % key
-        # log.debug('HomeWindow: clearProperty |{0}|', key)
         self.window.clearProperty(key)
 
 
-def add_menu_directory_item(label, path, folder=True, art=None):
-    li = xbmcgui.ListItem(label, path=path)
+def add_menu_directory_item(
+    label: str, path: str, folder: bool = True, art: dict | None = None
+) -> None:
+    li: xbmcgui.ListItem = xbmcgui.ListItem(label, path=path)
     if art is None:
         art = {}
         addon = xbmcaddon.Addon()
@@ -50,7 +51,7 @@ def add_menu_directory_item(label, path, folder=True, art=None):
     )
 
 
-def get_kodi_version():
+def get_kodi_version() -> float:
     json_data = xbmc.executeJSONRPC(
         '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }'
     )
