@@ -66,6 +66,7 @@ paths_to_copy = [
     "addon.xml",
     "default.py",
     "service.py",
+    "context.py",
     "icon.png",
     "fanart.jpg",
     "resources/__init__.py",
