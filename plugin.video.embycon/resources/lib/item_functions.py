@@ -158,7 +158,6 @@ class ItemDetails:
     art: dict[str, str] | None = None
 
     mpaa: str | None = None
-    rating: float = 0.0
     critic_rating: float = 0.0
     community_rating: float = 0.0
     year: int | None = None
@@ -617,7 +616,6 @@ def extract_item_info(
         maxwidth=gui_options.max_image_width,
         download_utils=download_utils,
     )
-    item_details.rating = item["OfficialRating"]
     item_details.mpaa = item["OfficialRating"]
 
     item_details.community_rating = item["CommunityRating"]
@@ -786,7 +784,7 @@ def add_gui_item(
         mediatype = "song"
 
     if is_video:
-        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video: xbmc.InfoTagVideo = list_item.getVideoInfoTag()
         info_tag_video.setMediaType(mediatype)
 
         info_tag_video.setTitle(list_item_name)
@@ -796,7 +794,8 @@ def add_gui_item(
         info_tag_video.setPlaycount(item_details.play_count)
         if item_details.year is not None:
             info_tag_video.setYear(item_details.year)
-        info_tag_video.setMpaa(item_details.rating)
+        if item_details.mpaa is not None:
+            info_tag_video.setMpaa(item_details.mpaa)
 
         if item_details.genres is not None and len(item_details.genres) > 0:
             info_tag_video.setGenres(item_details.genres)
@@ -816,32 +815,41 @@ def add_gui_item(
             info_tag_video.setSeason(item_details.season_number)
             info_tag_video.setSortSeason(item_details.season_sort_number)
             info_tag_video.setSortEpisode(item_details.episode_sort_number)
-            info_tag_video.setTvShowTitle(item_details.series_name)
+            if item_details.series_name is not None:
+                info_tag_video.setTvShowTitle(item_details.series_name)
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
         elif item_type == "season":
             info_tag_video.setSeason(item_details.season_number)
             info_tag_video.setEpisode(item_details.total_episodes)
-            info_tag_video.setTvShowTitle(item_details.series_name)
+            if item_details.series_name is not None:
+                info_tag_video.setTvShowTitle(item_details.series_name)
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
         elif item_type == "series":
             info_tag_video.setEpisode(item_details.total_episodes)
             info_tag_video.setSeason(item_details.total_seasons)
-            info_tag_video.setTvShowStatus(item_details.status)
+            if item_details.status is not None:
+                info_tag_video.setTvShowStatus(item_details.status)
             info_tag_video.setTvShowTitle(item_details.name)
 
         info_tag_video.setTagLine(item_details.tagline)
-        info_tag_video.setStudios([item_details.studio])
-        info_tag_video.setFirstAired(item_details.premiere_date)
-        info_tag_video.setPremiered(item_details.premiere_date)
-        info_tag_video.setDateAdded(item_details.date_added)
-        info_tag_video.setPlot(item_details.plot)
+        if item_details.studio is not None:
+            info_tag_video.setStudios([item_details.studio])
+        if item_details.premiere_date is not None:
+            info_tag_video.setFirstAired(item_details.premiere_date)
+        if item_details.premiere_date is not None:
+            info_tag_video.setPremiered(item_details.premiere_date)
+        if item_details.date_added is not None:
+            info_tag_video.setDateAdded(item_details.date_added)
+        if item_details.plot is not None:
+            info_tag_video.setPlot(item_details.plot)
         info_tag_video.setDirectors([item_details.director])
         info_tag_video.setWriters([item_details.writer])
-        info_tag_video.setCountries([item_details.production_location])
+        if item_details.production_location is not None:
+            info_tag_video.setCountries([item_details.production_location])
         if item_details.tags is not None and len(item_details.tags) > 0:
             info_tag_video.setTags(item_details.tags)
 
@@ -895,7 +903,7 @@ def add_gui_item(
         # info_tag_video.setDuration(item_details.duration)
 
     else:
-        info_tag_music = list_item.getMusicInfoTag()
+        info_tag_music: xbmc.InfoTagMusic = list_item.getMusicInfoTag()
         info_tag_music.setMediaType(mediatype)
 
         info_tag_music.setTitle(list_item_name)
@@ -908,7 +916,8 @@ def add_gui_item(
             info_tag_music.setGenres(item_details.genres)
 
         info_tag_music.setTrack(item_details.track_number)
-        info_tag_music.setAlbum(item_details.album_name)
+        if item_details.album_name is not None:
+            info_tag_music.setAlbum(item_details.album_name)
         if item_details.album_artist:
             info_tag_music.setAlbumArtist(item_details.album_artist)
         if item_details.song_artist:
