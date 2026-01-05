@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import xbmcaddon
 import xbmc
@@ -14,6 +15,8 @@ import math
 from datetime import datetime
 import calendar
 import re
+from dataclasses import dataclass
+from typing import List, Tuple
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
@@ -25,7 +28,7 @@ log = SimpleLogging(__name__)
 throwaway = time.strptime("20110101", "%Y%m%d")
 
 
-def get_emby_url(base_url, params):
+def get_emby_url(base_url: str, params: dict[str, object]) -> str:
     params["format"] = "json"
     param_list = []
     for key in params:
@@ -41,25 +44,51 @@ def get_emby_url(base_url, params):
 
 
 ###########################################################################
+@dataclass
+class StrmDetails:
+    """Result from get_strm_details containing playback URL and listitem properties."""
+
+    playurl: str | None
+    listitem_props: List[Tuple[str, str]]
+
+
+@dataclass
+class PlayUrlResult:
+    """Result from get_play_url containing playback URL, playback type, and listitem properties."""
+
+    playurl: str | None
+    playback_type: str | None
+    listitem_props: List[Tuple[str, str]]
+
+
 class PlayUtils:
     @staticmethod
-    def get_play_url(media_source):
+    def get_play_url(media_source: dict) -> PlayUrlResult:
         log.debug("get_play_url - media_source: {0}", media_source)
 
         # check if strm file Container
         if media_source.get("Container") == "strm":
             log.debug("Detected STRM Container")
-            playurl, listitem_props = PlayUtils().get_strm_details(media_source)
-            if playurl is None:
+            strm_result = PlayUtils().get_strm_details(media_source)
+            if strm_result.playurl is None:
                 log.debug("Error, no strm content")
-                return None, None, None
-            else:
-                return playurl, "0", listitem_props
+                return PlayUrlResult(
+                    playurl=None, playback_type=None, listitem_props=[]
+                )
+            return PlayUrlResult(
+                playurl=strm_result.playurl,
+                playback_type="0",
+                listitem_props=strm_result.listitem_props,
+            )
 
         # get all the options
         addon_settings = xbmcaddon.Addon()
         download_utils = DownloadUtils()
         server = download_utils.get_server(add_user_id=True)
+        if server is None:
+            log.debug("Error, no server info")
+            return PlayUrlResult(playurl=None, playback_type=None, listitem_props=[])
+
         use_https = addon_settings.getSetting("protocol") == "1"
         verify_cert = addon_settings.getSetting("verify_cert") == "true"
         allow_direct_file_play = (
@@ -120,7 +149,7 @@ class PlayUtils:
                 "SubtitleStreamIndex",
                 "AudioBitrate",
             ]
-            reduced_params = []
+            reduced_params: list[str] = []
             for param in params:
                 param_bits = param.split("=")
                 if param_bits[0] not in params_to_remove:
@@ -145,16 +174,17 @@ class PlayUtils:
             playurl = transcode_stream_path
             playback_type = "2"
 
-        return playurl, playback_type, []
+        return PlayUrlResult(
+            playurl=playurl, playback_type=playback_type, listitem_props=[]
+        )
 
     @staticmethod
-    def get_strm_details(media_source):
+    def get_strm_details(media_source: dict) -> StrmDetails:
         playurl = None
         listitem_props = []
 
-        contents = media_source.get(
-            "Path"
-        )  # contains contents of strm file with linebreaks
+        # contains contents of strm file with linebreaks
+        contents = media_source.get("Path", "")
 
         line_break = "\r"
         if "\r\n" in contents:
@@ -189,12 +219,12 @@ class PlayUtils:
                 log.debug("STRM playback url found")
 
         log.debug("Playback URL: {0} ListItem Properties: {1}", playurl, listitem_props)
-        return playurl, listitem_props
+        return StrmDetails(playurl=playurl, listitem_props=listitem_props)
 
 
-def get_checksum(item):
+def get_checksum(item: dict) -> str:
     userdata = item["UserData"]
-    checksum = "%s_%s_%s_%s_%s_%s_%s" % (
+    return "%s_%s_%s_%s_%s_%s_%s" % (
         item["Etag"],
         userdata["Played"],
         userdata["IsFavorite"],
@@ -204,10 +234,10 @@ def get_checksum(item):
         userdata.get("PlayedPercentage", "-"),
     )
 
-    return checksum
 
-
-def get_art(item, server, maxwidth, download_utils=None):
+def get_art(
+    item: dict, server: str, maxwidth: int, download_utils: DownloadUtils
+) -> dict[str, str]:
     art = {
         "thumb": "",
         "fanart": "",
@@ -225,9 +255,18 @@ def get_art(item, server, maxwidth, download_utils=None):
         "tvshow.landscape": "",
     }
 
+    def set_artwork(
+        art_keys: list[str], artwork_type: str, parent: bool = False
+    ) -> None:
+        """Helper to set multiple art keys with the same artwork type."""
+        artwork_url = download_utils.get_artwork(
+            item, artwork_type, parent=parent, server=server, maxwidth=maxwidth
+        )
+        for key in art_keys:
+            art[key] = artwork_url
+
     image_tags = item["ImageTags"]
     if image_tags is not None and image_tags["Primary"] is not None:
-        # image_tag = image_tags["Primary"]
         art["thumb"] = download_utils.get_artwork(
             item, "Primary", server=server, maxwidth=maxwidth
         )
@@ -235,149 +274,39 @@ def get_art(item, server, maxwidth, download_utils=None):
     item_type = item["Type"]
 
     if item_type == "Genre":
-        art["poster"] = download_utils.get_artwork(
-            item, "Primary", server=server, maxwidth=maxwidth
-        )
+        set_artwork(["poster"], "Primary")
     elif item_type == "Episode":
-        art["tvshow.poster"] = download_utils.get_artwork(
-            item, "Primary", parent=True, server=server, maxwidth=maxwidth
-        )
-        # art['poster'] = download_utils.getArtwork(item, "Primary", parent=True, server=server, maxwidth=maxwidth)
-        art["tvshow.clearart"] = download_utils.get_artwork(
-            item, "Art", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["clearart"] = download_utils.get_artwork(
-            item, "Art", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.banner"] = download_utils.get_artwork(
-            item, "Banner", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["banner"] = download_utils.get_artwork(
-            item, "Banner", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=True, server=server, maxwidth=maxwidth
-        )
+        set_artwork(["tvshow.poster"], "Primary", parent=True)
+        set_artwork(["tvshow.clearart", "clearart"], "Art", parent=True)
+        set_artwork(["tvshow.clearlogo", "clearlogo"], "Logo", parent=True)
+        set_artwork(["tvshow.banner", "banner"], "Banner", parent=True)
+        set_artwork(["tvshow.landscape", "landscape"], "Thumb", parent=True)
+        set_artwork(["tvshow.fanart", "fanart"], "Backdrop", parent=True)
     elif item_type == "Season":
-        art["tvshow.poster"] = download_utils.get_artwork(
-            item, "Primary", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["season.poster"] = download_utils.get_artwork(
-            item, "Primary", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["poster"] = download_utils.get_artwork(
-            item, "Primary", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.clearart"] = download_utils.get_artwork(
-            item, "Art", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["clearart"] = download_utils.get_artwork(
-            item, "Art", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.banner"] = download_utils.get_artwork(
-            item, "Banner", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["season.banner"] = download_utils.get_artwork(
-            item, "Banner", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["banner"] = download_utils.get_artwork(
-            item, "Banner", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["season.landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=True, server=server, maxwidth=maxwidth
-        )
-        art["fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=True, server=server, maxwidth=maxwidth
-        )
+        set_artwork(["tvshow.poster"], "Primary", parent=True)
+        set_artwork(["season.poster", "poster"], "Primary", parent=False)
+        set_artwork(["tvshow.clearart", "clearart"], "Art", parent=True)
+        set_artwork(["tvshow.clearlogo", "clearlogo"], "Logo", parent=True)
+        set_artwork(["tvshow.banner"], "Banner", parent=True)
+        set_artwork(["season.banner", "banner"], "Banner", parent=False)
+        set_artwork(["tvshow.landscape"], "Thumb", parent=True)
+        set_artwork(["season.landscape", "landscape"], "Thumb", parent=False)
+        set_artwork(["tvshow.fanart", "fanart"], "Backdrop", parent=True)
     elif item_type == "Series":
-        art["tvshow.poster"] = download_utils.get_artwork(
-            item, "Primary", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["poster"] = download_utils.get_artwork(
-            item, "Primary", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.clearart"] = download_utils.get_artwork(
-            item, "Art", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["clearart"] = download_utils.get_artwork(
-            item, "Art", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["clearlogo"] = download_utils.get_artwork(
-            item, "Logo", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.banner"] = download_utils.get_artwork(
-            item, "Banner", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["banner"] = download_utils.get_artwork(
-            item, "Banner", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["landscape"] = download_utils.get_artwork(
-            item, "Thumb", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["tvshow.fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=False, server=server, maxwidth=maxwidth
-        )
-        art["fanart"] = download_utils.get_artwork(
-            item, "Backdrop", parent=False, server=server, maxwidth=maxwidth
-        )
+        set_artwork(["tvshow.poster", "poster"], "Primary", parent=False)
+        set_artwork(["tvshow.clearart", "clearart"], "Art", parent=False)
+        set_artwork(["tvshow.clearlogo", "clearlogo"], "Logo", parent=False)
+        set_artwork(["tvshow.banner", "banner"], "Banner", parent=False)
+        set_artwork(["tvshow.landscape", "landscape"], "Thumb", parent=False)
+        set_artwork(["tvshow.fanart", "fanart"], "Backdrop", parent=False)
     elif item_type == "Movie" or item_type == "BoxSet":
-        art["poster"] = download_utils.get_artwork(
-            item, "Primary", server=server, maxwidth=maxwidth
-        )
-        art["landscape"] = download_utils.get_artwork(
-            item, "Thumb", server=server, maxwidth=maxwidth
-        )
-        art["banner"] = download_utils.get_artwork(
-            item, "Banner", server=server, maxwidth=maxwidth
-        )
-        art["clearlogo"] = download_utils.get_artwork(
-            item, "Logo", server=server, maxwidth=maxwidth
-        )
-        art["clearart"] = download_utils.get_artwork(
-            item, "Art", server=server, maxwidth=maxwidth
-        )
-        art["discart"] = download_utils.get_artwork(
-            item, "Disc", server=server, maxwidth=maxwidth
-        )
-        art["fanart"] = download_utils.get_artwork(
-            item, "Backdrop", server=server, maxwidth=maxwidth
-        )
+        set_artwork(["poster"], "Primary")
+        set_artwork(["landscape"], "Thumb")
+        set_artwork(["banner"], "Banner")
+        set_artwork(["clearlogo"], "Logo")
+        set_artwork(["clearart"], "Art")
+        set_artwork(["discart"], "Disc")
+        set_artwork(["fanart"], "Backdrop")
 
     if not art["fanart"]:
         art["fanart"] = download_utils.get_artwork(
@@ -387,23 +316,23 @@ def get_art(item, server, maxwidth, download_utils=None):
     return art
 
 
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+def id_generator(
+    size: int = 6, chars: str = string.ascii_uppercase + string.digits
+) -> str:
     return "".join(random.choice(chars) for _ in range(size))
 
 
-def double_urlencode(text):
-    text = single_urlencode(text)
-    text = single_urlencode(text)
-    return text
+def double_urlencode(value: str) -> str:
+    text: str = single_urlencode(value)
+    return single_urlencode(text)
 
 
-def single_urlencode(text):
-    text = urllib.parse.urlencode({"1": text})
-    text = text[2:]
-    return text
+def single_urlencode(value: str) -> str:
+    text: str = urllib.parse.urlencode({"1": value})
+    return text[2:]
 
 
-def send_event_notification(method, data):
+def send_event_notification(method: str, data: dict) -> None:
     message_data = json.dumps(data)
     source_id = "embycon"
     base64_data = base64.b64encode(message_data.encode("utf-8"))
@@ -414,11 +343,11 @@ def send_event_notification(method, data):
     xbmc.executebuiltin(command)
 
 
-def datetime_from_string(time_string):
+def datetime_from_string(time_string: str) -> datetime:
     if time_string[-1:] == "Z":
         time_string = re.sub("[0-9]{1}Z", " UTC", time_string)
     elif time_string[-6:] == "+00:00":
-        time_string = re.sub("[0-9]{1}\+00:00", " UTC", time_string)
+        time_string = re.sub("[0-9]{1}\\+00:00", " UTC", time_string)
     log.debug("New Time String : {0}", time_string)
 
     start_time = time.strptime(time_string, "%Y-%m-%dT%H:%M:%S.%f %Z")
@@ -429,7 +358,7 @@ def datetime_from_string(time_string):
     return local_dt
 
 
-def convert_size(size_bytes):
+def convert_size(size_bytes: int) -> str:
     if size_bytes == 0:
         return "0B"
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")

@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import xbmc
 import xbmcgui
@@ -12,15 +13,15 @@ log = SimpleLogging(__name__)
 
 
 class SkipIntroMonitor(threading.Thread):
-    intro_start_ticks = 0
-    intro_end_ticks = 0
-    auto_skip = False
-    original_play_path = None
+    intro_start_ticks: int = 0
+    intro_end_ticks: int = 0
+    auto_skip: bool = False
+    original_play_path: str | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         threading.Thread.__init__(self)
 
-    def run(self):
+    def run(self) -> None:
         log.debug("SkipIntroMonitor Running")
 
         settings = xbmcaddon.Addon()
@@ -88,14 +89,14 @@ class SkipIntroMonitor(threading.Thread):
 
         log.debug("SkipIntroMonitor Exited")
 
-    def set_times(self, start, end):
+    def set_times(self, start: int, end: int) -> None:
         self.intro_start_ticks = start
         self.intro_end_ticks = end
 
-    def set_auto_skip(self, auto_skip):
+    def set_auto_skip(self, auto_skip: bool) -> None:
         self.auto_skip = auto_skip
 
-    def set_play_path(self, path):
+    def set_play_path(self, path: str) -> None:
         self.original_play_path = path
 
 
@@ -104,25 +105,27 @@ class SkipIntroDialog(xbmcgui.WindowXMLDialog):
     confirm = False
     action_exitkeys_id = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        xmlFilename: str,
+        scriptPath: str,
+        defaultSkin: str = "default",
+        defaultRes: str = "720p",
+    ) -> None:
         log.debug("SkipIntroPromptDialog: __init__")
-        xbmcgui.WindowXML.__init__(self, *args, **kwargs)
+        xbmcgui.WindowXML.__init__(
+            self, xmlFilename, scriptPath, defaultSkin, defaultRes
+        )
         self.dialog_open = True
 
-    def onInit(self):
+    def onInit(self) -> None:
         log.debug("SkipIntroPromptDialog: onInit")
         self.action_exitkeys_id = [10, 13]
 
-    def onFocus(self, controlId):
+    def onFocus(self, controlId: int) -> None:
         pass
 
-    def doAction(self, actionID):
-        pass
-
-    def onMessage(self, message):
-        log.debug("SkipIntroPromptDialog: onMessage: {0}", message)
-
-    def onAction(self, action):
+    def onAction(self, action: xbmcgui.Action) -> None:
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
             self.dialog_open = False
             self.close()
@@ -132,7 +135,7 @@ class SkipIntroDialog(xbmcgui.WindowXMLDialog):
         else:
             log.debug("SkipIntroPromptDialog: onAction: {0}", action.getId())
 
-    def onClick(self, controlId):
+    def onClick(self, controlId: int) -> None:
         if controlId == 1:
             self.confirm = True
             self.dialog_open = False

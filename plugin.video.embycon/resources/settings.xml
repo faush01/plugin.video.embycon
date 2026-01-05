@@ -374,11 +374,6 @@
 					<default>true</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="add_user_ratings" type="boolean" label="30348" help="">
-					<level>0</level>
-					<default>true</default>
-					<control type="toggle"/>
-				</setting>
 				<setting id="include_people" type="boolean" label="30183" help="">
 					<level>0</level>
 					<default>false</default>
@@ -484,21 +479,6 @@
 					</control>
 				</setting>
 			</group>
-			<group id="4" label="30224">
-				<setting id="widget_select_action" type="integer" label="30026" help="">
-					<level>0</level>
-					<default>0</default>
-					<constraints>
-						<options>
-							<option label="30313">0</option>
-							<option label="30314">1</option>
-						</options>
-					</constraints>
-					<control type="list" format="string">
-						<heading>30026</heading>
-					</control>
-				</setting>
-			</group>
 		</category>
 		<category label="30111" id="background_services_settings" help="">
 			<group id="1" label="30343">
@@ -524,18 +504,6 @@
 						<minimum>0</minimum>
 						<step>1</step>
 						<maximum>120</maximum>
-					</constraints>
-					<control type="slider" format="integer">
-						<popup>false</popup>
-					</control>
-				</setting>
-				<setting id="new_content_check_interval" type="integer" label="30342" help="">
-					<level>0</level>
-					<default>20</default>
-					<constraints>
-						<minimum>0</minimum>
-						<step>1</step>
-						<maximum>300</maximum>
 					</constraints>
 					<control type="slider" format="integer">
 						<popup>false</popup>

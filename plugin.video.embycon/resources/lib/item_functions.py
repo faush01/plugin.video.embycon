@@ -1,4 +1,6 @@
+from __future__ import annotations
 import sys
+from dataclasses import dataclass
 import urllib.parse
 
 from datetime import datetime
@@ -9,25 +11,80 @@ import xbmc
 import xbmcgui
 
 from .utils import get_art, datetime_from_string
+from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
 
 
 log = SimpleLogging(__name__)
 
 
+@dataclass
+class GuiItem:
+    """Represents a GUI item for Kodi directory listings.
+
+    Attributes:
+        url: The URL or path for the item
+        list_item: The Kodi ListItem object with metadata
+        is_folder: Whether this item is a folder (True) or playable item (False)
+    """
+
+    url: str
+    list_item: xbmcgui.ListItem
+    is_folder: bool
+
+    def as_tuple(self) -> tuple[str, xbmcgui.ListItem, bool]:
+        """Returns the item as a tuple for compatibility with xbmcplugin.addDirectoryItems."""
+        return (self.url, self.list_item, self.is_folder)
+
+
+@dataclass
+class GuiOptions:
+    """GUI options for item extraction.
+
+    Attributes:
+        server: The server URL
+        name_format: Optional format string for item names
+        name_format_type: Optional item type to apply name format to
+        use_prem_date_for_added: Whether to use premiere date for date added
+        max_image_width: Maximum width for images
+    """
+
+    server: str
+    name_format: str | None = None
+    name_format_type: str | None = None
+    use_prem_date_for_added: bool = False
+    max_image_width: int = 400
+
+
+@dataclass
+class DisplayOptions:
+    """Display options for GUI items.
+
+    Attributes:
+        addCounts: Whether to add unwatched counts to item names
+        addResumePercent: Whether to add resume percentage to item names
+        addSubtitleAvailable: Whether to add subtitle indicator to item names
+        addUserRatings: Whether to add user ratings to items
+    """
+
+    addCounts: bool = False
+    addResumePercent: bool = False
+    addSubtitleAvailable: bool = False
+
+
 class MediaStream:
     type = "na"
-    width = 0
-    height = 0
-    channels = 0
-    codec = "na"
-    aspect_ratio = 1.0
-    language = "na"
-    hdr_type = ""
+    width: int = 0
+    height: int = 0
+    channels: int = 0
+    codec: str = "na"
+    aspect_ratio: float = 1.0
+    language: str = "na"
+    hdr_type: str = ""
 
     # "default" if x is None else x
 
-    def set_hdr_type(self, value):
+    def set_hdr_type(self, value: str | None) -> None:
         # Kodi options : dolbyvision, hdr10, hlg
         if value is not None:
             value = value.lower()
@@ -38,41 +95,41 @@ class MediaStream:
             elif value == "dolbyvision":
                 self.hdr_type = "dolbyvision"
 
-    def set_channels(self, value):
+    def set_channels(self, value: int | None) -> None:
         if value is not None:
             self.channels = int(value)
 
-    def set_language(self, value):
+    def set_language(self, value: str | None) -> None:
         if value is not None:
             self.language = value
 
-    def set_aspect_ratio(self, value):
+    def set_aspect_ratio(self, value: float | None) -> None:
         if value is not None:
             self.aspect_ratio = float(value)
 
-    def set_type(self, value):
+    def set_type(self, value: str | None) -> None:
         if value is not None:
             self.type = value
 
-    def set_codec(self, value):
+    def set_codec(self, value: str | None) -> None:
         if value is not None:
             self.codec = value
 
-    def set_width(self, value):
+    def set_width(self, value: int | None) -> None:
         if value is not None:
             self.width = int(value)
 
-    def set_height(self, value):
+    def set_height(self, value: int | None) -> None:
         if value is not None:
             self.height = int(value)
 
 
 class Person:
-    name = ""
-    role = ""
-    thumbnail = ""
+    name: str = ""
+    role: str = ""
+    thumbnail: str = ""
 
-    def __init__(self, n, r, t):
+    def __init__(self, n: str, r: str, t: str) -> None:
         self.name = n
         self.role = r
         self.thumbnail = t
@@ -80,92 +137,90 @@ class Person:
 
 class ItemDetails:
     # objects
-    media_streams = []
-    cast = None
+    media_streams: list[MediaStream] = []
+    cast: list[Person] | None = None
 
     # values
-    name = None
-    sort_name = None
-    id = None
-    etag = None
-    path = None
-    is_folder = False
-    plot = None
-    series_name = None
-    episode_number = 0
-    season_number = 0
-    episode_sort_number = 0
-    season_sort_number = 0
-    track_number = 0
-    series_id = None
-    art = None
+    name: str | None = None
+    sort_name: str | None = None
+    id: str | None = None
+    etag: str | None = None
+    path: str | None = None
+    is_folder: bool = False
+    plot: str | None = None
+    series_name: str | None = None
+    episode_number: int = 0
+    season_number: int = 0
+    episode_sort_number: int = 0
+    season_sort_number: int = 0
+    track_number: int = 0
+    series_id: str | None = None
+    art: dict[str, str] | None = None
 
-    mpaa = None
-    rating = None
-    critic_rating = 0.0
-    community_rating = 0.0
-    year = None
-    premiere_date = ""
-    date_added = ""
-    location_type = None
-    studio = None
-    production_location = None
-    genres = None
-    play_count = 0
-    director = ""
-    writer = ""
-    tagline = ""
-    status = None
-    tags = None
+    mpaa: str | None = None
+    critic_rating: float = 0.0
+    community_rating: float = 0.0
+    year: int | None = None
+    premiere_date: str | None = None
+    date_added: str | None = None
+    location_type: str | None = None
+    studio: str | None = None
+    production_location: str | None = None
+    genres: list[str] | None = None
+    play_count: int = 0
+    director: str = ""
+    writer: str = ""
+    tagline: str = ""
+    status: str | None = None
+    tags: list[str] | None = None
 
-    resume_time = 0
-    duration = 0
-    recursive_item_count = 0
-    recursive_unplayed_items_count = 0
-    total_seasons = 0
-    total_episodes = 0
-    watched_episodes = 0
-    unwatched_episodes = 0
-    number_episodes = 0
-    original_title = None
-    item_type = None
-    subtitle_available = False
-    total_items = 0
+    resume_time: float = 0.0
+    duration: float = 0.0
+    recursive_item_count: int = 0
+    recursive_unplayed_items_count: int | None = 0
+    total_seasons: int = 0
+    total_episodes: int = 0
+    watched_episodes: int = 0
+    unwatched_episodes: int = 0
+    number_episodes: int = 0
+    original_title: str | None = None
+    item_type: str | None = None
+    subtitle_available: bool = False
+    total_items: int = 0
+    song_artist: str = ""
+    album_artist: str = ""
+    album_name: str | None = ""
 
-    song_artist = ""
-    album_artist = ""
-    album_name = ""
+    program_channel_name: str | None = None
+    program_end_date: str | None = None
+    program_start_date: str | None = None
 
-    program_channel_name = None
-    program_end_date = None
-    program_start_date = None
+    favorite: str = "false"
+    overlay: str = "0"
 
-    favorite = "false"
-    overlay = "0"
+    name_format: str = ""
+    mode: str = ""
 
-    name_format = ""
-    mode = ""
+    baseline_itemname: str | None = None
 
-    baseline_itemname = None
-
-    def set_episode_number(self, value):
+    def set_episode_number(self, value: int | None) -> None:
         if value is not None:
             self.episode_number = value
 
-    def set_season_sort_number(self, value):
+    def set_season_sort_number(self, value: int | None) -> None:
         if value is not None:
             self.season_sort_number = value
 
-    def set_season_number(self, value):
+    def set_season_number(self, value: int | None) -> None:
         if value is not None:
             self.season_number = value
 
-    def set_episode_sort_number(self, value):
+    def set_episode_sort_number(self, value: int | None) -> None:
         if value is not None:
             self.episode_sort_number = value
 
 
-def extract_media_info(item):
+def extract_media_info(item: dict) -> list[str]:
     media_info = []
 
     media_sources = item["MediaSources"]
@@ -299,7 +354,9 @@ def extract_media_info(item):
     return media_info
 
 
-def extract_item_info(item, gui_options, download_utils=None):
+def extract_item_info(
+    item: dict, gui_options: GuiOptions, download_utils: DownloadUtils
+) -> ItemDetails:
     item_details = ItemDetails()
 
     item_details.id = item["Id"]
@@ -310,6 +367,8 @@ def extract_item_info(item, gui_options, download_utils=None):
     item_details.name = item["Name"]
     item_details.sort_name = item["SortName"]
     item_details.original_title = item_details.name
+
+    server_url = gui_options.server
 
     if item_details.item_type == "Episode":
         item_details.set_episode_number(item["IndexNumber"])
@@ -360,8 +419,8 @@ def extract_item_info(item, gui_options, download_utils=None):
 
     # set the item name
     # override with name format string from request
-    name_format = gui_options["name_format"]
-    name_format_type = gui_options["name_format_type"]
+    name_format = gui_options.name_format
+    name_format_type = gui_options.name_format_type
 
     if name_format is not None and item_details.item_type == name_format_type:
         name_info = {}
@@ -389,7 +448,7 @@ def extract_item_info(item, gui_options, download_utils=None):
         item_details.premiere_date = tokens[0]
 
     # use premier date for date added
-    if gui_options["use_prem_date_for_added"]:
+    if gui_options.use_prem_date_for_added and item_details.premiere_date is not None:
         item_details.date_added = item_details.premiere_date + " 00:00:00"
     else:
         create_date = item["DateCreated"]
@@ -399,13 +458,14 @@ def extract_item_info(item, gui_options, download_utils=None):
     # add the premiered date for Upcoming TV
     if item_details.location_type == "Virtual":
         airtime = item["AirTime"]
-        item_details.name = (
+        if (
             item_details.name
-            + " - "
-            + item_details.premiere_date
-            + " - "
-            + str(airtime)
-        )
+            and item_details.premiere_date is not None
+            and airtime is not None
+        ):
+            item_details.name = (
+                f"{item_details.name} - {item_details.premiere_date} - {airtime}"
+            )
 
     if item_details.item_type == "Program":
         item_details.program_channel_name = item["ChannelName"]
@@ -475,7 +535,7 @@ def extract_item_info(item, gui_options, download_utils=None):
                         400,
                         400,
                         person_tag,
-                        server=gui_options["server"],
+                        server=server_url,
                     )
                 else:
                     person_thumbnail = ""
@@ -495,7 +555,7 @@ def extract_item_info(item, gui_options, download_utils=None):
     # production location
     prod_location = item["ProductionLocations"]
     # log.debug("ProductionLocations : {0}", prod_location)
-    if prod_location and len(prod_location) > 0:
+    if prod_location is not None and len(prod_location) > 0:
         item_details.production_location = prod_location[0]
 
     # Process Genres
@@ -552,11 +612,10 @@ def extract_item_info(item, gui_options, download_utils=None):
 
     item_details.art = get_art(
         item,
-        gui_options["server"],
-        maxwidth=gui_options["max_image_width"],
+        server_url,
+        maxwidth=gui_options.max_image_width,
         download_utils=download_utils,
     )
-    item_details.rating = item["OfficialRating"]
     item_details.mpaa = item["OfficialRating"]
 
     item_details.community_rating = item["CommunityRating"]
@@ -576,7 +635,13 @@ def extract_item_info(item, gui_options, download_utils=None):
     return item_details
 
 
-def add_gui_item(url, item_details, display_options, folder=True, default_sort=False):
+def add_gui_item(
+    url: str,
+    item_details: ItemDetails,
+    display_options: DisplayOptions,
+    folder: bool = True,
+    default_sort: bool = False,
+) -> GuiItem | None:
     # log.debug("item_details: {0}", item_details.__dict__)
 
     if not item_details.name:
@@ -588,6 +653,7 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         mode = "&mode=0"
 
     # Create the URL to pass to the item
+    item_type = item_details.item_type or "none"
     if folder:
         u = (
             sys.argv[0]
@@ -595,7 +661,7 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
             + urllib.parse.quote(url)
             + mode
             + "&media_type="
-            + item_details.item_type
+            + item_type
         )
         if item_details.name_format:
             u += "&name_format=" + urllib.parse.quote(item_details.name_format)
@@ -606,7 +672,7 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
 
     # Create the ListItem that will be displayed
     list_item_name = item_details.name
-    item_type = item_details.item_type.lower()
+    item_type = item_type.lower()
     is_video = item_type not in ["musicalbum", "audio", "music"]
 
     # calculate percentage
@@ -625,25 +691,31 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         capped_percentage = percentage
 
     counts_added = False
-    add_counts = display_options["addCounts"]
+    add_counts = display_options.addCounts
     if add_counts and item_details.unwatched_episodes != 0:
         counts_added = True
         list_item_name = list_item_name + (" (%s)" % item_details.unwatched_episodes)
 
-    add_resume_percent = display_options["addResumePercent"]
+    add_resume_percent = display_options.addResumePercent
     if not counts_added and add_resume_percent and capped_percentage not in [0, 100]:
         list_item_name = list_item_name + (" (%s%%)" % capped_percentage)
 
-    subtitle_available = display_options["addSubtitleAvailable"]
+    subtitle_available = display_options.addSubtitleAvailable
     if subtitle_available and item_details.subtitle_available:
         list_item_name += " (cc)"
 
     if item_details.item_type == "Program":
-        start_time = datetime_from_string(item_details.program_start_date)
-        end_time = datetime_from_string(item_details.program_end_date)
+        start_time = datetime.now()
+        end_time = start_time.now()
+        if (
+            item_details.program_start_date is not None
+            and item_details.program_end_date is not None
+        ):
+            start_time = datetime_from_string(item_details.program_start_date)
+            end_time = datetime_from_string(item_details.program_end_date)
 
-        duration = (end_time - start_time).total_seconds()
-        time_done = (datetime.now() - start_time).total_seconds()
+        duration: float = (end_time - start_time).total_seconds()
+        time_done: float = (datetime.now() - start_time).total_seconds()
         percentage_done = (float(time_done) / float(duration)) * 100.0
         capped_percentage = int(percentage_done)
 
@@ -653,8 +725,9 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         item_details.duration = int(duration)
         item_details.resume_time = int(time_done)
 
+        channel = item_details.program_channel_name or "Unknown Channel"
         list_item_name = (
-            item_details.program_channel_name
+            channel
             + " - "
             + list_item_name
             + " - "
@@ -678,56 +751,18 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     # log.debug("Setting thumbnail as: {0}", thumbPath)
 
     item_properties = {}
-
-    # calculate percentage
-    # if capped_percentage != 0:
-    #    item_properties["complete_percentage"] = str(capped_percentage)
-
     item_properties["IsPlayable"] = "false"
 
-    # if not folder and is_video:
-    #    item_properties["TotalTime"] = str(item_details.duration)
-    #    item_properties["ResumeTime"] = str(item_details.resume_time)
-
-    list_item.setArt(item_details.art)
-
-    item_properties["fanart_image"] = item_details.art["fanart"]  # back compat
-    item_properties["discart"] = item_details.art["discart"]  # not avail to setArt
-    item_properties["tvshow.poster"] = item_details.art[
-        "tvshow.poster"
-    ]  # not avail to setArt
+    if item_details.art:
+        list_item.setArt(item_details.art)
+        item_properties["fanart_image"] = item_details.art["fanart"]  # back compat
+        item_properties["discart"] = item_details.art["discart"]  # not avail to setArt
+        item_properties["tvshow.poster"] = item_details.art[
+            "tvshow.poster"
+        ]  # not avail to setArt
 
     if item_details.series_id:
         item_properties["series_id"] = item_details.series_id
-
-    # new way
-    # info_labels = {}
-
-    # add cast
-    # if item_details.cast is not None:
-    #    list_item.setCast(item_details.cast)
-
-    # info_labels["title"] = list_item_name
-    # if item_details.sort_name:
-    #    info_labels["sorttitle"] = item_details.sort_name
-    # else:
-    #    info_labels["sorttitle"] = list_item_name
-
-    # info_labels["duration"] = item_details.duration
-    # info_labels["playcount"] = item_details.play_count
-    # if item_details.favorite == 'true':
-    #    info_labels["top250"] = "1"
-
-    # info_labels["rating"] = item_details.rating
-    # info_labels["year"] = item_details.year
-
-    # if item_details.genres is not None and len(item_details.genres) > 0:
-    #    genres_list = []
-    #    for genre in item_details.genres:
-    #        genres_list.append(urllib.parse.quote(genre.encode('utf8')))
-    #    item_properties["genres"] = urllib.parse.quote("|".join(genres_list))
-
-    #    info_labels["genre"] = " / ".join(item_details.genres)
 
     mediatype = "video"
 
@@ -748,10 +783,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     elif item_type == "audio" or item_type == "music":
         mediatype = "song"
 
-    # info_labels["mediatype"] = mediatype
-
     if is_video:
-        info_tag_video = list_item.getVideoInfoTag()
+        info_tag_video: xbmc.InfoTagVideo = list_item.getVideoInfoTag()
         info_tag_video.setMediaType(mediatype)
 
         info_tag_video.setTitle(list_item_name)
@@ -761,7 +794,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         info_tag_video.setPlaycount(item_details.play_count)
         if item_details.year is not None:
             info_tag_video.setYear(item_details.year)
-        info_tag_video.setMpaa(item_details.rating)
+        if item_details.mpaa is not None:
+            info_tag_video.setMpaa(item_details.mpaa)
 
         if item_details.genres is not None and len(item_details.genres) > 0:
             info_tag_video.setGenres(item_details.genres)
@@ -781,72 +815,52 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
             info_tag_video.setSeason(item_details.season_number)
             info_tag_video.setSortSeason(item_details.season_sort_number)
             info_tag_video.setSortEpisode(item_details.episode_sort_number)
-            info_tag_video.setTvShowTitle(item_details.series_name)
-            # info_labels["episode"] = item_details.episode_number
-            # info_labels["season"] = item_details.season_number
-            # info_labels["sortseason"] = item_details.season_sort_number
-            # info_labels["sortepisode"] = item_details.episode_sort_number
-            # info_labels["tvshowtitle"] = item_details.series_name
+            if item_details.series_name is not None:
+                info_tag_video.setTvShowTitle(item_details.series_name)
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
         elif item_type == "season":
             info_tag_video.setSeason(item_details.season_number)
             info_tag_video.setEpisode(item_details.total_episodes)
-            info_tag_video.setTvShowTitle(item_details.series_name)
-            # info_labels["season"] = item_details.season_number
-            # info_labels["episode"] = item_details.total_episodes
-            # info_labels["tvshowtitle"] = item_details.series_name
+            if item_details.series_name is not None:
+                info_tag_video.setTvShowTitle(item_details.series_name)
             if item_details.season_number == 0:
                 item_properties["IsSpecial"] = "true"
 
         elif item_type == "series":
             info_tag_video.setEpisode(item_details.total_episodes)
             info_tag_video.setSeason(item_details.total_seasons)
-            info_tag_video.setTvShowStatus(item_details.status)
+            if item_details.status is not None:
+                info_tag_video.setTvShowStatus(item_details.status)
             info_tag_video.setTvShowTitle(item_details.name)
-            # info_labels["episode"] = item_details.total_episodes
-            # info_labels["season"] = item_details.total_seasons
-            # info_labels["status"] = item_details.status
-            # info_labels["tvshowtitle"] = item_details.name
 
         info_tag_video.setTagLine(item_details.tagline)
-        info_tag_video.setStudios([item_details.studio])
-        info_tag_video.setFirstAired(item_details.premiere_date)
-        info_tag_video.setPremiered(item_details.premiere_date)
-        info_tag_video.setDateAdded(item_details.date_added)
-        info_tag_video.setPlot(item_details.plot)
+        if item_details.studio is not None:
+            info_tag_video.setStudios([item_details.studio])
+        if item_details.premiere_date is not None:
+            info_tag_video.setFirstAired(item_details.premiere_date)
+        if item_details.premiere_date is not None:
+            info_tag_video.setPremiered(item_details.premiere_date)
+        if item_details.date_added is not None:
+            info_tag_video.setDateAdded(item_details.date_added)
+        if item_details.plot is not None:
+            info_tag_video.setPlot(item_details.plot)
         info_tag_video.setDirectors([item_details.director])
         info_tag_video.setWriters([item_details.writer])
-        info_tag_video.setCountries([item_details.production_location])
+        if item_details.production_location is not None:
+            info_tag_video.setCountries([item_details.production_location])
         if item_details.tags is not None and len(item_details.tags) > 0:
             info_tag_video.setTags(item_details.tags)
 
-        info_tag_video.setDbId(int(item_details.id))
+        if item_details.id:
+            info_tag_video.setDbId(int(item_details.id))
 
-        # info_labels["Overlay"] = item_details.overlay # not used ??
-        # info_labels["tagline"] = item_details.tagline
-        # info_labels["studio"] = item_details.studio
-        # info_labels["premiered"] = item_details.premiere_date
-        # info_labels["plot"] = item_details.plot
-        # info_labels["director"] = item_details.director
-        # info_labels["writer"] = item_details.writer
-        # info_labels["dateadded"] = item_details.date_added
-        # info_labels["country"] = item_details.production_location
-        # info_labels["mpaa"] = item_details.mpaa
-        # info_labels["tag"] = item_details.tags
-
-        # if display_options["addUserRatings"]:
-        #    info_labels["userrating"] = item_details.critic_rating
-
-        if item_type in ("movie", "series"):
-            # info_labels["trailer"] = "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
+        if item_type in ("movie", "series") and item_details.id:
             info_tag_video.setTrailer(
                 "plugin://plugin.video.embycon?mode=playTrailer&id=" + item_details.id
             )
 
-        # list_item.setInfo('video', info_labels)
-        # log.debug("info_labels: {0}", info_labels)
         for stream in item_details.media_streams:
             if stream.type == "video":
                 vsd = xbmc.VideoStreamDetail()
@@ -858,13 +872,6 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
                 vsd.setHDRType(stream.hdr_type)
                 info_tag_video.addVideoStream(vsd)
 
-                # list_item.addStreamInfo('video',
-                #                        {'duration': item_details.duration,
-                #                         'aspect': stream["apect_ratio"],
-                #                         'codec': stream["codec"],
-                #                         'width': stream["width"],
-                #                         'height': stream["height"]})
-
             elif stream.type == "audio":
                 asd = xbmc.AudioStreamDetail()
                 asd.setCodec(stream.codec)
@@ -872,18 +879,10 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
                 asd.setLanguage(stream.language)
                 info_tag_video.addAudioStream(asd)
 
-                # list_item.addStreamInfo('audio',
-                #                        {'codec': stream["codec"],
-                #                         'channels': stream["channels"],
-                #                         'language': stream["language"]})
-
             elif stream.type == "sub":
                 ssd = xbmc.SubtitleStreamDetail()
                 ssd.setLanguage(stream.language)
                 info_tag_video.addSubtitleStream(ssd)
-
-                # list_item.addStreamInfo('subtitle',
-                #                        {'language': stream["language"]})
 
         item_properties["TotalSeasons"] = str(item_details.total_seasons)
         item_properties["TotalEpisodes"] = str(item_details.total_episodes)
@@ -903,12 +902,8 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
         info_tag_video.setResumePoint(item_details.resume_time, item_details.duration)
         # info_tag_video.setDuration(item_details.duration)
 
-        # list_item.setRating("imdb", item_details.community_rating, 0, True)
-        # list_item.setRating("rt", item_details.critic_rating, 0, False)
-        # item_properties["TotalTime"] = str(item_details.duration)
-
     else:
-        info_tag_music = list_item.getMusicInfoTag()
+        info_tag_music: xbmc.InfoTagMusic = list_item.getMusicInfoTag()
         info_tag_music.setMediaType(mediatype)
 
         info_tag_music.setTitle(list_item_name)
@@ -921,21 +916,12 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
             info_tag_music.setGenres(item_details.genres)
 
         info_tag_music.setTrack(item_details.track_number)
-        info_tag_music.setAlbum(item_details.album_name)
+        if item_details.album_name is not None:
+            info_tag_music.setAlbum(item_details.album_name)
         if item_details.album_artist:
             info_tag_music.setAlbumArtist(item_details.album_artist)
         if item_details.song_artist:
             info_tag_music.setArtist(item_details.song_artist)
-
-        # info_labels = {}
-        # info_labels["tracknumber"] = item_details.track_number
-        # if item_details.album_artist:
-        #    info_labels["artist"] = item_details.album_artist
-        # elif item_details.song_artist:
-        #    info_labels["artist"] = item_details.song_artist
-        # info_labels["album"] = item_details.album_name
-        # log.debug("info_labels: {0}", info_labels)
-        # list_item.setInfo('music', info_labels)
 
     list_item.setContentLookup(False)
     item_properties["ItemType"] = item_details.item_type
@@ -947,4 +933,4 @@ def add_gui_item(url, item_details, display_options, folder=True, default_sort=F
     # log.debug("item_properties: {0}", item_properties)
     list_item.setProperties(item_properties)
 
-    return u, list_item, folder
+    return GuiItem(url=u, list_item=list_item, is_folder=folder)

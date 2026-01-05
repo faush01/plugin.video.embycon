@@ -10,14 +10,14 @@ log = SimpleLogging(__name__)
 enabled = False
 
 
-def set_timing_enabled(val):
+def set_timing_enabled(val: bool) -> None:
     global enabled
     enabled = val
 
 
-def timer(func):
+def timer(func):  # noqa: ANN001, ANN201
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: object, **kwargs: object) -> object:
         started = time.time()
         value = func(*args, **kwargs)
         ended = time.time()

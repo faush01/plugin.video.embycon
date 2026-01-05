@@ -1,0 +1,2 @@
+kodistubs==21.*
+Pillow

@@ -1,5 +1,7 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
+from typing import cast
 import os
 import threading
 
@@ -9,22 +11,23 @@ import xbmcaddon
 import xbmcvfs
 
 from .simple_logging import SimpleLogging
-from .play_utils import send_event_notification
-from .action_menu import ActionAutoClose
+from .play_utils import PlaybackMonitorService
+from .utils import send_event_notification
+from .auto_close import ActionAutoClose
 
 
 log = SimpleLogging(__name__)
 
 
 class PlayNextService(threading.Thread):
-    stop_thread = False
-    monitor = None
+    stop_thread: bool = False
+    monitor: PlaybackMonitorService
 
-    def __init__(self, play_monitor):
+    def __init__(self, play_monitor: PlaybackMonitorService) -> None:
         super(PlayNextService, self).__init__()
         self.monitor = play_monitor
 
-    def run(self):
+    def run(self) -> None:
         from .play_utils import get_playing_data
 
         settings = xbmcaddon.Addon()
@@ -58,7 +61,10 @@ class PlayNextService(threading.Thread):
                 ):
                     play_next_triggered = True
                     log.debug(
-                        "play_next_triggered hit at {0} seconds from end", time_to_end
+                        "play_next_triggered duration: {0}, position: {1} time to end: {2} seconds from end",
+                        duration,
+                        position,
+                        time_to_end,
                     )
 
                     play_data = get_playing_data(self.monitor.played_information)
@@ -99,31 +105,45 @@ class PlayNextService(threading.Thread):
             if xbmc.Monitor().waitForAbort(1):
                 break
 
-    def stop_servcie(self):
+    def stop_service(self) -> None:
         log.debug("PlayNextService Stop Called")
         self.stop_thread = True
 
 
 class PlayNextDialog(xbmcgui.WindowXMLDialog):
-    action_exitkeys_id = None
-    episode_info = None
-    play_called = False
-    auto_close_thread = None
+    action_exitkeys_id: list[int] | None = None
+    episode_info: dict | None = None
+    play_called: bool = False
+    auto_close_thread: ActionAutoClose | None = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        xmlFilename: str,
+        scriptPath: str,
+        defaultSkin: str = "default",
+        defaultRes: str = "720p",
+    ) -> None:
         log.debug("PlayNextDialog: __init__")
-        xbmcgui.WindowXML.__init__(self, *args, **kwargs)
+        xbmcgui.WindowXML.__init__(
+            self, xmlFilename, scriptPath, defaultSkin, defaultRes
+        )
         self.auto_close_thread = ActionAutoClose(self)
         self.auto_close_thread.set_timeout(30)
         self.auto_close_thread.start()
 
-    def onInit(self):
+    def onInit(self) -> None:
         log.debug("PlayNextDialog: onInit")
         self.action_exitkeys_id = [10, 13]
 
         log.debug("PlayNextDialog: episode_info : {0}", self.episode_info)
 
-        series_name = self.episode_info.get("SeriesName")
+        if self.auto_close_thread is not None:
+            self.auto_close_thread.set_callback(self)
+
+        if self.episode_info is None:
+            return
+
+        series_name = self.episode_info.get("SeriesName", "n/a")
         season_name = self.episode_info.get("SeasonName", "n/a")
         next_epp_name = self.episode_info.get("Name", "n/a")
 
@@ -135,66 +155,82 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
         if rating:
             next_epp_name += " (%s)" % (rating,)
 
-        overview = self.episode_info.get("Overview")
+        overview = self.episode_info.get("Overview", "n/a")
 
-        overview_label = self.getControl(3018)
+        overview_label: xbmcgui.ControlTextBox = cast(
+            xbmcgui.ControlTextBox, self.getControl(3018)
+        )
         overview_label.setText(overview)
 
-        series_label = self.getControl(3011)
+        series_label: xbmcgui.ControlLabel = cast(
+            xbmcgui.ControlLabel, self.getControl(3011)
+        )
         series_label.setLabel(series_name)
 
-        season_label = self.getControl(3016)
+        season_label: xbmcgui.ControlLabel = cast(
+            xbmcgui.ControlLabel, self.getControl(3016)
+        )
         season_label.setLabel(season_name)
 
-        epp_season_num = self.getControl(3017)
+        epp_season_num: xbmcgui.ControlLabel = cast(
+            xbmcgui.ControlLabel, self.getControl(3017)
+        )
         epp_season_num.setLabel(epp_season_number)
 
-        series_label = self.getControl(3012)
+        series_label: xbmcgui.ControlLabel = cast(
+            xbmcgui.ControlLabel, self.getControl(3012)
+        )
         series_label.setLabel(next_epp_name)
 
-        epp_image = self.getControl(3015)
+        epp_image: xbmcgui.ControlImage = cast(
+            xbmcgui.ControlImage, self.getControl(3015)
+        )
         epp_image.setImage(self.episode_info["art"]["thumb"])
 
         runtime_ticks = self.episode_info.get("RunTimeTicks", 0)
+        if runtime_ticks is None:
+            runtime_ticks = 0
         duration = (runtime_ticks / 10000000.0) / 60.0  # convert ticks to minutes
         duration = int(round(duration, 0))
         duration_string = "%s m" % (duration,)
-        duration_label = self.getControl(3019)
+        duration_label: xbmcgui.ControlLabel = cast(
+            xbmcgui.ControlLabel, self.getControl(3019)
+        )
         duration_label.setLabel(duration_string)
 
-        self.auto_close_thread.set_callback(self)
-
-    def update_progress(self, percentage):
-        count_down = self.getControl(3030)
+    def update_progress(self, percentage: float) -> None:
+        count_down: xbmcgui.ControlProgress = cast(
+            xbmcgui.ControlProgress, self.getControl(3030)
+        )
         count_down.setPercent(percentage)
 
-    def onFocus(self, control_id):
+    def onFocus(self, controlId: int) -> None:
         pass
 
-    def doAction(self, action_id):
-        pass
-
-    def onMessage(self, message):
-        log.debug("PlayNextDialog: onMessage: {0}", message)
-
-    def onAction(self, action):
+    def onAction(self, action: xbmcgui.Action) -> None:
         if action.getId() == 10:  # ACTION_PREVIOUS_MENU
-            self.auto_close_thread.stop()
+            if self.auto_close_thread is not None:
+                self.auto_close_thread.stop()
             self.close()
         elif action.getId() == 92:  # ACTION_NAV_BACK
-            self.auto_close_thread.stop()
+            if self.auto_close_thread is not None:
+                self.auto_close_thread.stop()
             self.close()
         else:
-            self.auto_close_thread.set_last()
+            if self.auto_close_thread is not None:
+                self.auto_close_thread.set_last()
             log.debug("PlayNextDialog: onAction: {0}", action.getId())
 
-    def onClick(self, control_id):
-        if control_id == 3013:
+    def onClick(self, controlId: int) -> None:
+        if controlId == 3013:
             log.debug("PlayNextDialog: Play Next Episode")
             self.play_called = True
-            self.auto_close_thread.stop()
+            if self.auto_close_thread is not None:
+                self.auto_close_thread.stop()
             self.close()
-            next_item_id = self.episode_info.get("Id")
+            next_item_id = "-1"
+            if self.episode_info is not None:
+                next_item_id = self.episode_info.get("Id")
             log.debug("Playing Next Episode: {0}", next_item_id)
             play_info = {}
             play_info["item_id"] = next_item_id
@@ -202,13 +238,15 @@ class PlayNextDialog(xbmcgui.WindowXMLDialog):
             play_info["force_transcode"] = False
             send_event_notification("embycon_play_action", play_info)
 
-        self.auto_close_thread.set_last()
+        if self.auto_close_thread is not None:
+            self.auto_close_thread.set_last()
 
-    def set_episode_info(self, info):
+    def set_episode_info(self, info: dict) -> None:
         self.episode_info = info
 
-    def get_play_called(self):
+    def get_play_called(self) -> bool:
         return self.play_called
 
-    def stop_auto_close(self):
-        self.auto_close_thread.stop()
+    def stop_auto_close(self) -> None:
+        if self.auto_close_thread is not None:
+            self.auto_close_thread.stop()

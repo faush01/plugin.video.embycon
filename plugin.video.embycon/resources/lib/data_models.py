@@ -1,52 +1,55 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 
 
 # --- Data Classes for Nested JSON Structure ---
 @dataclass
 class MediaStream:
-    Title: Optional[str] = None
-    Codec: Optional[str] = None
-    Language: Optional[str] = None
-    TimeBase: Optional[str] = None
-    VideoRange: Optional[str] = None
-    DisplayTitle: Optional[str] = None
-    DisplayLanguage: Optional[str] = None
-    NalLengthSize: Optional[str] = None
-    IsInterlaced: Optional[bool] = None
-    BitRate: Optional[int] = None
-    BitDepth: Optional[int] = None
-    RefFrames: Optional[int] = None
-    IsDefault: Optional[bool] = None
-    IsForced: Optional[bool] = None
-    IsHearingImpaired: Optional[bool] = None
-    Height: Optional[int] = None
-    Width: Optional[int] = None
-    AverageFrameRate: Optional[float] = None
-    RealFrameRate: Optional[float] = None
-    Profile: Optional[str] = None
-    Type: Optional[str] = None
-    AspectRatio: Optional[str] = None
-    Index: Optional[int] = None
-    IsExternal: Optional[bool] = None
-    IsTextSubtitleStream: Optional[bool] = None
-    SupportsExternalStream: Optional[bool] = None
-    Protocol: Optional[str] = None
-    PixelFormat: Optional[str] = None
-    Level: Optional[int] = None
-    IsAnamorphic: Optional[bool] = None
-    ExtendedVideoType: Optional[str] = None
-    ExtendedVideoSubType: Optional[str] = None
-    ExtendedVideoSubTypeDescription: Optional[str] = None
-    AttachmentSize: Optional[int] = None
-    SubtitleLocationType: Optional[str] = None
-    ChannelLayout: Optional[str] = None
-    Channels: Optional[int] = None
-    SampleRate: Optional[int] = None
-    ColorTransfer: Optional[str] = None
-    ColorPrimaries: Optional[str] = None
-    ColorSpace: Optional[str] = None
-    CodecTag: Optional[str] = None
+    Title: str | None = None
+    Codec: str | None = None
+    Language: str | None = None
+    TimeBase: str | None = None
+    VideoRange: str | None = None
+    DisplayTitle: str | None = None
+    DisplayLanguage: str | None = None
+    NalLengthSize: str | None = None
+    IsInterlaced: bool | None = None
+    BitRate: int | None = None
+    BitDepth: int | None = None
+    RefFrames: int | None = None
+    IsDefault: bool | None = None
+    IsForced: bool | None = None
+    IsHearingImpaired: bool | None = None
+    Height: int | None = None
+    Width: int | None = None
+    AverageFrameRate: float | None = None
+    RealFrameRate: float | None = None
+    Profile: str | None = None
+    Type: str | None = None
+    AspectRatio: str | None = None
+    Index: int | None = None
+    IsExternal: bool | None = None
+    IsTextSubtitleStream: bool | None = None
+    SupportsExternalStream: bool | None = None
+    Protocol: str | None = None
+    PixelFormat: str | None = None
+    Level: int | None = None
+    IsAnamorphic: bool | None = None
+    ExtendedVideoType: str | None = None
+    ExtendedVideoSubType: str | None = None
+    ExtendedVideoSubTypeDescription: str | None = None
+    AttachmentSize: int | None = None
+    SubtitleLocationType: str | None = None
+    ChannelLayout: str | None = None
+    Channels: int | None = None
+    SampleRate: int | None = None
+    ColorTransfer: str | None = None
+    ColorPrimaries: str | None = None
+    ColorSpace: str | None = None
+    CodecTag: str | None = None
+    Path: str | None = None
+    MimeType: str | None = None
 
 
 @dataclass
@@ -57,26 +60,28 @@ class MediaSource:
     Type: str
     Container: str
     Size: int
-    Name: Optional[str] = None
-    IsRemote: Optional[bool] = None
-    HasMixedProtocols: Optional[bool] = None
-    RunTimeTicks: Optional[int] = None
-    SupportsTranscoding: Optional[bool] = None
-    SupportsDirectStream: Optional[bool] = None
-    SupportsDirectPlay: Optional[bool] = None
-    IsInfiniteStream: Optional[bool] = None
-    RequiresOpening: Optional[bool] = None
-    RequiresClosing: Optional[bool] = None
-    RequiresLooping: Optional[bool] = None
-    SupportsProbing: Optional[bool] = None
+    Name: str | None = None
+    IsRemote: bool | None = None
+    HasMixedProtocols: bool | None = None
+    RunTimeTicks: int | None = None
+    SupportsTranscoding: bool | None = None
+    SupportsDirectStream: bool | None = None
+    SupportsDirectPlay: bool | None = None
+    IsInfiniteStream: bool | None = None
+    RequiresOpening: bool | None = None
+    RequiresClosing: bool | None = None
+    RequiresLooping: bool | None = None
+    SupportsProbing: bool | None = None
     MediaStreams: List[MediaStream] = field(default_factory=list)
     Formats: List[Any] = field(default_factory=list)
-    Bitrate: Optional[int] = None
-    RequiredHttpHeaders: Optional[Dict[str, Any]] = field(default_factory=dict)
-    AddApiKeyToDirectStreamUrl: Optional[bool] = None
-    ReadAtNativeFramerate: Optional[bool] = None
-    DefaultAudioStreamIndex: Optional[int] = None
-    ItemId: Optional[str] = None
+    Bitrate: int | None = None
+    RequiredHttpHeaders: Dict[str, Any] | None = field(default_factory=dict)
+    AddApiKeyToDirectStreamUrl: bool | None = None
+    ReadAtNativeFramerate: bool | None = None
+    DefaultAudioStreamIndex: int | None = None
+    ItemId: str | None = None
+    Chapters: List[Any] = field(default_factory=list)
+    DefaultSubtitleStreamIndex: int | None = None
 
 
 @dataclass
@@ -94,9 +99,9 @@ class GenreItem:
 @dataclass
 class UserData:
     PlaybackPositionTicks: int
-    PlayedPercentage: Optional[float] = 0.0
-    UnplayedItemCount: Optional[int] = 0
-    PlayCount: Optional[int] = 0
+    PlayedPercentage: float | None = 0.0
+    UnplayedItemCount: int | None = 0
+    PlayCount: int | None = 0
     IsFavorite: bool = False
     Played: bool = False
 
@@ -109,20 +114,20 @@ class TagItem:
 
 @dataclass
 class ImageTags:
-    Primary: Optional[str] = None
-    Thumb: Optional[str] = None
-    Logo: Optional[str] = None
-    Banner: Optional[str] = None
-    Art: Optional[str] = None
-    Disc: Optional[str] = None
+    Primary: str | None = None
+    Thumb: str | None = None
+    Logo: str | None = None
+    Banner: str | None = None
+    Art: str | None = None
+    Disc: str | None = None
 
 
 @dataclass
 class ProviderIds:
-    Imdb: Optional[str] = None
-    Tmdb: Optional[str] = None
-    Tvdb: Optional[str] = None
-    TvRage: Optional[str] = None
+    Imdb: str | None = None
+    Tmdb: str | None = None
+    Tvdb: str | None = None
+    TvRage: str | None = None
 
 
 @dataclass
@@ -132,63 +137,65 @@ class Item:
     Id: str
     Etag: str
     DateCreated: str
-    Guid: Optional[str] = None
-    Container: Optional[str] = None
-    SortName: Optional[str] = None
-    PremiereDate: Optional[str] = None
+    Guid: str | None = None
+    Container: str | None = None
+    SortName: str | None = None
+    PremiereDate: str | None = None
     MediaSources: List[MediaSource] = field(default_factory=list)
-    CriticRating: Optional[int] = None
+    CriticRating: int | None = None
     ProductionLocations: List[str] = field(default_factory=list)
-    Path: Optional[str] = None
-    OfficialRating: Optional[str] = None
-    Overview: Optional[str] = None
+    Path: str | None = None
+    OfficialRating: str | None = None
+    Overview: str | None = None
     Taglines: List[str] = field(default_factory=list)
     Genres: List[str] = field(default_factory=list)
-    CommunityRating: Optional[float] = None
-    RunTimeTicks: Optional[int] = None
-    Size: Optional[int] = None
-    Bitrate: Optional[int] = None
-    ProductionYear: Optional[int] = None
-    IsFolder: Optional[bool] = None
-    Type: Optional[str] = None
+    CommunityRating: float | None = None
+    RunTimeTicks: int | None = None
+    Size: int | None = None
+    Bitrate: int | None = None
+    ProductionYear: int | None = None
+    IsFolder: bool | None = None
+    Type: str | None = None
     Studios: List[Studio] = field(default_factory=list)
     GenreItems: List[GenreItem] = field(default_factory=list)
     TagItems: List[TagItem] = field(default_factory=list)
-    UserData: Optional[UserData] = None  # type: ignore
+    UserData: UserData | None = None  # type: ignore
     MediaStreams: List[MediaStream] = field(default_factory=list)
-    ImageTags: Optional[ImageTags] = None  # type: ignore
+    ImageTags: ImageTags | None = None  # type: ignore
     BackdropImageTags: List[str] = field(default_factory=list)
-    MediaType: Optional[str] = None
-    CanDelete: Optional[bool] = None
-    CanDownload: Optional[bool] = None
-    PresentationUniqueKey: Optional[str] = None
-    ForcedSortName: Optional[str] = None
+    MediaType: str | None = None
+    CanDelete: bool | None = None
+    CanDownload: bool | None = None
+    PresentationUniqueKey: str | None = None
+    ForcedSortName: str | None = None
     ExternalUrls: List[str] = field(default_factory=list)
     RemoteTrailers: List[str] = field(default_factory=list)
-    ProviderIds: Optional[Dict[str, str]] = field(default_factory=dict)
-    ParentId: Optional[str] = None
-    ChildCount: Optional[int] = None
-    DisplayPreferencesId: Optional[str] = None
-    PrimaryImageAspectRatio: Optional[float] = None
-    CollectionType: Optional[str] = None
-    LockedFields: Optional[List[str]] = field(default_factory=list)
-    LockData: Optional[bool] = None
-    RecursiveItemCount: Optional[int] = None
-    Status: Optional[str] = None
+    ProviderIds: Dict[str, str] | None = field(default_factory=dict)
+    ParentId: str | None = None
+    ChildCount: int | None = None
+    DisplayPreferencesId: str | None = None
+    PrimaryImageAspectRatio: float | None = None
+    CollectionType: str | None = None
+    LockedFields: List[str] | None = field(default_factory=list)
+    LockData: bool | None = None
+    RecursiveItemCount: int | None = None
+    Status: str | None = None
     AirDays: List[str] = field(default_factory=list)
-    IndexNumber: Optional[int] = None
-    ParentLogoItemId: Optional[str] = None
-    ParentBackdropItemId: Optional[str] = None
-    ParentBackdropImageTags: Optional[List[str]] = field(default_factory=list)
-    SeriesName: Optional[str] = None
-    SeriesId: Optional[str] = None
-    SeriesPrimaryImageTag: Optional[str] = None
-    ParentLogoImageTag: Optional[str] = None
-    ParentThumbItemId: Optional[str] = None
-    ParentThumbImageTag: Optional[str] = None
-    ParentIndexNumber: Optional[int] = None
-    SeasonId: Optional[str] = None
-    SeasonName: Optional[str] = None
+    IndexNumber: int | None = None
+    ParentLogoItemId: str | None = None
+    ParentBackdropItemId: str | None = None
+    ParentBackdropImageTags: List[str] | None = field(default_factory=list)
+    SeriesName: str | None = None
+    SeriesId: str | None = None
+    SeriesPrimaryImageTag: str | None = None
+    ParentLogoImageTag: str | None = None
+    ParentThumbItemId: str | None = None
+    ParentThumbImageTag: str | None = None
+    ParentIndexNumber: int | None = None
+    SeasonId: str | None = None
+    SeasonName: str | None = None
+    DateModified: str | None = None
+    FileName: str | None = None
 
 
 @dataclass

@@ -1,4 +1,5 @@
 # Gnu General Public License - see LICENSE.TXT
+from __future__ import annotations
 
 import socket
 import json
@@ -23,7 +24,7 @@ from .clientinfo import ClientInformation
 log = SimpleLogging(__name__)
 
 
-def check_connection_speed():
+def check_connection_speed() -> int:
     log.debug("check_connection_speed")
 
     settings = xbmcaddon.Addon()
@@ -34,6 +35,12 @@ def check_connection_speed():
 
     du = DownloadUtils()
     server = du.get_server()
+    if server is None:
+        log.error("No server configured for speed test")
+        xbmcgui.Dialog().ok(
+            "Speed Test Error", "No server configured, please setup server first"
+        )
+        return -1
 
     url = server + "/emby/playback/bitratetest?size=%s" % test_data_size
 
@@ -126,7 +133,7 @@ def check_connection_speed():
     return speed
 
 
-def get_server_details():
+def get_server_details() -> list[dict]:
     log.debug("Getting Server Details from Network")
     servers = []
 
@@ -175,7 +182,7 @@ def get_server_details():
     return servers
 
 
-def check_server(force=False, change_user=False):
+def check_server(force: bool = False, change_user: bool = False) -> None:
     log.debug("checkServer Called")
 
     settings = xbmcaddon.Addon()
@@ -202,9 +209,9 @@ def check_server(force=False, change_user=False):
         server_list = []
         for server in server_info:
             server_item = xbmcgui.ListItem(server.get("Name", string_load(30063)))
-            sub_line = server.get("Address")
+            sub_line = server.get("Address", "no address")
             server_item.setLabel2(sub_line)
-            server_item.setProperty("address", server.get("Address"))
+            server_item.setProperty("address", server.get("Address", "no address"))
             art = {"Thumb": server_icon}
             server_item.setArt(art)
             server_list.append(server_item)
@@ -272,14 +279,13 @@ def check_server(force=False, change_user=False):
                         "%s://%s:%s/" % (server_protocol, server_address, server_port),
                     )
                     break
-                else:
-                    message = server_url + "\n" + string_load(30371)
-                    return_index = xbmcgui.Dialog().yesno(
-                        addon_name + " : " + string_load(30135), message
-                    )
-                    if not return_index:
-                        xbmc.executebuiltin("ActivateWindow(Home)")
-                        return
+                message = server_url + "\n" + string_load(30371)
+                return_index = xbmcgui.Dialog().yesno(
+                    addon_name + " : " + string_load(30135), message
+                )
+                if not return_index:
+                    xbmc.executebuiltin("ActivateWindow(Home)")
+                    return
 
         log.debug("Selected server: {0}", server_url)
 
@@ -307,7 +313,7 @@ def check_server(force=False, change_user=False):
                 server_address,
             )
 
-        settings.setSetting("ipaddress", server_address)
+        settings.setSetting("ipaddress", server_address or "")
 
         if server_protocol == "https":
             settings.setSetting("protocol", "1")
