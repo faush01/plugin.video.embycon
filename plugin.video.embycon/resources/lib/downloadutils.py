@@ -214,7 +214,6 @@ class DownloadUtils:
                 {"Container": "jpeg", "Type": "Photo"},
             ],
             "DirectPlayProfiles": [
-                {"Type": "Video"},
                 {"Type": "Audio"},
                 {"Type": "Photo"},
             ],
@@ -243,13 +242,23 @@ class DownloadUtils:
             ],
         }
 
-        if len(filtered_codecs) > 0:
-            profile["DirectPlayProfiles"][0]["VideoCodec"] = "-%s" % ",".join(
-                filtered_codecs
-            )
-
+        # video direct play profiles
+        direct_play_profile = profile["DirectPlayProfiles"]
         if force_transcode:
-            profile["DirectPlayProfiles"] = []
+            direct_play_profile = []
+        elif len(filtered_codecs) > 0:
+            direct_play_profile.append(
+                {
+                    "Type": "Video",
+                    "VideoCodec": "-%s" % ",".join(filtered_codecs),
+                }
+            )
+        else:
+            direct_play_profile.append(
+                {
+                    "Type": "Video",
+                }
+            )
 
         if addon_settings.getSetting("playback_video_force_8") == "true":
             profile["CodecProfiles"].append(
