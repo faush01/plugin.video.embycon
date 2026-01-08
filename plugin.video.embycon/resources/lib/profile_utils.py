@@ -166,7 +166,7 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         to_add = target_len - text_len
         if to_add < 1:
             return value
-        for x in range(0, to_add):
+        for _x in range(0, to_add):
             value += " "
         return value
 
@@ -198,7 +198,7 @@ def list_available_profiles(_params: dict[str, str]) -> None:
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     profile_path = os.path.join(addon_dir, "profile")
-    dirs, files = xbmcvfs.listdir(profile_path)
+    _dirs, files = xbmcvfs.listdir(profile_path)
     files.sort(reverse=True)
 
     for file in files:

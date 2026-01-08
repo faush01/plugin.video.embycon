@@ -394,7 +394,7 @@ def clear_cached_server_data() -> None:
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     cache_path = os.path.join(addon_dir, "cache")
-    dirs, files = xbmcvfs.listdir(cache_path)
+    _dirs, files = xbmcvfs.listdir(cache_path)
 
     del_count = 0
     for filename in files:
@@ -417,7 +417,7 @@ def clear_old_cache_data() -> None:
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     cache_path = os.path.join(addon_dir, "cache")
-    dirs, files = xbmcvfs.listdir(cache_path)
+    _dirs, files = xbmcvfs.listdir(cache_path)
 
     del_count = 0
     for filename in files:
@@ -425,7 +425,7 @@ def clear_old_cache_data() -> None:
             log.debug("clear_old_cache_data() : Checking CacheFile : {0}", filename)
 
             cache_item = None
-            for x in range(0, 5):
+            for _x in range(0, 5):
                 try:
                     data_file = os.path.join(cache_path, filename)
                     with FileLock(data_file, timeout=5):

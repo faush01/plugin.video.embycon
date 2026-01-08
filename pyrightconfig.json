@@ -2,10 +2,19 @@
     "ignore": [
         "**/resources/lib/websocket/*.py"
     ],
-    "typeCheckingMode": "standard",
-    //"reportUnknownVariableType": true,
-    //"reportUnknownMemberType": true,
-    //"reportUnknownParameterType": true,
-    //"reportUnknownArgumentType": true,
-    //"reportUnknownFieldType": true
+    "typeCheckingMode": "strict",
+    "reportMissingTypeStubs": false,
+    "reportUnnecessaryIsInstance": false,
+    "reportUnnecessaryComparison": false,
+    "reportMissingTypeArgument": false,
+    "reportUnknownParameterType": false,
+    "reportUnknownMemberType": false,
+    "reportUnknownVariableType": false,
+    "reportUnknownArgumentType": false,
+    "reportIndexIssue": false,
+    "reportArgumentType": false,
+    "reportAttributeAccessIssue": false,
+    "reportPrivateUsage": false,
+    "reportUnknownLambdaType": false,
+    "reportMissingParameterType": false
 }

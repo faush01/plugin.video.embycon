@@ -197,14 +197,6 @@ def main_entry_point() -> None:
     log.debug("===== EmbyCon FINISHED =====")
 
 
-def __enrich_url(param_url: str, params: dict[str, str]) -> str:
-    enriched_url = param_url
-    parent_id = __get_parent_id_from(params)
-    if parent_id is not None:
-        enriched_url = param_url + "&ParentId=" + parent_id
-    return enriched_url
-
-
 def __get_parent_id_from(params: dict[str, str]) -> str | None:
     result = None
     show_provider_ids = params.get("show_ids")
