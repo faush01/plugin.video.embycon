@@ -3,16 +3,17 @@
         "**/resources/lib/websocket/*.py"
     ],
     "typeCheckingMode": "strict",
+    // general error suppressions
     "reportMissingTypeStubs": false,
     "reportUnnecessaryIsInstance": false,
     "reportUnnecessaryComparison": false,
+    // type specific error suppressions
     "reportMissingTypeArgument": false,
     "reportUnknownParameterType": false,
     "reportUnknownMemberType": false,
     "reportUnknownVariableType": false,
     "reportUnknownArgumentType": false,
     "reportArgumentType": false,
-    "reportAttributeAccessIssue": false,
     "reportUnknownLambdaType": false,
     "reportMissingParameterType": false
 }

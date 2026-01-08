@@ -1,5 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 from __future__ import annotations
+from typing import cast
 
 import xbmcgui
 import xbmcaddon
@@ -243,7 +244,7 @@ class DownloadUtils:
         }
 
         # video direct play profiles
-        direct_play_profile = profile["DirectPlayProfiles"]
+        direct_play_profile = cast(list, profile["DirectPlayProfiles"])
         if force_transcode:
             direct_play_profile = []
         elif len(filtered_codecs) > 0:
@@ -261,7 +262,8 @@ class DownloadUtils:
             )
 
         if addon_settings.getSetting("playback_video_force_8") == "true":
-            profile["CodecProfiles"].append(
+            codec_profiles = cast(list, profile["CodecProfiles"])
+            codec_profiles.append(
                 {
                     "Type": "Video",
                     "Codec": "h264",
@@ -275,7 +277,7 @@ class DownloadUtils:
                     ],
                 }
             )
-            profile["CodecProfiles"].append(
+            codec_profiles.append(
                 {
                     "Type": "Video",
                     "Codec": "h265,hevc",
