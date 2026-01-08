@@ -66,8 +66,11 @@ def check_connection_speed() -> int:
         conn = http.client.HTTPSConnection(server, timeout=http_timeout)
     elif local_use_https and not verify_cert:
         log.debug("Connection: HTTPS, Cert NOT checked")
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         conn = http.client.HTTPSConnection(
-            server, timeout=http_timeout, context=ssl._create_unverified_context()
+            server, timeout=http_timeout, context=context
         )
     else:
         log.debug("Connection: HTTP")

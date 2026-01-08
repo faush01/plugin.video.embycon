@@ -845,10 +845,13 @@ class DownloadUtils:
                 conn = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
                 conn = http.client.HTTPSConnection(
                     server,
                     timeout=http_timeout,
-                    context=ssl._create_unverified_context(),
+                    context=ssl_context,
                 )
             else:
                 log.debug("Connection: HTTP")
