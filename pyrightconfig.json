@@ -8,12 +8,11 @@
     "reportUnnecessaryIsInstance": false,
     "reportUnnecessaryComparison": false,
     // type specific error suppressions
-    "reportMissingTypeArgument": false,
-    "reportUnknownParameterType": false,
-    "reportUnknownMemberType": false,
-    "reportUnknownVariableType": false,
-    "reportUnknownArgumentType": false,
-    "reportArgumentType": false,
+    "reportMissingTypeArgument": false, // 51
+    "reportUnknownParameterType": false, // 49
+    "reportUnknownMemberType": false, // 689
+    "reportUnknownVariableType": false, // 579
+    "reportUnknownArgumentType": false, // 601
     "reportUnknownLambdaType": false,
     "reportMissingParameterType": false
 }

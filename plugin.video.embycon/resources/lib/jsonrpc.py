@@ -1,6 +1,11 @@
 from __future__ import annotations
 import json
+from typing import Any, TypedDict
 import xbmc
+
+
+class JsonRpcResponse(TypedDict):
+    result: dict[str, Any]
 
 
 class JsonRpc(object):
@@ -10,13 +15,13 @@ class JsonRpc(object):
     def __init__(self, method: str) -> None:
         self.method = method
 
-    def execute(self, params: dict | None = None) -> dict:
-        query = {
+    def execute(self, params: dict[str, Any]) -> JsonRpcResponse:
+        query: dict[str, Any] = {
             "jsonrpc": self.jsonrpc,
             "id": self.id_,
             "method": self.method,
         }
-        if params is not None:
+        if params:
             query["params"] = params
 
         return json.loads(xbmc.executeJSONRPC(json.dumps(query)))
@@ -27,6 +32,6 @@ def get_value(name: str) -> object:
     return result["result"]["value"]
 
 
-def set_value(name: str, value: object) -> dict:
+def set_value(name: str, value: object) -> JsonRpcResponse:
     params = {"setting": name, "value": value}
     return JsonRpc("Settings.setSettingValue").execute(params)
