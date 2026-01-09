@@ -13,5 +13,4 @@
     "reportUnknownMemberType": false, // 689
     "reportUnknownVariableType": false, // 579
     "reportUnknownArgumentType": false, // 601
-    "reportMissingParameterType": false
 }
