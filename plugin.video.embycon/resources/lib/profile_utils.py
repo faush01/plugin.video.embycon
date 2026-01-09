@@ -121,10 +121,18 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
 
             if self.display_option == 0:
                 profile_details_text += "Sorted By : LocalTime\n"
-                stats.sort(key=lambda x: x["time_local"], reverse=True)
+
+                def get_time_local(x: dict) -> float:
+                    return x["time_local"]
+
+                stats.sort(key=get_time_local, reverse=True)
             elif self.display_option == 1:
                 profile_details_text += "Sorted By : StackTime\n"
-                stats.sort(key=lambda x: x["time_stack"], reverse=True)
+
+                def get_time_stack(x: dict) -> float:
+                    return x["time_stack"]
+
+                stats.sort(key=get_time_stack, reverse=True)
 
             profile_details_text += "\n"
             profile_details_text += "   "
