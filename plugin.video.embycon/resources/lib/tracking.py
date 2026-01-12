@@ -3,11 +3,14 @@
 import sys
 import functools
 import time
+from typing import Callable, TypeVar
 from .simple_logging import SimpleLogging
 
 log = SimpleLogging(__name__)
 
 enabled = False
+
+F = TypeVar("F", bound=Callable[..., object])
 
 
 def set_timing_enabled(val: bool) -> None:
@@ -15,7 +18,7 @@ def set_timing_enabled(val: bool) -> None:
     enabled = val
 
 
-def timer(func):  # noqa: ANN001, ANN201
+def timer(func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args: object, **kwargs: object) -> object:
         started = time.time()
@@ -30,4 +33,4 @@ def timer(func):  # noqa: ANN001, ANN201
             log.info("timing_data|{0}|{1}|{2}|{3}", func.__name__, started, ended, data)
         return value
 
-    return wrapper
+    return wrapper  # type: ignore[return-value]

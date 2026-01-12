@@ -1,5 +1,6 @@
 # Gnu General Public License - see LICENSE.TXT
 from __future__ import annotations
+from typing import cast
 
 import xbmcgui
 import xbmcaddon
@@ -214,7 +215,6 @@ class DownloadUtils:
                 {"Container": "jpeg", "Type": "Photo"},
             ],
             "DirectPlayProfiles": [
-                {"Type": "Video"},
                 {"Type": "Audio"},
                 {"Type": "Photo"},
             ],
@@ -243,16 +243,27 @@ class DownloadUtils:
             ],
         }
 
-        if len(filtered_codecs) > 0:
-            profile["DirectPlayProfiles"][0]["VideoCodec"] = "-%s" % ",".join(
-                filtered_codecs
+        # video direct play profiles
+        direct_play_profile = cast(list, profile["DirectPlayProfiles"])
+        if force_transcode:
+            direct_play_profile = []
+        elif len(filtered_codecs) > 0:
+            direct_play_profile.append(
+                {
+                    "Type": "Video",
+                    "VideoCodec": "-%s" % ",".join(filtered_codecs),
+                }
+            )
+        else:
+            direct_play_profile.append(
+                {
+                    "Type": "Video",
+                }
             )
 
-        if force_transcode:
-            profile["DirectPlayProfiles"] = []
-
         if addon_settings.getSetting("playback_video_force_8") == "true":
-            profile["CodecProfiles"].append(
+            codec_profiles = cast(list, profile["CodecProfiles"])
+            codec_profiles.append(
                 {
                     "Type": "Video",
                     "Codec": "h264",
@@ -266,7 +277,7 @@ class DownloadUtils:
                     ],
                 }
             )
-            profile["CodecProfiles"].append(
+            codec_profiles.append(
                 {
                     "Type": "Video",
                     "Codec": "h265,hevc",
@@ -845,10 +856,13 @@ class DownloadUtils:
                 conn = http.client.HTTPSConnection(server, timeout=http_timeout)
             elif local_use_https and not self.verify_cert:
                 log.debug("Connection: HTTPS, Cert NOT checked")
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
                 conn = http.client.HTTPSConnection(
                     server,
                     timeout=http_timeout,
-                    context=ssl._create_unverified_context(),
+                    context=ssl_context,
                 )
             else:
                 log.debug("Connection: HTTP")

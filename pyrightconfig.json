@@ -2,10 +2,15 @@
     "ignore": [
         "**/resources/lib/websocket/*.py"
     ],
-    "typeCheckingMode": "standard",
-    //"reportUnknownVariableType": true,
-    //"reportUnknownMemberType": true,
-    //"reportUnknownParameterType": true,
-    //"reportUnknownArgumentType": true,
-    //"reportUnknownFieldType": true
+    "typeCheckingMode": "strict",
+    // general error suppressions
+    "reportMissingTypeStubs": false,
+    "reportUnnecessaryIsInstance": false,
+    "reportUnnecessaryComparison": false,
+    // type specific error suppressions
+    "reportMissingTypeArgument": false, // 51
+    "reportUnknownParameterType": false, // 49
+    "reportUnknownMemberType": false, // 689
+    "reportUnknownVariableType": false, // 579
+    "reportUnknownArgumentType": false, // 601
 }

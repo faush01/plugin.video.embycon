@@ -121,10 +121,18 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
 
             if self.display_option == 0:
                 profile_details_text += "Sorted By : LocalTime\n"
-                stats.sort(key=lambda x: x["time_local"], reverse=True)
+
+                def get_time_local(x: dict) -> float:
+                    return x["time_local"]
+
+                stats.sort(key=get_time_local, reverse=True)
             elif self.display_option == 1:
                 profile_details_text += "Sorted By : StackTime\n"
-                stats.sort(key=lambda x: x["time_stack"], reverse=True)
+
+                def get_time_stack(x: dict) -> float:
+                    return x["time_stack"]
+
+                stats.sort(key=get_time_stack, reverse=True)
 
             profile_details_text += "\n"
             profile_details_text += "   "
@@ -166,7 +174,7 @@ class ProfileDetailsDialog(xbmcgui.WindowXMLDialog):
         to_add = target_len - text_len
         if to_add < 1:
             return value
-        for x in range(0, to_add):
+        for _x in range(0, to_add):
             value += " "
         return value
 
@@ -198,7 +206,7 @@ def list_available_profiles(_params: dict[str, str]) -> None:
 
     addon_dir = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
     profile_path = os.path.join(addon_dir, "profile")
-    dirs, files = xbmcvfs.listdir(profile_path)
+    _dirs, files = xbmcvfs.listdir(profile_path)
     files.sort(reverse=True)
 
     for file in files:

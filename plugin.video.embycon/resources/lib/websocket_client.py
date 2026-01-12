@@ -184,7 +184,7 @@ class WebSocketClient(threading.Thread):
                 "MoveRight": "Input.Right",
                 "MoveLeft": "Input.Left",
             }
-            JsonRpc(actions[command]).execute()
+            JsonRpc(actions[command]).execute({})
 
         elif command == "GoHome":
             JsonRpc("GUI.ActivateWindow").execute({"window": "home"})

@@ -66,8 +66,11 @@ def check_connection_speed() -> int:
         conn = http.client.HTTPSConnection(server, timeout=http_timeout)
     elif local_use_https and not verify_cert:
         log.debug("Connection: HTTPS, Cert NOT checked")
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         conn = http.client.HTTPSConnection(
-            server, timeout=http_timeout, context=ssl._create_unverified_context()
+            server, timeout=http_timeout, context=context
         )
     else:
         log.debug("Connection: HTTP")
@@ -167,7 +170,7 @@ def get_server_details() -> list[dict]:
                 server_count += 1
                 progress.update(server_count * 10, string_load(30375) % server_count)
                 xbmc.sleep(1000)
-                data, addr = sock.recvfrom(1024)
+                data, _addr = sock.recvfrom(1024)
                 responce_data = json.loads(data)
                 servers.append(responce_data)
                 log.debug("UDP Responce Data : {0}", responce_data)

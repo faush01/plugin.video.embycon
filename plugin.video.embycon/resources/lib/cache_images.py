@@ -16,7 +16,7 @@ import xbmcaddon
 
 from .downloadutils import DownloadUtils
 from .simple_logging import SimpleLogging
-from .jsonrpc import JsonRpc
+from .jsonrpc import JsonRpc, JsonRpcResponse
 from .translation import string_load
 from .datamanager import DataManager
 from .utils import get_art, double_urlencode
@@ -87,14 +87,14 @@ class CacheArtwork(threading.Thread):
 
         # is the web server enabled
         web_query = {"setting": "services.webserver"}
-        result = JsonRpc("Settings.GetSettingValue").execute(web_query)
+        result: JsonRpcResponse = JsonRpc("Settings.GetSettingValue").execute(web_query)
         xbmc_webserver_enabled = result["result"]["value"]
         if not xbmc_webserver_enabled:
             xbmcgui.Dialog().ok(string_load(30294), string_load(30295))
             return
 
         params = {"properties": ["url"]}
-        json_result = JsonRpc("Textures.GetTextures").execute(params)
+        json_result: JsonRpcResponse = JsonRpc("Textures.GetTextures").execute(params)
         textures = json_result.get("result", {}).get("textures", [])
         # log.debug("texture ids: {0}", textures)
 

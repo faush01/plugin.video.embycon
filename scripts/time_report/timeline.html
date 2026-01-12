@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Call Timeline</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #controls {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #timeline {
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        select,
+        input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        #stats {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {
+            display: inline-block;
+            margin-right: 30px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #0066cc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Function Call Timeline Viewer</h1>
+
+    <div id="fileLoader"
+        style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; border: 2px dashed #ccc;">
+        <h3>Load Timing Data</h3>
+        <p>Drop timing_data.json here or click to select file</p>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button onclick="document.getElementById('fileInput').click()"
+            style="padding: 10px 30px; background: #0066cc; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px;">Select
+            File</button>
+    </div>
+
+    <div id="controls" style="display: none;">
+        <div class="control-group">
+            <label for="idFilter">Filter by ID:</label>
+            <select id="idFilter">
+                <option value="">All IDs</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="functionFilter">Filter by Function:</label>
+            <select id="functionFilter">
+                <option value="">All Functions</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="minDuration">Min Duration (ms):</label>
+            <input type="number" id="minDuration" value="0" step="0.1" min="0">
+        </div>
+        <div class="control-group">
+            <button onclick="applyFilters()"
+                style="padding: 6px 20px; background: #0066cc; color: white; border: none; border-radius: 3px; cursor: pointer;">Apply
+                Filters</button>
+            <button onclick="resetFilters()"
+                style="padding: 6px 20px; background: #666; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">Reset</button>
+        </div>
+    </div>
+
+    <div id="timeline"></div>
+
+    <div id="detailSection" style="display: none; margin-top: 20px;">
+        <div
+            style="background: white; padding: 15px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0; display: inline-block;">Detailed View: <span id="detailTitle"></span></h3>
+            <button onclick="closeDetailView()"
+                style="float: right; padding: 5px 15px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">Close</button>
+        </div>
+        <div id="detailTimeline" style="background: white; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        </div>
+    </div>
+
+    <div id="stats">
+        <h3>Statistics</h3>
+        <div class="stat-item">Total Calls: <span class="stat-value" id="totalCalls">-</span></div>
+        <div class="stat-item">Unique IDs: <span class="stat-value" id="uniqueIds">-</span></div>
+        <div class="stat-item">Unique Functions: <span class="stat-value" id="uniqueFunctions">-</span></div>
+        <div class="stat-item">Time Span: <span class="stat-value" id="timeSpan">-</span></div>
+        <div class="stat-item">Avg Duration: <span class="stat-value" id="avgDuration">-</span></div>
+    </div>
+
+    <script>
+        let timingData = [];
+        let filteredData = [];
+        let selectedId = null;
+
+        // Set up file input and drag-and-drop handlers
+        const fileInput = document.getElementById('fileInput');
+        const fileLoader = document.getElementById('fileLoader');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop handlers
+        fileLoader.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLoader.style.borderColor = '#0066cc';
+            fileLoader.style.backgroundColor = '#f0f8ff';
+        });
+
+        fileLoader.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileLoader.style.borderColor = '#ccc';
+            fileLoader.style.backgroundColor = 'white';
+        });
+
+        fileLoader.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLoader.style.borderColor = '#ccc';
+            fileLoader.style.backgroundColor = 'white';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                loadFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                loadFile(files[0]);
+            }
+        }
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    timingData = JSON.parse(e.target.result);
+                    document.getElementById('fileLoader').style.display = 'none';
+                    document.getElementById('controls').style.display = 'block';
+                    initializeFilters();
+                    applyFilters();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function initializeFilters() {
+            // Get unique IDs
+            const uniqueIds = [...new Set(timingData.map(d => d.id))].sort((a, b) => a - b);
+            const idSelect = document.getElementById('idFilter');
+            uniqueIds.forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `ID ${id}`;
+                idSelect.appendChild(option);
+            });
+
+            // Get unique functions
+            const uniqueFunctions = [...new Set(timingData.map(d => d.function))].sort();
+            const funcSelect = document.getElementById('functionFilter');
+            uniqueFunctions.forEach(func => {
+                const option = document.createElement('option');
+                option.value = func;
+                option.textContent = func;
+                funcSelect.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const idFilter = document.getElementById('idFilter').value;
+            const functionFilter = document.getElementById('functionFilter').value;
+            const minDuration = parseFloat(document.getElementById('minDuration').value) / 1000; // Convert ms to seconds
+
+            filteredData = timingData.filter(item => {
+                const duration = item.end - item.start;
+                return (!idFilter || item.id == idFilter) &&
+                    (!functionFilter || item.function === functionFilter) &&
+                    (duration >= minDuration);
+            });
+
+            renderTimeline();
+            updateStats();
+        }
+
+        function resetFilters() {
+            document.getElementById('idFilter').value = '';
+            document.getElementById('functionFilter').value = '';
+            document.getElementById('minDuration').value = '0';
+            applyFilters();
+        }
+
+        function renderTimeline() {
+            if (filteredData.length === 0) {
+                document.getElementById('timeline').innerHTML = '<p style="padding: 20px;">No data matches the current filters.</p>';
+                return;
+            }
+
+            // Find the global time range
+            const globalStart = Math.min(...filteredData.map(d => d.start));
+            const globalEnd = Math.max(...filteredData.map(d => d.end));
+            const timeSpanMs = (globalEnd - globalStart) * 1000;
+
+            // Calculate minimum visible duration as 0.1% of total time span
+            const minVisibleDuration = Math.max(1, timeSpanMs * 0.001);
+
+            // Group data by ID
+            const groupedById = {};
+            filteredData.forEach(item => {
+                if (!groupedById[item.id]) {
+                    groupedById[item.id] = [];
+                }
+                groupedById[item.id].push(item);
+            });
+
+            // Sort IDs
+            const sortedIds = Object.keys(groupedById).sort((a, b) => parseInt(a) - parseInt(b));
+
+            // Prepare data for Plotly
+            const traces = [];
+
+            // Color palette for different functions
+            const functionColors = {};
+            const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+            let colorIndex = 0;
+
+            sortedIds.forEach(id => {
+                const items = groupedById[id];
+
+                items.forEach(item => {
+                    // Assign color based on function
+                    if (!functionColors[item.function]) {
+                        functionColors[item.function] = colors[colorIndex % colors.length];
+                        colorIndex++;
+                    }
+
+                    const duration = (item.end - item.start) * 1000; // Convert to ms
+                    const relativeStart = (item.start - globalStart) * 1000; // Relative time in ms
+                    const relativeEndActual = (item.end - globalStart) * 1000;
+                    let relativeEndDisplay = relativeEndActual;
+
+                    // Ensure minimum visible duration for zero or near-zero duration calls
+                    if (relativeEndDisplay - relativeStart < minVisibleDuration) {
+                        relativeEndDisplay = relativeStart + minVisibleDuration;
+                    }
+
+                    // Truncate data string if too long
+                    const dataStr = item.data.length > 100 ? item.data.substring(0, 100) + '...' : item.data;
+
+                    traces.push({
+                        x: [relativeStart, relativeEndDisplay],
+                        y: [`ID ${id}`, `ID ${id}`],
+                        mode: 'lines',
+                        line: {
+                            color: functionColors[item.function],
+                            width: 20
+                        },
+                        name: item.function,
+                        showlegend: false,
+                        hovertemplate:
+                            `<b>ID:</b> ${id}<br>` +
+                            `<b>Function:</b> ${item.function}<br>` +
+                            `<b>Start:</b> ${relativeStart.toFixed(2)} ms<br>` +
+                            `<b>End:</b> ${relativeEndActual.toFixed(2)} ms<br>` +
+                            `<b>Duration:</b> ${duration.toFixed(2)} ms<br>` +
+                            `<b>Data:</b> ${dataStr}<br>` +
+                            '<extra></extra>'
+                    });
+                });
+            });
+
+            // Create legend traces (one per unique function)
+            const legendTraces = Object.entries(functionColors).map(([func, color]) => ({
+                x: [null],
+                y: [null],
+                mode: 'markers',
+                marker: { size: 10, color: color },
+                name: func,
+                showlegend: true
+            }));
+
+            const layout = {
+                title: 'Function Call Timeline (grouped by ID)',
+                xaxis: {
+                    title: 'Time (ms from start)',
+                    showgrid: true,
+                    zeroline: false
+                },
+                yaxis: {
+                    title: 'Request ID',
+                    showgrid: true,
+                    zeroline: false,
+                    autorange: 'reversed'
+                },
+                hovermode: 'closest',
+                height: Math.max(400, sortedIds.length * 40 + 150),
+                showlegend: true,
+                legend: {
+                    orientation: 'v',
+                    x: 1.01,
+                    y: 1
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                displaylogo: false
+            };
+
+            Plotly.newPlot('timeline', [...traces, ...legendTraces], layout, config);
+
+            // Add click event listener for drill-down
+            document.getElementById('timeline').on('plotly_click', function (data) {
+                if (data.points && data.points.length > 0) {
+                    const yLabel = data.points[0].y;
+                    const idMatch = yLabel.match(/ID (\d+)/);
+                    if (idMatch) {
+                        const clickedId = parseInt(idMatch[1]);
+                        showDetailView(clickedId);
+                    }
+                }
+            });
+        }
+
+        function showDetailView(id) {
+            selectedId = id;
+            const idData = filteredData.filter(item => item.id === id);
+
+            if (idData.length === 0) return;
+
+            // Sort by start time
+            idData.sort((a, b) => a.start - b.start);
+
+            // Show detail section
+            document.getElementById('detailSection').style.display = 'block';
+            document.getElementById('detailTitle').textContent = `ID ${id} (${idData.length} calls)`;
+
+            // Find the time range for this ID
+            const localStart = Math.min(...idData.map(d => d.start));
+            const localEnd = Math.max(...idData.map(d => d.end));
+            const timeSpanMs = (localEnd - localStart) * 1000;
+
+            // Calculate minimum visible duration as 0.1% of total time span
+            const minVisibleDuration = Math.max(1, timeSpanMs * 0.001);
+
+            // Color palette for different functions
+            const functionColors = {};
+            const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+            let colorIndex = 0;
+
+            // Create traces for individual calls
+            const traces = [];
+            idData.forEach((item, index) => {
+                if (!functionColors[item.function]) {
+                    functionColors[item.function] = colors[colorIndex % colors.length];
+                    colorIndex++;
+                }
+
+                const duration = (item.end - item.start) * 1000;
+                const relativeStart = (item.start - localStart) * 1000;
+                const relativeEndActual = (item.end - localStart) * 1000;
+                let relativeEndDisplay = relativeEndActual;
+
+                // Ensure minimum visible duration for zero or near-zero duration calls
+                if (relativeEndDisplay - relativeStart < minVisibleDuration) {
+                    relativeEndDisplay = relativeStart + minVisibleDuration;
+                }
+
+                const dataStr = item.data.length > 100 ? item.data.substring(0, 100) + '...' : item.data;
+
+                traces.push({
+                    x: [relativeStart, relativeEndDisplay],
+                    y: [`${index + 1}. ${item.function}`, `${index + 1}. ${item.function}`],
+                    mode: 'lines',
+                    line: {
+                        color: functionColors[item.function],
+                        width: 20
+                    },
+                    name: item.function,
+                    showlegend: false,
+                    hovertemplate:
+                        `<b>Function:</b> ${item.function}<br>` +
+                        `<b>Start:</b> ${relativeStart.toFixed(2)} ms<br>` +
+                        `<b>End:</b> ${relativeEndActual.toFixed(2)} ms<br>` +
+                        `<b>Duration:</b> ${duration.toFixed(2)} ms<br>` +
+                        `<b>Data:</b> ${dataStr}<br>` +
+                        '<extra></extra>'
+                });
+            });
+
+            // Create legend traces
+            const legendTraces = Object.entries(functionColors).map(([func, color]) => ({
+                x: [null],
+                y: [null],
+                mode: 'markers',
+                marker: { size: 10, color: color },
+                name: func,
+                showlegend: true
+            }));
+
+            const layout = {
+                title: `Individual Function Calls for ID ${id}`,
+                xaxis: {
+                    title: 'Time (ms from first call)',
+                    showgrid: true,
+                    zeroline: false
+                },
+                yaxis: {
+                    //title: 'Function Call Sequence',
+                    showgrid: true,
+                    zeroline: false,
+                    autorange: 'reversed'
+                },
+                hovermode: 'closest',
+                height: Math.max(400, idData.length * 30 + 150),
+                showlegend: true,
+                legend: {
+                    orientation: 'v',
+                    x: 1.01,
+                    y: 1
+                },
+                margin: {
+                    l: 200,  // Left margin for function names
+                    r: 50,
+                    t: 80,
+                    b: 80
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                displaylogo: false
+            };
+
+            Plotly.newPlot('detailTimeline', [...traces, ...legendTraces], layout, config);
+
+            // Scroll to detail view
+            document.getElementById('detailSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeDetailView() {
+            document.getElementById('detailSection').style.display = 'none';
+            selectedId = null;
+        }
+
+        function updateStats() {
+            const totalCalls = filteredData.length;
+            const uniqueIds = new Set(filteredData.map(d => d.id)).size;
+            const uniqueFunctions = new Set(filteredData.map(d => d.function)).size;
+
+            let timeSpan = 0;
+            let totalDuration = 0;
+            if (filteredData.length > 0) {
+                const minStart = Math.min(...filteredData.map(d => d.start));
+                const maxEnd = Math.max(...filteredData.map(d => d.end));
+                timeSpan = ((maxEnd - minStart) * 1000).toFixed(2);
+
+                totalDuration = filteredData.reduce((sum, item) => sum + (item.end - item.start), 0);
+            }
+
+            const avgDuration = totalCalls > 0 ? ((totalDuration / totalCalls) * 1000).toFixed(2) : 0;
+
+            document.getElementById('totalCalls').textContent = totalCalls;
+            document.getElementById('uniqueIds').textContent = uniqueIds;
+            document.getElementById('uniqueFunctions').textContent = uniqueFunctions;
+            document.getElementById('timeSpan').textContent = `${timeSpan} ms`;
+            document.getElementById('avgDuration').textContent = `${avgDuration} ms`;
+        }
+    </script>
+</body>
+
+</html>
