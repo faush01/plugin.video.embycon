@@ -309,7 +309,7 @@ msgstr "交互"
 
 msgctxt "#30229"
 msgid "TV Shows"
-msgstr "电视节目"
+msgstr "电视剧"
 
 msgctxt "#30231"
 msgid "Movies"
@@ -369,7 +369,7 @@ msgstr "显示插件设置"
 
 msgctxt "#30255"
 msgid "TV Shows - A-Z"
-msgstr "剧集 - A-Z"
+msgstr "电视剧 - A-Z"
 
 msgctxt "#30256"
 msgid "Movies"
@@ -381,7 +381,7 @@ msgstr "电影 - 最近添加"
 
 msgctxt "#30258"
 msgid "Movies - In Progress"
-msgstr "电影 - 正在播放"
+msgstr "电影 - 正在观看"
 
 msgctxt "#30259"
 msgid "Movies - Favorites"
@@ -393,23 +393,23 @@ msgstr "合集"
 
 msgctxt "#30261"
 msgid "TV Shows"
-msgstr "剧集"
+msgstr "电视剧"
 
 msgctxt "#30262"
 msgid "TV Shows - Favorites"
-msgstr "剧集 - 收藏夹"
+msgstr "电视剧 - 收藏夹"
 
 msgctxt "#30263"
 msgid "Episodes - Recently Added"
-msgstr "单集 - 最近添加"
+msgstr "剧集 - 最近添加"
 
 msgctxt "#30264"
 msgid "Episodes - In Progress"
-msgstr "单集 - 正在播放"
+msgstr "剧集 - 正在观看"
 
 msgctxt "#30265"
 msgid "Episodes - Next Up"
-msgstr "单集 - 下一集"
+msgstr "剧集 - 下一集"
 
 msgctxt "#30266"
 msgid "Movies - Pages"
@@ -417,7 +417,7 @@ msgstr "电影 - 页面"
 
 msgctxt "#30267"
 msgid " - In Progress"
-msgstr " - 正在播放"
+msgstr " - 正在观看"
 
 msgctxt "#30268"
 msgid " - Recently Added"
@@ -465,7 +465,7 @@ msgstr " - 下一集"
 
 msgctxt "#30279"
 msgid "TV Shows - Unwatched"
-msgstr "剧集 - 未观看"
+msgstr "电视剧 - 未观看"
 
 msgctxt "#30280"
 msgid "Missing Title"
@@ -493,7 +493,7 @@ msgstr "电影 - 未观看"
 
 msgctxt "#30287"
 msgid "TV Shows - Latest"
-msgstr "剧集 - 最新"
+msgstr "电视剧 - 最新"
 
 msgctxt "#30288"
 msgid " - Latest"
@@ -501,7 +501,7 @@ msgstr " - 最新"
 
 msgctxt "#30289"
 msgid "TV Shows - Genres"
-msgstr "剧集 - 流派"
+msgstr "电视剧 - 流派"
 
 msgctxt "#30290"
 msgid "All"
@@ -1121,7 +1121,7 @@ msgstr "电影视图 ID"
 
 msgctxt "#30451"
 msgid "TV Shows view ID"
-msgstr "剧集视图 ID"
+msgstr "电视剧视图 ID"
 
 msgctxt "#30452"
 msgid "Seasons view ID"
@@ -1129,7 +1129,7 @@ msgstr "季视图 ID"
 
 msgctxt "#30453"
 msgid "Episodes view ID"
-msgstr "单集视图 ID"
+msgstr "剧集视图 ID"
 
 msgctxt "#30454"
 msgid "Collections view ID"
